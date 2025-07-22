@@ -1,0 +1,141 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { BookOpen, Users, FileText, Calendar, Trophy, GraduationCap, Home, LogOut, Menu, X } from "lucide-react"
+
+export default function Navigation() {
+  const [user, setUser] = useState<any>(null)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user")
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem("user")
+    router.push("/")
+  }
+
+  if (!user) return null
+
+  const teacherNavItems = [
+    { href: "/dashboard", label: "Trang chủ", icon: Home },
+    { href: "/classes", label: "Quản lý lớp", icon: Users },
+    { href: "/assignments", label: "Bài tập", icon: FileText },
+    { href: "/quizzes", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades", label: "Xếp hạng", icon: Trophy },
+  ]
+
+  const studentNavItems = [
+    { href: "/dashboard", label: "Trang chủ", icon: Home },
+    { href: "/classes", label: "Lớp học", icon: Users },
+    { href: "/assignments", label: "Bài tập", icon: FileText },
+    { href: "/quizzes", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades", label: "Kết quả", icon: GraduationCap },
+    { href: "/schedule", label: "Thời khóa biểu", icon: Calendar },
+  ]
+
+  const navItems = user.role === "teacher" ? teacherNavItems : studentNavItems
+
+  return (
+    <nav className="bg-white shadow-sm border-b">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link href="/dashboard" className="flex-shrink-0 flex items-center">
+              <BookOpen className="h-8 w-8 text-blue-600" />
+              <span className="ml-2 text-xl font-bold text-gray-900">EduSystem</span>
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === item.href
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                  }`}
+                >
+                  <Icon className="h-4 w-4 mr-2" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          <div className="flex items-center">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>{user.fullName?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end">
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium">{user.fullName}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
+                    <p className="text-xs text-blue-600">{user.role === "teacher" ? "Giáo viên" : "Học sinh"}</p>
+                  </div>
+                </div>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Đăng xuất
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile menu button */}
+            <Button variant="ghost" className="md:hidden ml-2" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    pathname === item.href
+                      ? "text-blue-600 bg-blue-100"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Icon className="h-5 w-5 mr-3" />
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </nav>
+  )
+}
