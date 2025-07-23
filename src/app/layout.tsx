@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
+import Footer from "@/components/footer/page"
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +23,7 @@ export default function RootLayout({
       {/* <body className={inter.className}>{children}</body> */}
       <body className={inter.className}>
         <SessionProviderWrapper>{children}</SessionProviderWrapper>
+        <Footer />
       </body>
     </html>
   );
