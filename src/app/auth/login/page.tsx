@@ -46,11 +46,25 @@ export default function LoginPage() {
       id: 1,
       email: data.email,
       fullName: "Người dùng Demo",
+<<<<<<< HEAD
       role: data.email.includes("teacher") ? "teacher" : "student",
     };
     localStorage.setItem("user", JSON.stringify(mockUser));
     router.push("/dashboard");
   };
+=======
+      role: formData.email.includes("teacher") ? "teacher" : "student",
+    }
+    localStorage.setItem("user", JSON.stringify(mockUser))
+    // Redirect based on role
+    const redirectPath =
+      mockUser.role === "teacher"
+        ? "/dashboard/teacher"
+        : "/dashboard/student"
+
+    router.push(redirectPath)
+  }
+>>>>>>> 5509dda1a04fa91a7879d79c87ef3fc2a97ff57d
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">

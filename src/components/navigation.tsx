@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { BookOpen, Users, FileText, Calendar, Trophy, GraduationCap, Home, LogOut, Menu, X } from "lucide-react"
+import Image from "next/image"
 
 export default function Navigation() {
   const [user, setUser] = useState<any>(null)
@@ -29,31 +30,37 @@ export default function Navigation() {
   if (!user) return null
 
   const teacherNavItems = [
-    { href: "/dashboard", label: "Trang chủ", icon: Home },
-    { href: "/classes", label: "Quản lý lớp", icon: Users },
-    { href: "/assignments", label: "Bài tập", icon: FileText },
-    { href: "/quizzes", label: "Trắc nghiệm", icon: BookOpen },
-    { href: "/grades", label: "Xếp hạng", icon: Trophy },
+    { href: "/dashboard/teacher", label: "Trang chủ", icon: Home },
+    { href: "/classes/teacher", label: "Quản lý lớp", icon: Users },
+    { href: "/assignments/teacher", label: "Bài tập", icon: FileText },
+    { href: "/quizzes/teacher", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades/teacher", label: "Xếp hạng", icon: Trophy },
   ]
 
   const studentNavItems = [
-    { href: "/dashboard", label: "Trang chủ", icon: Home },
-    { href: "/classes", label: "Lớp học", icon: Users },
-    { href: "/assignments", label: "Bài tập", icon: FileText },
-    { href: "/quizzes", label: "Trắc nghiệm", icon: BookOpen },
-    { href: "/grades", label: "Kết quả", icon: GraduationCap },
-    { href: "/schedule", label: "Thời khóa biểu", icon: Calendar },
+    { href: "/dashboard/student", label: "Trang chủ", icon: Home },
+    { href: "/classes/student", label: "Lớp học", icon: Users },
+    { href: "/assignments/student", label: "Bài tập", icon: FileText },
+    { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades/student", label: "Kết quả", icon: GraduationCap },
+    { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar },
   ]
 
   const navItems = user.role === "teacher" ? teacherNavItems : studentNavItems
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-white shadow-sm border-b whitespace-nowrap">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/dashboard" className="flex-shrink-0 flex items-center">
-              <BookOpen className="h-8 w-8 text-blue-600" />
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className=""
+              />
               <span className="ml-2 text-xl font-bold text-gray-900">EduSystem</span>
             </Link>
           </div>
@@ -66,11 +73,10 @@ export default function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    pathname === item.href
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-50"
-                  }`}
+                  className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === item.href
+                      ? "text-hover:text-green-600 bg-blue-50"
+                      : "text-gray-700 hover:text-green-600 hover:bg-gray-50"
+                    }`}
                 >
                   <Icon className="h-4 w-4 mr-2" />
                   {item.label}
@@ -93,7 +99,7 @@ export default function Navigation() {
                   <div className="flex flex-col space-y-1 leading-none">
                     <p className="font-medium">{user.fullName}</p>
                     <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
-                    <p className="text-xs text-blue-600">{user.role === "teacher" ? "Giáo viên" : "Học sinh"}</p>
+                    <p className="text-xs text-green-600">{user.role === "teacher" ? "Giáo viên" : "Học sinh"}</p>
                   </div>
                 </div>
                 <DropdownMenuItem onClick={handleLogout}>
@@ -121,11 +127,10 @@ export default function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                    pathname === item.href
-                      ? "text-blue-600 bg-blue-100"
-                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
-                  }`}
+                  className={`flex items-center px-3 py-2 rounded-md text-base font-medium transition-colors ${pathname === item.href
+                      ? "text-green-600 bg-green-100"
+                      : "text-gray-700 hover:text-green-600 hover:bg-gray-100"
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <Icon className="h-5 w-5 mr-3" />
