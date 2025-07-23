@@ -157,7 +157,7 @@ export default function RegisterPage() {
               </>
             )}
 
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 cursor-pointer">
+            <Button type="submit" className="w-full py-5 bg-green-600 hover:bg-green-700 cursor-pointer">
               Đăng ký
             </Button>
           </form>
