@@ -30,20 +30,20 @@ export default function Navigation() {
   if (!user) return null
 
   const teacherNavItems = [
-    { href: "/dashboard", label: "Trang chủ", icon: Home },
-    { href: "/classes", label: "Quản lý lớp", icon: Users },
-    { href: "/assignments", label: "Bài tập", icon: FileText },
-    { href: "/quizzes", label: "Trắc nghiệm", icon: BookOpen },
-    { href: "/grades", label: "Xếp hạng", icon: Trophy },
+    { href: "/dashboard/teacher", label: "Trang chủ", icon: Home },
+    { href: "/classes/teacher", label: "Quản lý lớp", icon: Users },
+    { href: "/assignments/teacher", label: "Bài tập", icon: FileText },
+    { href: "/quizzes/teacher", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades/teacher", label: "Xếp hạng", icon: Trophy },
   ]
 
   const studentNavItems = [
-    { href: "/dashboard", label: "Trang chủ", icon: Home },
-    { href: "/classes", label: "Lớp học", icon: Users },
-    { href: "/assignments", label: "Bài tập", icon: FileText },
-    { href: "/quizzes", label: "Trắc nghiệm", icon: BookOpen },
-    { href: "/grades", label: "Kết quả", icon: GraduationCap },
-    { href: "/schedule", label: "Thời khóa biểu", icon: Calendar },
+    { href: "/dashboard/student", label: "Trang chủ", icon: Home },
+    { href: "/classes/student", label: "Lớp học", icon: Users },
+    { href: "/assignments/student", label: "Bài tập", icon: FileText },
+    { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades/student", label: "Kết quả", icon: GraduationCap },
+    { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar },
   ]
 
   const navItems = user.role === "teacher" ? teacherNavItems : studentNavItems

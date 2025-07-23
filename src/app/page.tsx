@@ -1,7 +1,19 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen, Users, GraduationCap, Calendar, FileText, Trophy } from "lucide-react"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  BookOpen,
+  Users,
+  GraduationCap,
+  Calendar,
+  FileText,
+  Trophy,
+} from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -55,23 +67,24 @@ export default function HomePage() {
             </CardHeader>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <GraduationCap className="h-8 w-8 text-red-600 mb-2" />
-              <CardTitle>Kết quả học tập</CardTitle>
-              <CardDescription>Xem điểm số và đánh giá tiến độ</CardDescription>
-            </CardHeader>
-          </Card>
+            <Card>
+              <CardHeader>
+                <GraduationCap className="h-8 w-8 text-red-600 mb-2" />
+                <CardTitle>Kết quả học tập</CardTitle>
+                <CardDescription>Xem điểm số và đánh giá tiến độ</CardDescription>
+              </CardHeader>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <Trophy className="h-8 w-8 text-yellow-600 mb-2" />
-              <CardTitle>Bảng xếp hạng</CardTitle>
-              <CardDescription>Theo dõi thành tích và xếp hạng</CardDescription>
-            </CardHeader>
-          </Card>
+            <Card>
+              <CardHeader>
+                <Trophy className="h-8 w-8 text-yellow-600 mb-2" />
+                <CardTitle>Bảng xếp hạng</CardTitle>
+                <CardDescription>Theo dõi thành tích và xếp hạng</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

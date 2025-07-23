@@ -27,7 +27,13 @@ export default function LoginPage() {
       role: formData.email.includes("teacher") ? "teacher" : "student",
     }
     localStorage.setItem("user", JSON.stringify(mockUser))
-    router.push("/dashboard")
+    // Redirect based on role
+    const redirectPath =
+      mockUser.role === "teacher"
+        ? "/dashboard/teacher"
+        : "/dashboard/student"
+
+    router.push(redirectPath)
   }
 
   return (
