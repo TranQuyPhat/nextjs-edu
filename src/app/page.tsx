@@ -12,7 +12,7 @@ export default function HomePage() {
           <p className="text-xl text-gray-600 mb-8">Nền tảng học tập hiện đại cho giáo viên và học sinh</p>
           <div className="flex gap-4 justify-center">
             <Link href="/auth/login">
-              <Button size="lg">Đăng nhập</Button>
+              <Button className="w-full bg-green-600 hover:bg-green-600 cursor-pointer" size="lg">Đăng nhập</Button>
             </Link>
             <Link href="/auth/register">
               <Button variant="outline" size="lg">

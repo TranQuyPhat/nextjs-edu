@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import Image from "next/image"
+
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -39,15 +41,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <Image
+            src="/images/logo.png"
+            alt="Logo"
+            width={100}
+            height={100}
+            priority 
+            className="mx-auto mb-4 object-contain"
+          />
           <CardTitle className="text-2xl text-center">Đăng ký tài khoản</CardTitle>
           <CardDescription className="text-center">Tạo tài khoản mới để sử dụng hệ thống</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 ">
               <Label htmlFor="fullName">Họ và tên</Label>
               <Input
                 id="fullName"
@@ -92,16 +102,15 @@ export default function RegisterPage() {
 
             <div className="space-y-3">
               <Label>Vai trò</Label>
-              <RadioGroup value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="student" id="student" />
-                  <Label htmlFor="student">Học sinh</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="teacher" id="teacher" />
-                  <Label htmlFor="teacher">Giáo viên</Label>
-                </div>
-              </RadioGroup>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="mt-1 p-2 w-full border rounded-md"
+              >
+                <option value="" disabled>Chọn vai trò</option>
+                <option value="student">Học sinh</option>
+                <option value="teacher">Giáo viên</option>
+              </select>
             </div>
 
             {formData.role === "student" && (
@@ -148,14 +157,14 @@ export default function RegisterPage() {
               </>
             )}
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 cursor-pointer">
               Đăng ký
             </Button>
           </form>
 
           <div className="mt-4 text-center text-sm">
             Đã có tài khoản?{" "}
-            <Link href="/auth/login" className="underline">
+            <Link href="/auth/login" className="underline text-green-800">
               Đăng nhập
             </Link>
           </div>
