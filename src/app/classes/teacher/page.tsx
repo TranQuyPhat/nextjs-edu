@@ -43,7 +43,6 @@ export default function TeacherClassesPage() {
     name: "",
     description: "",
   })
-  const [joinCode, setJoinCode] = useState("")
 
   useEffect(() => {
     const userData = localStorage.getItem("user")
@@ -68,12 +67,6 @@ export default function TeacherClassesPage() {
     }
     setClasses([...classes, newClassData])
     setNewClass({ name: "", description: "" })
-  }
-
-  const handleJoinClass = () => {
-    // Simulate joining a class
-    alert(`Đã tham gia lớp với mã: ${joinCode}`)
-    setJoinCode("")
   }
 
   const copyClassCode = (code: string) => {
