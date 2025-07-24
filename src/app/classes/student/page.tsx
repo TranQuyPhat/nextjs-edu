@@ -1,11 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Navigation from "@/components/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useState, useEffect } from "react";
+import Navigation from "@/components/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,12 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Plus, Eye } from "lucide-react"
-import Link from "next/link"
+} from "@/components/ui/dialog";
+import { Plus, Eye } from "lucide-react";
+import Link from "next/link";
 
 export default function StudentClassesPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<any>(null);
   const [classes] = useState([
     {
       id: 1,
@@ -36,24 +42,24 @@ export default function StudentClassesPage() {
       studentCount: 28,
       createdAt: "2024-01-20",
     },
-  ])
-  const [joinCode, setJoinCode] = useState("")
+  ]);
+  const [joinCode, setJoinCode] = useState("");
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData))
+      setUser(JSON.parse(userData));
     }
-  }, [])
+  }, []);
 
   const handleJoinClass = () => {
     // Simulate joining a class
-    alert(`Đã tham gia lớp với mã: ${joinCode}`)
-    setJoinCode("")
-  }
+    alert(`Đã tham gia lớp với mã: ${joinCode}`);
+    setJoinCode("");
+  };
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -63,7 +69,9 @@ export default function StudentClassesPage() {
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Lớp học của tôi</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Lớp học của tôi
+              </h1>
               <p className="text-gray-600">Các lớp học bạn đã tham gia</p>
             </div>
             <Dialog>
@@ -98,10 +106,15 @@ export default function StudentClassesPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {classes.map((classItem) => (
-              <Card key={classItem.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={classItem.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardHeader>
                   <CardTitle className="text-lg">{classItem.name}</CardTitle>
-                  <CardDescription>Giáo viên: Thầy/Cô {user.fullName}</CardDescription>
+                  <CardDescription>
+                    Giáo viên: Thầy/Cô {user.fullName}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -127,5 +140,5 @@ export default function StudentClassesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

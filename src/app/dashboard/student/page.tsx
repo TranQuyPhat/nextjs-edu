@@ -1,16 +1,25 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Navigation from "@/components/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { BookOpen, FileText, Clock, CheckCircle, TrendingUp, Calendar, Award, Target } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Navigation from "@/components/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  BookOpen,
+  FileText,
+  Clock,
+  CheckCircle,
+  TrendingUp,
+  Calendar,
+  Award,
+  Target,
+} from "lucide-react";
 
 export default function StudentDashboard() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<any>(null);
 
   // Mock data for student dashboard
   const [dashboardData] = useState({
@@ -83,26 +92,28 @@ export default function StudentDashboard() {
         average: 8.5,
       },
     ],
-  })
+  });
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem("user");
     if (userData) {
-      setUser(JSON.parse(userData))
+      setUser(JSON.parse(userData));
     }
-  }, [])
+  }, []);
 
   const getGradeBadge = (grade: number, maxGrade: number) => {
-    const percentage = (grade / maxGrade) * 100
-    if (percentage >= 90) return <Badge className="bg-green-500">Xuất sắc</Badge>
-    if (percentage >= 80) return <Badge className="bg-blue-500">Giỏi</Badge>
-    if (percentage >= 65) return <Badge className="bg-yellow-500">Khá</Badge>
-    if (percentage >= 50) return <Badge className="bg-orange-500">Trung bình</Badge>
-    return <Badge variant="destructive">Yếu</Badge>
-  }
+    const percentage = (grade / maxGrade) * 100;
+    if (percentage >= 90)
+      return <Badge className="bg-green-500">Xuất sắc</Badge>;
+    if (percentage >= 80) return <Badge className="bg-blue-500">Giỏi</Badge>;
+    if (percentage >= 65) return <Badge className="bg-yellow-500">Khá</Badge>;
+    if (percentage >= 50)
+      return <Badge className="bg-orange-500">Trung bình</Badge>;
+    return <Badge variant="destructive">Yếu</Badge>;
+  };
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   return (
@@ -111,8 +122,12 @@ export default function StudentDashboard() {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Chào mừng, {user.name}!</h1>
-          <p className="text-gray-600">Theo dõi tiến độ học tập và hoàn thành bài tập</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Chào mừng, {user.name}!
+          </h1>
+          <p className="text-gray-600">
+            Theo dõi tiến độ học tập và hoàn thành bài tập
+          </p>
         </div>
 
         {/* Statistics Cards */}
@@ -123,7 +138,9 @@ export default function StudentDashboard() {
               <BookOpen className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{dashboardData.enrolledClasses}</div>
+              <div className="text-2xl font-bold">
+                {dashboardData.enrolledClasses}
+              </div>
               <p className="text-xs text-muted-foreground">Đang theo học</p>
             </CardContent>
           </Card>
@@ -135,7 +152,8 @@ export default function StudentDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {dashboardData.completedAssignments}/{dashboardData.totalAssignments}
+                {dashboardData.completedAssignments}/
+                {dashboardData.totalAssignments}
               </div>
               <p className="text-xs text-muted-foreground">Đã hoàn thành</p>
             </CardContent>
@@ -147,7 +165,9 @@ export default function StudentDashboard() {
               <Award className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{dashboardData.averageGrade}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {dashboardData.averageGrade}
+              </div>
               <p className="text-xs text-muted-foreground">
                 <span className="text-green-600">+0.3</span> từ tháng trước
               </p>
@@ -160,7 +180,9 @@ export default function StudentDashboard() {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600">{dashboardData.pendingAssignments}</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {dashboardData.pendingAssignments}
+              </div>
               <p className="text-xs text-muted-foreground">Bài tập mới</p>
             </CardContent>
           </Card>
@@ -183,19 +205,28 @@ export default function StudentDashboard() {
                     </Button>
                   </Link>
                   <Link href="/classes/student">
-                    <Button variant="outline" className="w-full h-20 flex flex-col gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
+                    >
                       <BookOpen className="h-5 w-5" />
                       <span className="text-xs">Lớp học</span>
                     </Button>
                   </Link>
                   <Link href="/grades/student">
-                    <Button variant="outline" className="w-full h-20 flex flex-col gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
+                    >
                       <Award className="h-5 w-5" />
                       <span className="text-xs">Điểm số</span>
                     </Button>
                   </Link>
                   <Link href="/schedule/student">
-                    <Button variant="outline" className="w-full h-20 flex flex-col gap-2 bg-transparent">
+                    <Button
+                      variant="outline"
+                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
+                    >
                       <Calendar className="h-5 w-5" />
                       <span className="text-xs">Lịch học</span>
                     </Button>
@@ -221,8 +252,12 @@ export default function StudentDashboard() {
                         <Badge variant="outline">{deadline.class}</Badge>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-medium text-orange-600">{deadline.timeLeft}</span>
-                        <p className="text-xs text-muted-foreground">{deadline.dueDate}</p>
+                        <span className="text-sm font-medium text-orange-600">
+                          {deadline.timeLeft}
+                        </span>
+                        <p className="text-xs text-muted-foreground">
+                          {deadline.dueDate}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
@@ -252,12 +287,17 @@ export default function StudentDashboard() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {dashboardData.recentGrades.map((grade) => (
-                  <div key={grade.id} className="flex items-center justify-between border rounded-lg p-3">
+                  <div
+                    key={grade.id}
+                    className="flex items-center justify-between border rounded-lg p-3"
+                  >
                     <div>
                       <h4 className="font-medium">{grade.assignment}</h4>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline">{grade.class}</Badge>
-                        <span className="text-xs text-muted-foreground">{grade.date}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {grade.date}
+                        </span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -285,26 +325,43 @@ export default function StudentDashboard() {
               <CardContent className="space-y-4">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600">
-                    {Math.round((dashboardData.completedAssignments / dashboardData.totalAssignments) * 100)}%
+                    {Math.round(
+                      (dashboardData.completedAssignments /
+                        dashboardData.totalAssignments) *
+                        100
+                    )}
+                    %
                   </div>
-                  <p className="text-sm text-muted-foreground">Hoàn thành tổng thể</p>
+                  <p className="text-sm text-muted-foreground">
+                    Hoàn thành tổng thể
+                  </p>
                 </div>
                 <Progress
-                  value={(dashboardData.completedAssignments / dashboardData.totalAssignments) * 100}
+                  value={
+                    (dashboardData.completedAssignments /
+                      dashboardData.totalAssignments) *
+                    100
+                  }
                   className="h-2"
                 />
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Đã hoàn thành</span>
-                    <span className="font-medium">{dashboardData.completedAssignments}</span>
+                    <span className="font-medium">
+                      {dashboardData.completedAssignments}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Chờ làm</span>
-                    <span className="font-medium text-orange-600">{dashboardData.pendingAssignments}</span>
+                    <span className="font-medium text-orange-600">
+                      {dashboardData.pendingAssignments}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tổng cộng</span>
-                    <span className="font-medium">{dashboardData.totalAssignments}</span>
+                    <span className="font-medium">
+                      {dashboardData.totalAssignments}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -323,16 +380,26 @@ export default function StudentDashboard() {
                   <div key={index} className="space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="font-medium">{classItem.class}</span>
-                      <span className="text-sm font-medium">{classItem.average}</span>
+                      <span className="text-sm font-medium">
+                        {classItem.average}
+                      </span>
                     </div>
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>
                           {classItem.completed}/{classItem.total} bài tập
                         </span>
-                        <span>{Math.round((classItem.completed / classItem.total) * 100)}%</span>
+                        <span>
+                          {Math.round(
+                            (classItem.completed / classItem.total) * 100
+                          )}
+                          %
+                        </span>
                       </div>
-                      <Progress value={(classItem.completed / classItem.total) * 100} className="h-2" />
+                      <Progress
+                        value={(classItem.completed / classItem.total) * 100}
+                        className="h-2"
+                      />
                     </div>
                   </div>
                 ))}
@@ -352,21 +419,27 @@ export default function StudentDashboard() {
                   <Award className="h-8 w-8 text-yellow-600" />
                   <div>
                     <p className="font-medium">Học sinh xuất sắc</p>
-                    <p className="text-xs text-muted-foreground">Điểm TB ≥ 8.5</p>
+                    <p className="text-xs text-muted-foreground">
+                      Điểm TB ≥ 8.5
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                   <CheckCircle className="h-8 w-8 text-blue-600" />
                   <div>
                     <p className="font-medium">Hoàn thành đúng hạn</p>
-                    <p className="text-xs text-muted-foreground">100% bài tập đúng hạn</p>
+                    <p className="text-xs text-muted-foreground">
+                      100% bài tập đúng hạn
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                   <TrendingUp className="h-8 w-8 text-green-600" />
                   <div>
                     <p className="font-medium">Tiến bộ vượt trội</p>
-                    <p className="text-xs text-muted-foreground">Cải thiện +0.3 điểm</p>
+                    <p className="text-xs text-muted-foreground">
+                      Cải thiện +0.3 điểm
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -388,7 +461,9 @@ export default function StudentDashboard() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Lớp đang học</span>
-                  <span className="font-medium">{dashboardData.enrolledClasses}</span>
+                  <span className="font-medium">
+                    {dashboardData.enrolledClasses}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm">Ngày học liên tiếp</span>
@@ -400,5 +475,5 @@ export default function StudentDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

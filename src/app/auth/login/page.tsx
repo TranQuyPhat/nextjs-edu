@@ -1,71 +1,97 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .email("Email không hợp lệ")
+    .required("Vui lòng nhập email"),
+  password: yup
+    .string()
+    .min(8, "Mật khẩu phải có ít nhất 8 ký tự")
+    .required("Vui lòng nhập mật khẩu"),
+});
+
+type FormData = yup.InferType<typeof schema>;
 
 export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  })
-  const router = useRouter()
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Simulate login - in real app, validate credentials
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+  });
+
+  const onSubmit = (formData: FormData) => {
     const mockUser = {
       id: 1,
       email: formData.email,
       fullName: "Người dùng Demo",
       role: formData.email.includes("teacher") ? "teacher" : "student",
-    }
-    localStorage.setItem("user", JSON.stringify(mockUser))
+    };
+    localStorage.setItem("user", JSON.stringify(mockUser));
+
     // Redirect based on role
     const redirectPath =
       mockUser.role === "teacher"
         ? "/dashboard/teacher"
-        : "/dashboard/student"
+        : "/dashboard/student";
 
-    router.push(redirectPath)
-  }
+    router.push(redirectPath);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Đăng nhập</CardTitle>
-          <CardDescription className="text-center">Nhập thông tin để truy cập hệ thống</CardDescription>
+          <CardDescription className="text-center">
+            Nhập thông tin để truy cập hệ thống
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="teacher@example.com hoặc student@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
+                {...register("email")}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Mật khẩu</Label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required
-              />
+              <Input id="password" type="password" {...register("password")} />
+              {errors.password && (
+                <p className="text-red-500 text-sm">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full">
@@ -80,8 +106,24 @@ export default function LoginPage() {
             </Link>
           </div>
 
+          <div className="flex items-center gap-2 my-4">
+            <div className="flex-grow h-px bg-gray-300" />
+            <span className="text-sm text-gray-500">hoặc</span>
+            <div className="flex-grow h-px bg-gray-300" />
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              signIn("google", { callbackUrl: "/api/auth/select-role" })
+            }
+            className="w-full"
+          >
+            Đăng nhập với Google
+          </Button>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
