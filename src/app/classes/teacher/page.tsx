@@ -24,27 +24,43 @@ import {
 } from "@/components/ui/dialog";
 import { Users, Plus, Copy, Eye, Settings } from "lucide-react";
 import Link from "next/link";
-
+interface ClassItem {
+  id: number;
+  className: string;
+  subject: string;
+  schoolYear: number;
+  semester: string;
+  description: string;
+  teacherId: number;
+  teacherName: string;
+}
 export default function TeacherClassesPage() {
   const [user, setUser] = useState<any>(null);
-  const [classes, setClasses] = useState([
-    {
-      id: 1,
-      name: "Toán 12A1",
-      description: "Lớp toán nâng cao cho học sinh khá giỏi",
-      code: "MATH12A1",
-      studentCount: 35,
-      createdAt: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Toán 11B2",
-      description: "Lớp toán cơ bản",
-      code: "MATH11B2",
-      studentCount: 28,
-      createdAt: "2024-01-20",
-    },
-  ]);
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const res = await fetch("http://localhost:8080/api/classes/teacher/2");
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        console.log("Fetched classes:", data);
+        setClasses(
+          data.map((item: ClassItem) => ({
+            id: item.id,
+            name: item.className,
+            description: item.description,
+            code: `CLASS${item.id}`, // hoặc để null nếu chưa có mã
+            studentCount: 0, // nếu API chưa có, bạn có thể cập nhật sau
+            createdAt: "2024-01-01", // nếu cần
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+      }
+    };
+    fetchClasses();
+  }, []);
+
+  const [classes, setClasses] = useState<any[]>([]);
   const [newClass, setNewClass] = useState({
     name: "",
     description: "",
