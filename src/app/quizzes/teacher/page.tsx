@@ -31,37 +31,84 @@ import {
 } from "@/components/ui/select";
 import { Plus, Clock, Users, CheckCircle, Edit, Eye } from "lucide-react";
 import Link from "next/link";
+interface QuizCard {
+  id: number;
+  title: string;
+  className: string;
+  description: string;
+  duration: number;
+  totalQuestions: number;
+  totalStudents: number;
+  status: string;
+  dueDate: string;
+  grade: string;
+  createBy: number;
+  classID: number;
+  subject: string;
+  studentsSubmitted: number;
+}
 
 export default function TeacherQuizzesPage() {
   const [user, setUser] = useState<any>(null);
-  const [quizzes, setQuizzes] = useState([
-    {
-      id: 1,
-      title: "Kiểm tra 15 phút - Hàm số",
-      description: "Bài kiểm tra về định nghĩa và tính chất hàm số",
-      className: "Toán 12A1",
-      duration: 15,
-      totalQuestions: 10,
-      attempts: 25,
-      totalStudents: 35,
-      status: "active",
-      createdAt: "2024-01-20",
-      dueDate: "2024-01-25",
-    },
-    {
-      id: 2,
-      title: "Bài kiểm tra giữa kỳ",
-      description: "Kiểm tra tổng hợp các chương đã học",
-      className: "Toán 12A1",
-      duration: 45,
-      totalQuestions: 20,
-      attempts: 30,
-      totalStudents: 35,
-      status: "completed",
-      createdAt: "2024-01-15",
-      dueDate: "2024-01-20",
-    },
-  ]);
+  // const [quizzes, setQuizzes] = useState([
+  //   {
+  //     id: 1,
+  //     title: "Kiểm tra 15 phút - Hàm số",
+  //     description: "Bài kiểm tra về định nghĩa và tính chất hàm số",
+  //     className: "Toán 12A1",
+  //     duration: 15,
+  //     totalQuestions: 10,
+  //     attempts: 25,
+  //     totalStudents: 35,
+  //     status: "active",
+  //     createdAt: "2024-01-20",
+  //     dueDate: "2024-01-25",
+  //   },
+  //   {
+  //     id: 2,
+  //     title: "Bài kiểm tra giữa kỳ",
+  //     description: "Kiểm tra tổng hợp các chương đã học",
+  //     className: "Toán 12A1",
+  //     duration: 45,
+  //     totalQuestions: 20,
+  //     attempts: 30,
+  //     totalStudents: 35,
+  //     status: "completed",
+  //     createdAt: "2024-01-15",
+  //     dueDate: "2024-01-20",
+  //   },
+  // ]);
+  const [quizzes, setQuizzes] = useState<QuizCard[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/api/quizzes")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("data ", data);
+
+        const filledData = data.map((quiz) => ({
+          id: quiz.id,
+          title: quiz.title || "Không có tiêu đề",
+          description: quiz.description || "Không có mô tả",
+          className: quiz.className || "Chưa rõ lớp",
+          duration: quiz.timeLimit || 0,
+          totalQuestions: quiz.questions.length || 0,
+          attempts: quiz.attempts ?? null,
+          totalStudents: quiz.totalStudents ?? null,
+          status: quiz.status ?? null,
+          createdAt: quiz.createdAt ?? null,
+          dueDate: quiz.endDate ?? null,
+          subject: quiz.subject ?? "chưa có môn",
+          studentsSubmitted: quiz.studentsSubmitted || 0,
+        }));
+        console.log(filledData);
+
+        setQuizzes(filledData);
+      })
+      .catch((err) => {
+        console.error("Lỗi khi fetch quizzes:", err);
+      });
+  }, []);
 
   const [newQuiz, setNewQuiz] = useState({
     title: "",
@@ -72,14 +119,6 @@ export default function TeacherQuizzesPage() {
     questions: [],
   });
 
-  const [currentQuestion, setCurrentQuestion] = useState({
-    question: "",
-    type: "multiple-choice",
-    options: ["", "", "", ""],
-    correctAnswer: "",
-    points: 1,
-  });
-
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
@@ -87,26 +126,26 @@ export default function TeacherQuizzesPage() {
     }
   }, []);
 
-  const handleCreateQuiz = () => {
-    const quizData = {
-      id: Date.now(),
-      ...newQuiz,
-      totalQuestions: newQuiz.questions.length,
-      attempts: 0,
-      totalStudents: 35,
-      status: "active",
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setQuizzes([...quizzes, quizData]);
-    setNewQuiz({
-      title: "",
-      description: "",
-      className: "",
-      duration: 15,
-      dueDate: "",
-      questions: [],
-    });
-  };
+  // const handleCreateQuiz = () => {
+  //   const quizData = {
+  //     id: Date.now(),
+  //     ...newQuiz,
+  //     totalQuestions: newQuiz.questions.length,
+  //     attempts: 0,
+  //     totalStudents: 35,
+  //     status: "active",
+  //     createdAt: new Date().toISOString().split("T")[0],
+  //   };
+  //   setQuizzes([...quizzes, quizData]);
+  //   setNewQuiz({
+  //     title: "",
+  //     description: "",
+  //     className: "",
+  //     duration: 15,
+  //     dueDate: "",
+  //     questions: [],
+  //   });
+  // };
 
   const getStatusBadge = (status: string, dueDate: string) => {
     const now = new Date();
@@ -161,16 +200,18 @@ export default function TeacherQuizzesPage() {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg">{quiz.title}</CardTitle>
+                  <CardTitle className="text-lg">
+                    {quiz.title} - Lớp: {quiz.className}
+                  </CardTitle>
                   <CardDescription className="mt-1">
-                    {quiz.className} • {quiz.duration} phút •{" "}
+                    {quiz.subject} • {quiz.duration} phút •{" "}
                     {quiz.totalQuestions} câu hỏi
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
                   {getStatusBadge(quiz.status, quiz.dueDate)}
                   <Badge variant="outline">
-                    {quiz.attempts}/{quiz.totalStudents} đã làm
+                    {quiz.studentsSubmitted}/{quiz.totalStudents} đã làm
                   </Badge>
                 </div>
               </div>

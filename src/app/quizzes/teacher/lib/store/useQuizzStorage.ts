@@ -2,10 +2,13 @@ import { create } from "zustand";
 
 export type Question = {
     question: string;
-    options: string[];
+    options: Option[];
     answer: string | null;
 };
-
+export type Option = {
+    optionLabel: string;
+    optionText: string;
+};
 export type QuizzFormData = {
     title: string;
     grade: string;
@@ -16,7 +19,6 @@ export type QuizzFormData = {
     description: string;
     fileName: string;
     questions: Question[];
-    filename: string;
 };
 
 type QuizzStore = {

@@ -31,66 +31,93 @@ import {
 import { readDocxFile } from "./ReadDocxFile";
 import { useRouter } from "next/navigation";
 import { useQuizzStorage } from "../lib/store/useQuizzStorage";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { schema } from "./type";
+interface QuizFormData {
+  title: string;
+  grade: string;
+  subject: string;
+  startDate: string;
+  endDate: string;
+  time: string;
+  description: string;
+  files: File[];
+  classId: number;
+  createdBy: number;
+}
 
 export default function CreateQuizzPage() {
-  const [files, setFiles] = useState<File[]>([]);
-
   const router = useRouter();
-  const [subject, setSubject] = useState("");
-
   const { setData } = useQuizzStorage();
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const [formData, setFormData] = useState({
-    title: "Đề kiểm tra 15 phút Toán học - Lớp 10", // ví dụ
-    grade: "10",
-    subject: "math",
-    startDate: new Date().toISOString().split("T")[0], // hôm nay
-    endDate: new Date().toISOString().split("T")[0],
-    time: "40",
-    description: "Đề kiểm tra 15 phút chương I",
-    files: [] as File[],
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<QuizFormData>({
+    defaultValues: {
+      title: "Đề kiểm tra 15 phút Toán học - Lớp 10",
+      grade: "10",
+      subject: "Văn",
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: new Date().toISOString().split("T")[0],
+      time: "40",
+      description: "Đề kiểm tra 15 phút chương I",
+      files: [],
+      classId: 2,
+      createdBy: 2,
+    },
+    resolver: yupResolver(schema),
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(e.target.files || []);
-    setFiles(selectedFiles);
-    setFormData({ ...formData, files: selectedFiles });
-    console.log(formData);
+    const selected = Array.from(e.target.files || []);
+    setValue("files", selected);
+    setSelectedFiles(selected);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const questionsList = [];
-    if (!formData.files || formData.files.length === 0) {
-      alert("Vui lòng chọn ít nhất một file .docx");
+  const readMultipleFiles = async (files: File[]) => {
+    let combinedQuestions: any[] = [];
+
+    for (const file of files) {
+      const questions = await readDocxFile(file);
+      combinedQuestions = [...combinedQuestions, ...questions];
+    }
+
+    return combinedQuestions;
+  };
+
+  const onSubmit = async (data: QuizFormData) => {
+    if (!data.files || data.files.length === 0) {
+      toast.error("Vui lòng chọn ít nhất 1 file DOCX");
       return;
     }
 
-    const allQuestions: {
-      question: string;
-      options: string[];
-      answer: string | null;
-    }[] = [];
+    try {
+      const questions = await readMultipleFiles(data.files);
+      if (questions.length === 0) {
+        toast.error("Không tìm thấy câu hỏi hợp lệ trong file.");
+        return;
+      }
 
-    for (const file of formData.files) {
-      const questions = await readDocxFile(file);
-      allQuestions.push(...questions);
+      const fileName = data.files.map((f) => f.name).join(", ");
+
+      setData({
+        ...data,
+        questions,
+        fileName,
+      });
+
+      router.push("/quizzes/teacher/quizzPreview");
+    } catch (error) {
+      console.error(error);
+      toast.error("Đã xảy ra lỗi khi đọc file.");
     }
-
-    const normalizedQuestions = allQuestions.map((q, idx) => ({
-      ...q,
-      question: `${idx + 1}. ${q.question}`,
-    }));
-
-    const firstFile = formData.files[0];
-
-    setData({
-      ...formData,
-      fileName: firstFile.name,
-      questions: normalizedQuestions,
-    });
-
-    router.push("/quizzes/teacher/quizzPreview");
   };
 
   return (
@@ -120,192 +147,90 @@ export default function CreateQuizzPage() {
             </div>
           </CardHeader>
           <CardContent className=" space-y-5">
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div className="space-y-3">
-                <Label htmlFor="title" className="text-slate-700">
-                  Tên đề thi <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  id="title"
-                  placeholder="Ví dụ: Đề kiểm tra Toán 15 phút - Lớp 10"
-                  className="py-2 border-slate-300 focus:ring-blue-500"
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                />
-              </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <Input placeholder="Tiêu đề" {...register("title")} />
+              {errors.title && (
+                <p className="text-red-500 text-sm">{errors.title.message}</p>
+              )}
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <Label htmlFor="grade" className="text-slate-700">
-                    Khối lớp
-                  </Label>
-                  <Select
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, subject: value })
-                    }
-                  >
-                    <SelectTrigger className="border-slate-300">
-                      <SelectValue placeholder="Chọn khối lớp" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">Lớp 10</SelectItem>
-                      <SelectItem value="11">Lớp 11</SelectItem>
-                      <SelectItem value="12">Lớp 12</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <Input placeholder="Khối lớp" {...register("grade")} />
+              {errors.grade && (
+                <p className="text-red-500 text-sm">{errors.grade.message}</p>
+              )}
 
-                <div className="space-y-3">
-                  <Label htmlFor="subject" className="text-slate-700">
-                    Môn học <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, subject: value })
-                    }
-                  >
-                    <SelectTrigger className="border-slate-300">
+              <Controller
+                control={control}
+                name="subject"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger>
                       <SelectValue placeholder="Chọn môn học" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="math">Toán học</SelectItem>
-                      <SelectItem value="literature">Ngữ văn</SelectItem>
-                      <SelectItem value="english">Tiếng Anh</SelectItem>
-                      <SelectItem value="physics">Vật lý</SelectItem>
+                      <SelectItem value="math">Toán</SelectItem>
+                      <SelectItem value="literature">Văn</SelectItem>
+                      <SelectItem value="english">Anh</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-slate-700">Thời gian giao đề</Label>
-
-                <div className="flex gap-4">
-                  <div className="flex flex-col flex-1">
-                    <Label
-                      htmlFor="startDate"
-                      className="text-sm text-slate-500 mb-1"
-                    >
-                      Từ ngày
-                    </Label>
-                    <input
-                      type="date"
-                      id="startDate"
-                      className="border border-slate-300 focus:ring-blue-500 p-2 rounded"
-                      onChange={(e) =>
-                        setFormData({ ...formData, startDate: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-col flex-1">
-                    <Label
-                      htmlFor="endDate"
-                      className="text-sm text-slate-500 mb-1"
-                    >
-                      Đến ngày
-                    </Label>
-                    <input
-                      onChange={(e) =>
-                        setFormData({ ...formData, endDate: e.target.value })
-                      }
-                      type="date"
-                      id="endDate"
-                      className="border border-slate-300 focus:ring-blue-500 p-2 rounded"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Label htmlFor="description" className="text-slate-700">
-                  Thời gian làm bài(phút)
-                </Label>
-                <Input
-                  id="time"
-                  placeholder="40"
-                  className="py-2 border-slate-300 focus:ring-blue-500"
-                  onChange={(e) =>
-                    setFormData({ ...formData, time: e.target.value })
-                  }
-                />
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="description" className="text-slate-700">
-                  Mô tả đề thi
-                </Label>
-                <Textarea
-                  id="description"
-                  placeholder="Nhập mô tả chi tiết về đề thi..."
-                  rows={3}
-                  className="border-slate-300 focus:ring-blue-500"
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-slate-700">
-                  Tải lên tệp đính kèm (nếu có)
-                </Label>
-
-                <div className="flex items-center justify-center w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
-                      <p className="text-sm text-slate-500">
-                        <span className="font-semibold text-blue-600">
-                          Click để tải lên
-                        </span>{" "}
-                        hoặc kéo thả file
-                      </p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        PDF, DOCX, PPT (Tối đa: 10MB)
-                      </p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileChange}
-                      multiple
-                    />
-                  </label>
-                </div>
-
-                {files.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <Label className="text-slate-600 text-sm">
-                      Tệp đã chọn:
-                    </Label>
-                    <ul className="space-y-1">
-                      {files.map((file, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center justify-between text-sm text-slate-700 bg-slate-100 px-3 py-2 rounded border border-slate-200"
-                        >
-                          <div className="flex items-center gap-2">
-                            <UploadCloud className="w-4 h-4 text-blue-500" />
-                            <span className="truncate max-w-xs text-black">
-                              {file.name}
-                            </span>
-                            <span className="text-black  text-xs mt-1">
-                              ({(file.size / 1024).toFixed(1)} KB)
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
                 )}
-              </div>
+              />
+              {errors.subject && (
+                <p className="text-red-500 text-sm">{errors.subject.message}</p>
+              )}
+
+              <Input type="date" {...register("startDate")} />
+              {errors.startDate && (
+                <p className="text-red-500 text-sm">
+                  {errors.startDate.message}
+                </p>
+              )}
+
+              <Input type="date" {...register("endDate")} />
+              {errors.endDate && (
+                <p className="text-red-500 text-sm">{errors.endDate.message}</p>
+              )}
+
+              <Input
+                type="number"
+                placeholder="Thời gian làm bài (phút)"
+                {...register("time")}
+              />
+              {errors.time && (
+                <p className="text-red-500 text-sm">{errors.time.message}</p>
+              )}
+
+              <Textarea placeholder="Mô tả đề" {...register("description")} />
+              {errors.description && (
+                <p className="text-red-500 text-sm">
+                  {errors.description.message}
+                </p>
+              )}
+
+              <Input
+                type="file"
+                multiple
+                accept=".docx"
+                onChange={handleFileChange}
+              />
+              {errors.files && (
+                <p className="text-red-500 text-sm">
+                  {(errors.files as any)?.message}
+                </p>
+              )}
+
+              {selectedFiles.length > 0 && (
+                <ul className="text-sm text-gray-600">
+                  {selectedFiles.map((file, idx) => (
+                    <li key={idx}>📄 {file.name}</li>
+                  ))}
+                </ul>
+              )}
 
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 py-2 text-white font-medium"
+                className="w-full bg-green-600 hover:bg-green-700"
               >
-                Tạo đề thi
+                Tiếp tục
               </Button>
             </form>
           </CardContent>

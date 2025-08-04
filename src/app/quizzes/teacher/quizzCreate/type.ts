@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-const schema = yup.object({
+export const schema = yup.object({
     title: yup.string().required("Vui lòng nhập tên đề thi"),
     grade: yup.string().required("Chọn khối lớp"),
     subject: yup.string().required("Chọn môn học"),

@@ -28,7 +28,12 @@ export default function HomePage() {
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/auth/login">
-              <Button className="w-full bg-green-600 hover:bg-green-600 cursor-pointer" size="lg">Đăng nhập</Button>
+              <Button
+                className="w-full bg-green-600 hover:bg-green-600 cursor-pointer"
+                size="lg"
+              >
+                Đăng nhập
+              </Button>
             </Link>
             <Link href="/auth/register">
               <Button variant="outline" size="lg">
@@ -96,5 +101,6 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
-  )
+    </div>
+  );
 }
