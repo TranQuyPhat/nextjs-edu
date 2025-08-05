@@ -169,26 +169,29 @@ export default function TeacherClassesPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <span className="text-sm font-mono">{classItem.code}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyClassCode(classItem.code)}>
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Link href={`/classes/${classItem.id}`}>
-                    <Button size="sm" variant="outline" className="flex-1 bg-transparent">
-                      <Eye className="h-4 w-4 mr-1" />
-                      Xem lớp
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <span className="text-sm font-mono">{classItem.code}</span>
+                    <Button size="sm" variant="ghost" onClick={() => copyClassCode(classItem.code)}>
+                      <Copy className="h-4 w-4" />
                     </Button>
-                  </Link>
-                  <Button size="sm" variant="outline">
-                    <Settings className="h-4 w-4" />
-                  </Button>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Tạo ngày: {new Date(classItem.createdAt).toLocaleDateString("vi-VN")}
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href={`/classes/${classItem.id}`} className="flex-1">
+                      <Button size="sm" variant="outline" className="w-full bg-transparent">
+                        <Eye className="h-4 w-4 mr-1" />
+                        Xem lớp
+                      </Button>
+                    </Link>
+                    <Button size="sm" variant="outline">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
           </Card>
         ))}
       </div>
