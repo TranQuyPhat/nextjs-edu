@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { BookOpen, Users, FileText, Calendar, Trophy, GraduationCap, Home, LogOut, Menu, X } from "lucide-react"
+import { BookOpen, Users, Calendar, Trophy, GraduationCap, Home, LogOut, Menu, X } from "lucide-react"
 import Image from "next/image"
 
 export default function Navigation() {
@@ -32,7 +32,6 @@ export default function Navigation() {
   const teacherNavItems = [
     { href: "/dashboard/teacher", label: "Trang chủ", icon: Home },
     { href: "/classes/teacher", label: "Quản lý lớp", icon: Users },
-    { href: "/assignments/teacher", label: "Bài tập", icon: FileText },
     { href: "/quizzes/teacher", label: "Trắc nghiệm", icon: BookOpen },
     { href: "/grades/teacher", label: "Xếp hạng", icon: Trophy },
   ]
@@ -40,7 +39,6 @@ export default function Navigation() {
   const studentNavItems = [
     { href: "/dashboard/student", label: "Trang chủ", icon: Home },
     { href: "/classes/student", label: "Lớp học", icon: Users },
-    { href: "/assignments/student", label: "Bài tập", icon: FileText },
     { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen },
     { href: "/grades/student", label: "Kết quả", icon: GraduationCap },
     { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar },
