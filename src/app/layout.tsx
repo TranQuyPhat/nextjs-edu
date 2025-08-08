@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
 import Footer from "@/components/footer/page";
 
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

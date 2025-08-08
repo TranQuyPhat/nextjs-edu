@@ -44,6 +44,18 @@ export default function ClassDetailPage() {
   const [classData, setClassData] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("overview")
 
+  
+  // back button
+  const [redirectPath, setRedirectPath] = useState("/classes")
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}")
+    if (user?.role === "teacher") {
+      setRedirectPath("/classes/teacher")
+    } else if (user?.role === "student") {
+      setRedirectPath("/classes/student")
+    }
+  }, [])
+
   // Mock data for class details
   const [students] = useState([
     { id: 1, name: "Nguyễn Văn An", email: "an@student.com", joinDate: "2024-01-15", avgGrade: 8.5 },
@@ -1089,7 +1101,7 @@ export default function ClassDetailPage() {
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
-            <Link href="/classes">
+             <Link href={redirectPath}>
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Quay lại

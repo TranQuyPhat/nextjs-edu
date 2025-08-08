@@ -48,8 +48,8 @@ export default function TeacherClassesPage() {
   const [newClass, setNewClass] = useState({
     name: "",
     description: "",
-  });
-  const [joinCode, setJoinCode] = useState("");
+  })
+  const [joinCode, setJoinCode] = useState("")
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -71,15 +71,16 @@ export default function TeacherClassesPage() {
       code: classCode,
       studentCount: 0,
       createdAt: new Date().toISOString().split("T")[0],
-    };
-    setClasses([...classes, newClassData]);
-    setNewClass({ name: "", description: "" });
-  };
+    }
+    setClasses([...classes, newClassData])
+    setNewClass({ name: "", description: "" })
+  }
 
   const handleJoinClass = () => {
-    alert(`Đã tham gia lớp với mã: ${joinCode}`);
-    setJoinCode("");
-  };
+    // Simulate joining a class
+    alert(`Đã tham gia lớp với mã: ${joinCode}`)
+    setJoinCode("")
+  }
 
   const copyClassCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -90,127 +91,103 @@ export default function TeacherClassesPage() {
     return <div>Loading...</div>;
   }
 
+  const TeacherClassView = () => (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Quản lý lớp học</h1>
+          <p className="text-gray-600">Tạo và quản lý các lớp học của bạn</p>
+        </div>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Tạo lớp mới
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tạo lớp học mới</DialogTitle>
+              <DialogDescription>Nhập thông tin để tạo lớp học mới</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="className">Tên lớp</Label>
+                <Input
+                  id="className"
+                  value={newClass.name}
+                  onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
+                  placeholder="VD: Toán 12A1"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="classDescription">Mô tả</Label>
+                <Textarea
+                  id="classDescription"
+                  value={newClass.description}
+                  onChange={(e) => setNewClass({ ...newClass, description: e.target.value })}
+                  placeholder="Mô tả về lớp học..."
+                />
+              </div>
+              <Button onClick={handleCreateClass} className="w-full">
+                Tạo lớp
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {classes.map((classItem) => (
+          <Card key={classItem.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg">{classItem.name}</CardTitle>
+                  <CardDescription className="mt-1">{classItem.description}</CardDescription>
+                </div>
+                <Badge variant="secondary">
+                  <Users className="h-3 w-3 mr-1" />
+                  {classItem.studentCount}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <span className="text-sm font-mono">{classItem.code}</span>
+                    <Button size="sm" variant="ghost" onClick={() => copyClassCode(classItem.code)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Tạo ngày: {new Date(classItem.createdAt).toLocaleDateString("vi-VN")}
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href={`/classes/${classItem.id}`} className="flex-1">
+                      <Button size="sm" variant="outline" className="w-full bg-transparent">
+                        <Eye className="h-4 w-4 mr-1" />
+                        Xem lớp
+                      </Button>
+                    </Link>
+                    <Button size="sm" variant="outline">
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <TeacherClassView
-          classes={classes}
-          newClass={newClass}
-          setNewClass={setNewClass}
-          handleCreateClass={handleCreateClass}
-          copyClassCode={copyClassCode}
-        />
+        <TeacherClassView />
       </div>
     </div>
-  );
+  )
 }
-const TeacherClassView = ({
-  classes,
-  newClass,
-  setNewClass,
-  handleCreateClass,
-  copyClassCode,
-}: any) => (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Quản lý lớp học</h1>
-        <p className="text-gray-600">Tạo và quản lý các lớp học của bạn</p>
-      </div>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Tạo lớp mới
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Tạo lớp học mới</DialogTitle>
-            <DialogDescription>
-              Nhập thông tin để tạo lớp học mới
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="className">Tên lớp</Label>
-              <Input
-                id="className"
-                value={newClass.name}
-                onChange={(e) =>
-                  setNewClass({ ...newClass, name: e.target.value })
-                }
-                placeholder="VD: Toán 12A1"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="classDescription">Mô tả</Label>
-              <Textarea
-                id="classDescription"
-                value={newClass.description}
-                onChange={(e) =>
-                  setNewClass({ ...newClass, description: e.target.value })
-                }
-                placeholder="Mô tả về lớp học..."
-              />
-            </div>
-            <Button onClick={handleCreateClass} className="w-full">
-              Tạo lớp
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {classes.map((classItem) => (
-        <Card key={classItem.id} className="hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <div>
-                <CardTitle className="text-lg">{classItem.name}</CardTitle>
-                <CardDescription className="mt-1">
-                  {classItem.description}
-                </CardDescription>
-              </div>
-              <Badge variant="secondary">
-                <Users className="h-3 w-3 mr-1" />
-                {classItem.studentCount}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <span className="text-sm font-mono">{classItem.code}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => copyClassCode(classItem.code)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="flex gap-2">
-                <Link href={`/classes/${classItem.id}`}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1 bg-transparent"
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    Xem lớp
-                  </Button>
-                </Link>
-                <Button size="sm" variant="outline">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  </div>
-);

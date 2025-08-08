@@ -101,6 +101,5 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
-    </div>
-  );
+  )
 }
