@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Clock, Users, CheckCircle, Edit, Eye } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 interface QuizCard {
   id: number;
   title: string;
@@ -50,34 +51,8 @@ interface QuizCard {
 
 export default function TeacherQuizzesPage() {
   const [user, setUser] = useState<any>(null);
-  // const [quizzes, setQuizzes] = useState([
-  //   {
-  //     id: 1,
-  //     title: "Kiểm tra 15 phút - Hàm số",
-  //     description: "Bài kiểm tra về định nghĩa và tính chất hàm số",
-  //     className: "Toán 12A1",
-  //     duration: 15,
-  //     totalQuestions: 10,
-  //     attempts: 25,
-  //     totalStudents: 35,
-  //     status: "active",
-  //     createdAt: "2024-01-20",
-  //     dueDate: "2024-01-25",
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Bài kiểm tra giữa kỳ",
-  //     description: "Kiểm tra tổng hợp các chương đã học",
-  //     className: "Toán 12A1",
-  //     duration: 45,
-  //     totalQuestions: 20,
-  //     attempts: 30,
-  //     totalStudents: 35,
-  //     status: "completed",
-  //     createdAt: "2024-01-15",
-  //     dueDate: "2024-01-20",
-  //   },
-  // ]);
+  const router = useRouter();
+
   const [quizzes, setQuizzes] = useState<QuizCard[]>([]);
 
   useEffect(() => {
@@ -93,9 +68,7 @@ export default function TeacherQuizzesPage() {
           className: quiz.className || "Chưa rõ lớp",
           duration: quiz.timeLimit || 0,
           totalQuestions: quiz.questions.length || 0,
-          attempts: quiz.attempts ?? null,
           totalStudents: quiz.totalStudents ?? null,
-          status: quiz.status ?? null,
           createdAt: quiz.createdAt ?? null,
           dueDate: quiz.endDate ?? null,
           subject: quiz.subject ?? "chưa có môn",
@@ -126,27 +99,6 @@ export default function TeacherQuizzesPage() {
     }
   }, []);
 
-  // const handleCreateQuiz = () => {
-  //   const quizData = {
-  //     id: Date.now(),
-  //     ...newQuiz,
-  //     totalQuestions: newQuiz.questions.length,
-  //     attempts: 0,
-  //     totalStudents: 35,
-  //     status: "active",
-  //     createdAt: new Date().toISOString().split("T")[0],
-  //   };
-  //   setQuizzes([...quizzes, quizData]);
-  //   setNewQuiz({
-  //     title: "",
-  //     description: "",
-  //     className: "",
-  //     duration: 15,
-  //     dueDate: "",
-  //     questions: [],
-  //   });
-  // };
-
   const getStatusBadge = (status: string, dueDate: string) => {
     const now = new Date();
     const due = new Date(dueDate);
@@ -174,7 +126,9 @@ export default function TeacherQuizzesPage() {
       </Badge>
     );
   };
-
+  const handleXemKetQua = (quizId: number) => {
+    router.push(`teacher/quizResult/${quizId}`);
+  };
   const TeacherQuizView = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -219,7 +173,11 @@ export default function TeacherQuizzesPage() {
             <CardContent>
               <p className="text-gray-600 mb-4">{quiz.description}</p>
               <div className="flex gap-2">
-                <Button size="sm" variant="outline">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleXemKetQua(quiz.id)}
+                >
                   <Eye className="h-4 w-4 mr-1" />
                   Xem kết quả
                 </Button>

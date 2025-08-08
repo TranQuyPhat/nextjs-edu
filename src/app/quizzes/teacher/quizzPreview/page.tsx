@@ -36,8 +36,7 @@ export default function ExamPreview() {
     try {
       const mappedQuestions = questions.map((q) => ({
         questionText: q.question,
-        questionType: "MULTIPLE_CHOICE",
-        correctOption: q.answer ?? "", // đảm bảo không null
+        correctOption: q.answer ?? "",
         score: 1,
         options: q.options.map((opt) => ({
           optionLabel: opt.optionLabel,

@@ -58,13 +58,13 @@ export default function QuizPage() {
       try {
         const res = await fetch(`http://localhost:8080/api/quizzes/${id}`);
         const data = await res.json();
+        console.log(data);
 
         setQuiz(data);
 
         setStartTime(new Date());
         setTimeLeft(data.timeLimit * 60);
 
-        // Khởi tạo answers object
         const initialAnswers = data.questions?.reduce(
           (acc: Record<number, string>, q: any) => {
             acc[q.id] = "";
@@ -164,18 +164,30 @@ export default function QuizPage() {
 
   const handleSubmit = useCallback(async () => {
     if (!startTime || isSubmitting) return;
-
+    const studentIds = [12, 13, 11, 15, 16, 17];
     setIsSubmitting(true);
+    const randomStudentId =
+      studentIds[Math.floor(Math.random() * studentIds.length)];
+    const quizAnswerss = {
+      33: "B",
+      34: "C",
+      35: "D",
+      36: "D",
+      37: "B",
+      38: "C",
+    };
     const submissionPayload = {
       quizId: parseInt(id as string),
-      studentId: 4,
+      studentId: randomStudentId,
       startAt: startTime.toISOString(),
+      submittedAt: new Date().toISOString(),
       endAt: new Date().toISOString(),
-      answers: quizAnswers,
+      answers: quizAnswerss,
     };
+    console.log(submissionPayload);
 
     try {
-      const res = await fetch("http://localhost:8080/api/quizzes/submission", {
+      const res = await fetch("http://localhost:8080/api/quiz-submissions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -186,6 +198,7 @@ export default function QuizPage() {
       if (res.ok) {
         setIsSubmited(true);
         const result = await res.json();
+
         const start = new Date(result.startAt).getTime();
         const end = new Date(result.endAt).getTime();
         const durationMs = end - start;
@@ -193,7 +206,6 @@ export default function QuizPage() {
         const durationMinutes = Math.floor(durationMs / 60000);
         const durationSeconds = Math.floor((durationMs % 60000) / 1000);
         console.log(result);
-        // lấy kết quả từ backend
         setQuizResult({
           studentName: result.studentName,
           className: result.className,
@@ -210,15 +222,14 @@ export default function QuizPage() {
         setShowResultDialog(true);
       } else {
         const error = await res.json();
-        console.log(submissionPayload);
 
         console.error("Lỗi khi nộp bài:", error);
-        alert("Nộp bài thất bại! Vui lòng thử lại.");
+        // alert("Nộp bài thất bại! Vui lòng thử lại.");
         setIsSubmitting(false);
       }
     } catch (err) {
       console.error("Lỗi kết nối:", err);
-      alert("Lỗi mạng! Vui lòng kiểm tra kết nối.");
+      // alert("Lỗi mạng! Vui lòng kiểm tra kết nối.");
       setIsSubmitting(false);
     }
   }, [id, startTime, quizAnswers, router, isSubmitting]);
