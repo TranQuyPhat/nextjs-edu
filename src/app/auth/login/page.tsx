@@ -17,7 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "next-auth/react";
-
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -42,25 +41,17 @@ export default function LoginPage() {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (formData: FormData) => {
+  const onSubmit = (data: FormData) => {
     const mockUser = {
       id: 1,
-      email: formData.email,
+      email: data.email,
       fullName: "Người dùng Demo",
       role: formData.email.includes("teacher") ? "teacher" : "student",
     };
     localStorage.setItem("user", JSON.stringify(mockUser));
-    router.push("/dashboard");
-  };
-=======
-      role: formData.email.includes("teacher") ? "teacher" : "student",
-    }
-    localStorage.setItem("user", JSON.stringify(mockUser))
     // Redirect based on role
     const redirectPath =
-      mockUser.role === "teacher"
-        ? "/dashboard/teacher"
-        : "/dashboard/student"
+      mockUser.role === "teacher" ? "/dashboard/teacher" : "/dashboard/student";
 
     router.push(redirectPath);
   };
@@ -110,7 +101,6 @@ export default function LoginPage() {
               Đăng ký ngay
             </Link>
           </div>
-
           <div className="flex items-center gap-2 my-4">
             <div className="flex-grow h-px bg-gray-300" />
             <span className="text-sm text-gray-500">hoặc</span>
