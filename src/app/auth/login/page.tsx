@@ -46,7 +46,7 @@ export default function LoginPage() {
       id: 1,
       email: data.email,
       fullName: "Người dùng Demo",
-      role: formData.email.includes("teacher") ? "teacher" : "student",
+      role: data.email.includes("teacher") ? "teacher" : "student",
     };
     localStorage.setItem("user", JSON.stringify(mockUser));
     // Redirect based on role
