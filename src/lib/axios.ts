@@ -10,16 +10,16 @@ const apiClient = axios.create({
 });
 
 // Optional: Thêm interceptor nếu cần xử lý token
-apiClient.interceptors.request.use(
-  (config) => {
-    // Ví dụ: nếu có token trong localStorage
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// apiClient.interceptors.request.use(
+//   (config) => {
+//     // Ví dụ: nếu có token trong localStorage
+//     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 
 export default apiClient;
