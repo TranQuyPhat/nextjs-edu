@@ -30,19 +30,15 @@ import {
 } from "@/components/ui/select";
 import { readDocxFile } from "./ReadDocxFile";
 import { useRouter } from "next/navigation";
-import { useQuizzStorage } from "../lib/store/useQuizzStorage";
+import { useQuizzStorage } from "../../../../lib/store/useQuizzStorage";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { schema } from "./type";
-interface QuizFormData {
-  title: string;
-  grade: string;
-  subject: string;
-  startDate: string;
-  endDate: string;
-  time: string;
-  description: string;
+import { QuizzFormData } from "@/types/quiz.type";
+import { QuizForm } from "@/components/forms/QuizForm";
+interface QuizFormDataExtended extends QuizzFormData {
   files: File[];
+  fileName: string;
   classId: number;
   createdBy: number;
 }
@@ -52,33 +48,50 @@ export default function CreateQuizzPage() {
   const { setData } = useQuizzStorage();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm<QuizFormData>({
-    defaultValues: {
-      title: "Đề kiểm tra 15 phút Toán học - Lớp 10",
-      grade: "10",
-      subject: "Văn",
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date().toISOString().split("T")[0],
-      time: "40",
-      description: "Đề kiểm tra 15 phút chương I",
-      files: [],
-      classId: 2,
-      createdBy: 2,
-    },
-    resolver: yupResolver(schema),
-  });
+  const defaultValues: QuizFormDataExtended = {
+    title: "Đề kiểm tra 15 phút Toán học - Lớp 10",
+    grade: "10",
+    subject: "math",
+    startDate: new Date().toISOString().split("T")[0],
+    endDate: new Date().toISOString().split("T")[0],
+    time: "40",
+    description: "Đề kiểm tra 15 phút chương I",
+    files: [],
+    classId: 2,
+    createdBy: 2,
+    fileName: "",
+    questions: [],
+  };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = Array.from(e.target.files || []);
-    setValue("files", selected);
-    setSelectedFiles(selected);
+  const handleSubmit = async (data: QuizFormDataExtended) => {
+    if (!data.files || data.files.length === 0) {
+      toast.error("Vui lòng chọn ít nhất 1 file DOCX");
+      return;
+    }
+
+    try {
+      let combinedQuestions: any[] = [];
+      for (const file of data.files) {
+        const questions = await readDocxFile(file);
+        combinedQuestions = [...combinedQuestions, ...questions];
+      }
+
+      if (combinedQuestions.length === 0) {
+        toast.error("Không tìm thấy câu hỏi hợp lệ trong file.");
+        return;
+      }
+
+      setData({
+        ...data,
+        fileName: data.files.map((f) => f.name).join(", "),
+        questions: combinedQuestions,
+      });
+
+      router.push("/quizzes/teacher/quizzPreview");
+    } catch (error) {
+      console.error(error);
+      toast.error("Đã xảy ra lỗi khi đọc file.");
+    }
   };
 
   const readMultipleFiles = async (files: File[]) => {
@@ -92,7 +105,7 @@ export default function CreateQuizzPage() {
     return combinedQuestions;
   };
 
-  const onSubmit = async (data: QuizFormData) => {
+  const onSubmit = async (data: QuizFormDataExtended) => {
     if (!data.files || data.files.length === 0) {
       toast.error("Vui lòng chọn ít nhất 1 file DOCX");
       return;
@@ -119,7 +132,9 @@ export default function CreateQuizzPage() {
       toast.error("Đã xảy ra lỗi khi đọc file.");
     }
   };
-
+  const handleAIGen = () => {
+    router.push("/quizzes/teacher/AIgenquiz");
+  };
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="mb-8 text-center">
@@ -147,92 +162,16 @@ export default function CreateQuizzPage() {
             </div>
           </CardHeader>
           <CardContent className=" space-y-5">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <Input placeholder="Tiêu đề" {...register("title")} />
-              {errors.title && (
-                <p className="text-red-500 text-sm">{errors.title.message}</p>
-              )}
-
-              <Input placeholder="Khối lớp" {...register("grade")} />
-              {errors.grade && (
-                <p className="text-red-500 text-sm">{errors.grade.message}</p>
-              )}
-
-              <Controller
-                control={control}
-                name="subject"
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn môn học" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="math">Toán</SelectItem>
-                      <SelectItem value="literature">Văn</SelectItem>
-                      <SelectItem value="english">Anh</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.subject && (
-                <p className="text-red-500 text-sm">{errors.subject.message}</p>
-              )}
-
-              <Input type="date" {...register("startDate")} />
-              {errors.startDate && (
-                <p className="text-red-500 text-sm">
-                  {errors.startDate.message}
-                </p>
-              )}
-
-              <Input type="date" {...register("endDate")} />
-              {errors.endDate && (
-                <p className="text-red-500 text-sm">{errors.endDate.message}</p>
-              )}
-
-              <Input
-                type="number"
-                placeholder="Thời gian làm bài (phút)"
-                {...register("time")}
-              />
-              {errors.time && (
-                <p className="text-red-500 text-sm">{errors.time.message}</p>
-              )}
-
-              <Textarea placeholder="Mô tả đề" {...register("description")} />
-              {errors.description && (
-                <p className="text-red-500 text-sm">
-                  {errors.description.message}
-                </p>
-              )}
-
-              <Input
-                type="file"
-                multiple
-                accept=".docx"
-                onChange={handleFileChange}
-              />
-              {errors.files && (
-                <p className="text-red-500 text-sm">
-                  {(errors.files as any)?.message}
-                </p>
-              )}
-
-              {selectedFiles.length > 0 && (
-                <ul className="text-sm text-gray-600">
-                  {selectedFiles.map((file, idx) => (
-                    <li key={idx}>📄 {file.name}</li>
-                  ))}
-                </ul>
-              )}
-
-              <Button
-                type="submit"
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                Tiếp tục
-              </Button>
-            </form>
+            <QuizForm
+              defaultValues={defaultValues}
+              schema={schema}
+              onSubmit={handleSubmit}
+              subjectOptions={[
+                { label: "Toán", value: "math" },
+                { label: "Văn", value: "literature" },
+                { label: "Anh", value: "english" },
+              ]}
+            />
           </CardContent>
         </Card>
 
@@ -268,17 +207,17 @@ export default function CreateQuizzPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-base text-slate-800">
-                    Đề thi đánh giá năng lực
+                    Tạo đề bằng AI
                   </h3>
                   <p className="text-sm text-slate-600 mt-2">
-                    Sử dụng bộ đề có sẵn theo chuẩn đánh giá năng lực của Bộ
-                    GD&amp;ĐT
+                    Sử dụng Ai để tạo đề dựa vào tài liệu
                   </p>
                   <Button
                     variant="outline"
                     className="mt-3 text-green-600 border-green-300 hover:bg-green-50"
+                    onClick={handleAIGen}
                   >
-                    Chọn bộ đề
+                    Tạo đề
                   </Button>
                 </div>
               </CardContent>
