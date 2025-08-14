@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
+import { toast } from "react-toastify";
+
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -41,19 +43,36 @@ export default function LoginPage() {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: FormData) => {
-    const mockUser = {
-      id: 1,
+  const onSubmit = async (data: FormData) => {
+    const res = await signIn("credentials", {
+      redirect: false,
       email: data.email,
-      fullName: "Người dùng Demo",
-      role: data.email.includes("teacher") ? "teacher" : "student",
-    };
-    localStorage.setItem("user", JSON.stringify(mockUser));
-    // Redirect based on role
-    const redirectPath =
-      mockUser.role === "teacher" ? "/dashboard/teacher" : "/dashboard/student";
+      password: data.password,
+    });
 
-    router.push(redirectPath);
+    if (res?.ok) {
+      toast.success("Đăng nhập thành công!");
+
+      const session = await getSession();
+
+      if (session?.user) {
+        // Lưu dữ liệu vào localStorage nếu bạn cần
+        localStorage.setItem("userId", session.user.id || "");
+        localStorage.setItem("username", session.user.name || "");
+        localStorage.setItem("email", session.user.email || "");
+        localStorage.setItem("accessToken", session.user.accessToken || "");
+        localStorage.setItem("roles", JSON.stringify(session.user.roles || []));
+
+        if (session?.user?.roles && session.user.roles.length === 1) {
+          router.push(`/dashboard/${session.user.roles[0]}`);
+        } else {
+          router.push("/select-role");
+          toast.success("Vui lòng chọn vai trò");
+        }
+      }
+    } else {
+      toast.error("Mật khẩu hoặc email không chính xác");
+    }
   };
 
   return (
@@ -107,16 +126,12 @@ export default function LoginPage() {
             <div className="flex-grow h-px bg-gray-300" />
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              signIn("google", { callbackUrl: "/api/auth/select-role" })
-            }
-            className="w-full"
+          <button
+            onClick={() => signIn("google", { callbackUrl: "/select-role" })}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full transition"
           >
             Đăng nhập với Google
-          </Button>
+          </button>
         </CardContent>
       </Card>
     </div>
