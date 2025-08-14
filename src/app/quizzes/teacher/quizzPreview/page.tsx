@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,12 +18,6 @@ export default function QuizEditPage() {
   const { data: quiz, setData, reset } = useQuizzStorage();
   const [showConfirm, setShowConfirm] = useState(false);
 
-  useEffect(() => {
-    if (!quiz || !quiz.questions.length) {
-      toast.error("Không có dữ liệu quiz. Vui lòng tạo trước.");
-    }
-  }, [quiz, router]);
-
   const title = useMemo(() => {
     const n = quiz?.questions.length ?? 0;
     return `Chỉnh sửa quiz (${n} câu hỏi)`;
@@ -34,12 +27,49 @@ export default function QuizEditPage() {
     setShowConfirm(true);
   }
 
-  function onSaveAll() {
-    toast.success("Đã lưu tất cả thay đổi vào bộ nhớ tạm.");
-  }
+  async function onApprove() {
+    try {
+      // Lấy quiz hiện tại trong store
+      const { data: quizData } = useQuizzStorage.getState();
 
-  function onApprove() {
-    toast.success("Quiz đã sẵn sàng ✔️");
+      // Map questions về dạng backend cần
+      const mappedQuestions = quizData.questions.map((q) => ({
+        questionText: q.question,
+        correctOption: q.answer ?? "",
+        score: 1,
+        options: q.options.map((opt) => ({
+          optionLabel: opt.optionLabel,
+          optionText: opt.optionText,
+        })),
+      }));
+
+      // Tạo payload gửi lên backend
+      const payload = {
+        ...quizData,
+        questions: mappedQuestions,
+      };
+
+      const res = await fetch("http://localhost:8080/api/quizzes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // Nếu cần token thì thêm:
+          // "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Lỗi khi gửi quiz: ${errorText}`);
+      }
+
+      const result = await res.json();
+      console.log("Duyệt quiz thành công:", result);
+      router.push("quizzes/teacher"); // Điều hướng sau khi duyệt
+    } catch (error) {
+      console.error("Gửi quiz thất bại:", error);
+    }
   }
 
   return (
@@ -65,7 +95,6 @@ export default function QuizEditPage() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              onClick={onSaveAll}
               className="border-green-500/30 text-green-700 hover:bg-green-50"
             >
               <Save className="mr-2 h-4 w-4" />

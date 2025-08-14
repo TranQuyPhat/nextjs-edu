@@ -81,9 +81,12 @@ export async function callGenerateAPI(params: {
         }
 
         const backendResponse: BackendQuizResponse = await res.json();
-        console.log(backendResponse);
 
-        useQuizzStorage.getState().setData(mapBackendToFormData(backendResponse));
+        const { questions, ...rest } = mapBackendToFormData(backendResponse);
+        useQuizzStorage.getState().setData({
+            ...useQuizzStorage.getState().data,
+            questions
+        });
 
 
 

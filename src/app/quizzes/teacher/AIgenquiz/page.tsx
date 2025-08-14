@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { FileUploadArea } from "@/components/uploader/file-upload-area";
@@ -18,21 +20,23 @@ import { GenerateActions } from "@/components/action/generate-actions";
 import { ProcessingScreen } from "@/components/processing/processing-screen";
 import { Leaf, Sparkles } from "lucide-react";
 import { useQuizStore } from "@/lib/store/quizStore";
+import { useQuizzStorage } from "@/lib/store/useQuizzStorage";
 
 export default function HomePage() {
   const { isGenerating } = useQuizStore();
+  const { data, setData } = useQuizzStorage();
 
+  const { reset } = useQuizzStorage();
   useEffect(() => {
-    // Example welcome toast (once per visit)
-    // eslint-disable-next-line no-undef
-    if (typeof window !== "undefined" && !sessionStorage.getItem("welcomed")) {
-      toast({
-        title: "Chào mừng 👋",
-        description: "Tạo quiz từ tài liệu của bạn chỉ với vài bước.",
-      });
-      sessionStorage.setItem("welcomed", "1");
-    }
-  }, [toast]);
+    reset(); // xóa tất cả, kể cả questions
+  }, []);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setData({ [name]: value });
+  };
 
   return (
     <main className="min-h-dvh bg-white">
@@ -66,15 +70,142 @@ export default function HomePage() {
         <div className="md:col-span-3">
           <Card className="border-green-500/20">
             <CardHeader>
-              <CardTitle className="text-green-700">1) Tải tài liệu</CardTitle>
-              <CardDescription>
-                Kéo & thả file hoặc chọn từ máy. Hỗ trợ PDF, DOCX, TXT, MD...
-              </CardDescription>
+              <CardTitle className="text-green-700">
+                1) Nhập thông tin đề
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <FileUploadArea />
-              <Separator />
-              <FileList />
+              <div className="space-y-1">
+                <label
+                  className="text-sm font-medium text-muted-foreground"
+                  htmlFor="title"
+                >
+                  Tiêu đề đề thi
+                </label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Ví dụ: Đề kiểm tra giữa kỳ Toán 10"
+                  value={data.title}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="grade"
+                  >
+                    Khối lớp
+                  </label>
+                  <Input
+                    id="grade"
+                    name="grade"
+                    placeholder="VD: 10"
+                    value={data.grade}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="subject"
+                  >
+                    Môn học
+                  </label>
+                  <Input
+                    id="subject"
+                    name="subject"
+                    placeholder="VD: Toán"
+                    value={data.subject}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="startDate"
+                  >
+                    Ngày bắt đầu
+                  </label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    name="startDate"
+                    value={data.startDate}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="endDate"
+                  >
+                    Ngày kết thúc
+                  </label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    name="endDate"
+                    value={data.endDate}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="time"
+                  >
+                    Thời gian (phút)
+                  </label>
+                  <Input
+                    id="time"
+                    type="number"
+                    name="time"
+                    placeholder="VD: 45"
+                    value={data.time}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label
+                  className="text-sm font-medium text-muted-foreground"
+                  htmlFor="description"
+                >
+                  Mô tả đề
+                </label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Ghi chú thêm nếu cần..."
+                  value={data.description}
+                  onChange={handleChange}
+                />
+              </div>
+              <Card className="border-green-500/20 mt-4">
+                <CardHeader>
+                  <CardTitle className="text-green-700">
+                    2) Tải tài liệu
+                  </CardTitle>
+                  <CardDescription>
+                    Kéo & thả file hoặc chọn từ máy. Hỗ trợ PDF, DOCX, TXT,
+                    MD...
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FileUploadArea />
+                  <Separator />
+                  <FileList />
+                </CardContent>
+              </Card>
             </CardContent>
           </Card>
         </div>
@@ -82,7 +213,7 @@ export default function HomePage() {
         <div className="md:col-span-2">
           <Card className="border-green-500/20">
             <CardHeader>
-              <CardTitle className="text-green-700">2) Cấu hình AI</CardTitle>
+              <CardTitle className="text-green-700">3) Cấu hình AI</CardTitle>
               <CardDescription>
                 Tuỳ chỉnh cách sinh câu hỏi và đầu ra mong muốn.
               </CardDescription>
@@ -93,10 +224,8 @@ export default function HomePage() {
             </CardContent>
           </Card>
           <p className="mt-4 text-xs text-muted-foreground">
-            Mẹo: Chọn {/* eslint-disable-next-line react/jsx-no-literals */}
-            {'"EXTRACT"'} nếu tài liệu đã có câu hỏi; chọn{" "}
-            {/* eslint-disable-next-line react/jsx-no-literals */}
-            {'"GENERATE"'} để AI tự tạo từ nội dung.
+            Mẹo: Chọn <code>{'"EXTRACT"'}</code> nếu tài liệu đã có câu hỏi;
+            chọn <code>{'"GENERATE"'}</code> để AI tự tạo từ nội dung.
           </p>
         </div>
       </section>
