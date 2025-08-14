@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { QuizEditor } from "@/components/editor/quiz-editor";
 import { ConfirmLeaveDialog } from "@/components/shared/confirm-leave-dialog";
+import { useApproveQuiz } from "../../hook/useApproveQuiz";
 import { useQuizzStorage } from "@/lib/store/useQuizzStorage";
+import { useRouter } from "next/navigation";
 
 export default function QuizEditPage() {
   const router = useRouter();
   const { data: quiz, setData, reset } = useQuizzStorage();
+
+  const approveMutation = useApproveQuiz();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const title = useMemo(() => {
@@ -28,50 +31,17 @@ export default function QuizEditPage() {
   }
 
   async function onApprove() {
-    try {
-      // Lấy quiz hiện tại trong store
-      const { data: quizData } = useQuizzStorage.getState();
-
-      // Map questions về dạng backend cần
-      const mappedQuestions = quizData.questions.map((q) => ({
-        questionText: q.question,
-        correctOption: q.answer ?? "",
-        score: 1,
-        options: q.options.map((opt) => ({
-          optionLabel: opt.optionLabel,
-          optionText: opt.optionText,
-        })),
-      }));
-
-      // Tạo payload gửi lên backend
-      const payload = {
-        ...quizData,
-        questions: mappedQuestions,
-      };
-
-      const res = await fetch("http://localhost:8080/api/quizzes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Nếu cần token thì thêm:
-          // "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Lỗi khi gửi quiz: ${errorText}`);
-      }
-
-      const result = await res.json();
-      console.log("Duyệt quiz thành công:", result);
-      router.push("quizzes/teacher"); // Điều hướng sau khi duyệt
-    } catch (error) {
-      console.error("Gửi quiz thất bại:", error);
-    }
+    approveMutation.mutate(quiz, {
+      onSuccess: (result) => {
+        console.log("Duyệt quiz thành công:", result);
+        useQuizzStorage.getState().reset();
+        router.push("/quizzes/teacher");
+      },
+      onError: (error) => {
+        console.error("Gửi quiz thất bại:", error);
+      },
+    });
   }
-
   return (
     <main className="min-h-dvh bg-white">
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
@@ -105,7 +75,7 @@ export default function QuizEditPage() {
               className="bg-green-500 text-white hover:bg-green-600"
             >
               <CheckCircle2 className="mr-2 h-4 w-4" />
-              Duyệt quiz
+              {approveMutation.isPending ? "Đang gửi..." : "Duyệt quiz"}
             </Button>
           </div>
         </div>

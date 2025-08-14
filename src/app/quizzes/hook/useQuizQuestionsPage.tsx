@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "../api/api-client";
 
 export function useQuizQuestionsPage(
   quizId: number,
@@ -7,16 +8,14 @@ export function useQuizQuestionsPage(
 ) {
   return useQuery({
     queryKey: ["quiz", quizId, "questions", page, size],
-    queryFn: async () => {
-      const res = await fetch(
-        `http://localhost:8080/api/quizzes/${quizId}/questions?page=${page}&size=${size}`,
-        {
-          credentials: "include",
-        }
-      );
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
-    },
+    queryFn: () =>
+      apiClient(`/api/quizzes/${quizId}/questions?page=${page}&size=${size}`),
     keepPreviousData: true,
+  });
+}
+export function useQuizById(quizId: number) {
+  return useQuery({
+    queryKey: ["quiz", quizId],
+    queryFn: () => apiClient(`/api/quizzes/${quizId}`),
   });
 }

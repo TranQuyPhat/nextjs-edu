@@ -177,29 +177,6 @@ export default function CreateQuizzPage() {
 
         <div>
           <div className="space-y-5">
-            <Card className="hover:shadow-lg transition-shadow border border-blue-100">
-              <CardContent className=" flex gap-4 items-start">
-                <div className="bg-blue-100 p-3 rounded-lg mt-1">
-                  <Edit className="text-blue-600 w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-base text-slate-800">
-                    Tự soạn đề thi / Bài tập
-                  </h3>
-                  <p className="text-sm text-slate-600 mt-2">
-                    Sử dụng trình soạn thảo trực quan của hệ thống để tạo đề thi
-                    với đầy đủ các loại câu hỏi
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="mt-3 text-blue-600 border-blue-300 hover:bg-blue-50"
-                  >
-                    Bắt đầu soạn đề
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
             <Card className="hover:shadow-lg transition-shadow border border-green-100">
               <CardContent className=" flex gap-4 items-start">
                 <div className="bg-green-100 p-3 rounded-lg mt-1">
@@ -230,17 +207,16 @@ export default function CreateQuizzPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-base text-slate-800">
-                    Tạo đề từ Ma trận đề
+                    Tạo đề từ Ngân hàng đề
                   </h3>
                   <p className="text-sm text-slate-600 mt-2">
-                    Tự động sinh đề thi dựa trên ma trận kiến thức và cấu trúc
-                    đề thi
+                    Tự động sinh đề thi dựa trên ngân hàng đề
                   </p>
                   <Button
                     variant="outline"
                     className="mt-3 text-purple-600 border-purple-300 hover:bg-purple-50"
                   >
-                    Thiết lập ma trận
+                    Tạo đề
                   </Button>
                 </div>
               </CardContent>
