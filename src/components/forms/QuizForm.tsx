@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import type { QuizzFormData } from "@/types/quiz.type";
+import { QuizUploadGuide } from "@/app/quizzes/components/QuizUploadGuide";
 
 export interface QuizFormDataExtended extends QuizzFormData {
   files: File[];
@@ -152,6 +153,7 @@ export function QuizForm({
       {/* File DOCX */}
       <div className="space-y-1">
         <Label htmlFor="files">Tệp DOCX</Label>
+        <QuizUploadGuide />
         <Input
           id="files"
           type="file"

@@ -33,9 +33,9 @@ import { useRouter } from "next/navigation";
 import { useQuizzStorage } from "../../../../lib/store/useQuizzStorage";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { schema } from "./type";
 import { QuizzFormData } from "@/types/quiz.type";
 import { QuizForm } from "@/components/forms/QuizForm";
+import { quizFormSchema } from "@/lib/validation/quizFormSchema";
 interface QuizFormDataExtended extends QuizzFormData {
   files: File[];
   fileName: string;
@@ -164,7 +164,7 @@ export default function CreateQuizzPage() {
           <CardContent className=" space-y-5">
             <QuizForm
               defaultValues={defaultValues}
-              schema={schema}
+              schema={quizFormSchema}
               onSubmit={handleSubmit}
               subjectOptions={[
                 { label: "Toán", value: "math" },

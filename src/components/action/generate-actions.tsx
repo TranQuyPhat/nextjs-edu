@@ -103,6 +103,7 @@ export function GenerateActions() {
   return (
     <div className="flex items-center justify-end">
       <Button
+        data-tour="generate-action"
         onClick={onGenerate}
         disabled={!hasFiles || isGenerating}
         className="bg-green-500 text-white hover:bg-green-600 disabled:opacity-60"

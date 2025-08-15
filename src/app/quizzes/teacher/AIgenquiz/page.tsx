@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, ChangeEvent } from "react";
+import { useEffect, ChangeEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,16 +21,27 @@ import { ProcessingScreen } from "@/components/processing/processing-screen";
 import { Leaf, Sparkles } from "lucide-react";
 import { useQuizStore } from "@/lib/store/quizStore";
 import { useQuizzStorage } from "@/lib/store/useQuizzStorage";
+import { useTour } from "@reactour/tour";
 
 export default function HomePage() {
+  const { setIsOpen } = useTour();
   const { isGenerating } = useQuizStore();
   const { data, setData } = useQuizzStorage();
-
   const { reset } = useQuizzStorage();
   useEffect(() => {
     reset(); // xóa tất cả, kể cả questions
   }, []);
+  useEffect(() => {
+    if (setIsOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
 
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [setIsOpen]);
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -55,6 +66,7 @@ export default function HomePage() {
             <Button
               variant="outline"
               className="border-green-500/30 text-green-700 hover:bg-green-50"
+              onClick={() => setIsOpen(true)}
             >
               Hướng dẫn nhanh
             </Button>
@@ -75,122 +87,128 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <label
-                  className="text-sm font-medium text-muted-foreground"
-                  htmlFor="title"
-                >
-                  Tiêu đề đề thi
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="Ví dụ: Đề kiểm tra giữa kỳ Toán 10"
-                  value={data.title}
-                  onChange={handleChange}
-                />
+              <div data-tour="exam-info">
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="title"
+                  >
+                    Tiêu đề đề thi
+                  </label>
+                  <Input
+                    id="title"
+                    name="title"
+                    placeholder="Ví dụ: Đề kiểm tra giữa kỳ Toán 10"
+                    value={data.title}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label
+                      className="text-sm font-medium text-muted-foreground"
+                      htmlFor="grade"
+                    >
+                      Khối lớp
+                    </label>
+                    <Input
+                      id="grade"
+                      name="grade"
+                      placeholder="VD: 10"
+                      value={data.grade}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label
+                      className="text-sm font-medium text-muted-foreground"
+                      htmlFor="subject"
+                    >
+                      Môn học
+                    </label>
+                    <Input
+                      id="subject"
+                      name="subject"
+                      placeholder="VD: Toán"
+                      value={data.subject}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label
+                      className="text-sm font-medium text-muted-foreground"
+                      htmlFor="startDate"
+                    >
+                      Ngày bắt đầu
+                    </label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      name="startDate"
+                      value={data.startDate}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label
+                      className="text-sm font-medium text-muted-foreground"
+                      htmlFor="endDate"
+                    >
+                      Ngày kết thúc
+                    </label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      name="endDate"
+                      value={data.endDate}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label
+                      className="text-sm font-medium text-muted-foreground"
+                      htmlFor="time"
+                    >
+                      Thời gian (phút)
+                    </label>
+                    <Input
+                      id="time"
+                      type="number"
+                      name="time"
+                      placeholder="VD: 45"
+                      value={data.time}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="description"
+                  >
+                    Mô tả đề
+                  </label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    placeholder="Ghi chú thêm nếu cần..."
+                    value={data.description}
+                    onChange={handleChange}
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label
-                    className="text-sm font-medium text-muted-foreground"
-                    htmlFor="grade"
-                  >
-                    Khối lớp
-                  </label>
-                  <Input
-                    id="grade"
-                    name="grade"
-                    placeholder="VD: 10"
-                    value={data.grade}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label
-                    className="text-sm font-medium text-muted-foreground"
-                    htmlFor="subject"
-                  >
-                    Môn học
-                  </label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="VD: Toán"
-                    value={data.subject}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <label
-                    className="text-sm font-medium text-muted-foreground"
-                    htmlFor="startDate"
-                  >
-                    Ngày bắt đầu
-                  </label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    name="startDate"
-                    value={data.startDate}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label
-                    className="text-sm font-medium text-muted-foreground"
-                    htmlFor="endDate"
-                  >
-                    Ngày kết thúc
-                  </label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    name="endDate"
-                    value={data.endDate}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label
-                    className="text-sm font-medium text-muted-foreground"
-                    htmlFor="time"
-                  >
-                    Thời gian (phút)
-                  </label>
-                  <Input
-                    id="time"
-                    type="number"
-                    name="time"
-                    placeholder="VD: 45"
-                    value={data.time}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label
-                  className="text-sm font-medium text-muted-foreground"
-                  htmlFor="description"
-                >
-                  Mô tả đề
-                </label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Ghi chú thêm nếu cần..."
-                  value={data.description}
-                  onChange={handleChange}
-                />
-              </div>
-              <Card className="border-green-500/20 mt-4">
+              <Card
+                data-tour="file-upload"
+                className="border-green-500/20 mt-4"
+              >
                 <CardHeader>
                   <CardTitle className="text-green-700">
                     2) Tải tài liệu

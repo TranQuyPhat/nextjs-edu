@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 
 import { QuizFilters } from "../api";
 import { useQuizzesQuery } from "../hooks";
+import { TeacherQuizSkeleton } from "../components/TeacherQuizSkeleton";
 
 export default function TeacherQuizzesPage() {
   const [user, setUser] = useState<any>(null);
@@ -43,11 +44,6 @@ export default function TeacherQuizzesPage() {
     isFetching,
     error,
   } = useQuizzesQuery(filters);
-
-  // render tuỳ ý
-  if (isLoading) return <div>Đang tải…</div>;
-  if (error)
-    return <div className="text-red-500">Lỗi: {(error as Error).message}</div>;
 
   const getStatusBadge = (status: string, dueDate: string) => {
     const now = new Date();
@@ -166,8 +162,15 @@ export default function TeacherQuizzesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <TeacherQuizView />
+        {isLoading ? (
+          <TeacherQuizSkeleton />
+        ) : error ? (
+          <div className="text-red-500">Lỗi: {(error as Error).message}</div>
+        ) : (
+          <TeacherQuizView />
+        )}
       </div>
     </div>
   );

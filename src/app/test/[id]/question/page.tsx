@@ -26,7 +26,7 @@ export default function QuizQuestionsTest() {
   return (
     <div>
       <h2>
-        Trang {pageParam} {isFetching && "...đang tải"}
+        Trang {pageParam} {isFetching && "..."}
       </h2>
       <pre>{JSON.stringify(data, null, 2)}</pre>
     </div>

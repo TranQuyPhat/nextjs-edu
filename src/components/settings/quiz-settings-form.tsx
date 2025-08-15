@@ -23,7 +23,7 @@ export function QuizSettingsForm() {
   );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5" data-tour="ai-config">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label className="text-green-800">Chế độ sinh (Mode)</Label>
