@@ -109,12 +109,13 @@ export default function LoginPage() {
                 </p>
               )}
             </div>
-         
-              <Button type="submit"
-              className="w-full py-5 bg-green-600 hover:bg-green-700 cursor-pointer" >
-                Đăng nhập
-              </Button>
-           
+
+            <Button
+              type="submit"
+              className="w-full py-5 bg-green-600 hover:bg-green-700 cursor-pointer"
+            >
+              Đăng nhập
+            </Button>
           </form>
 
           <div className="mt-4 text-center text-sm">
