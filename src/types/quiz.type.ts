@@ -25,7 +25,7 @@ export type QuizzFormData = {
     subject: string;
     startDate: string;
     endDate: string;
-    time: string;
+    timeLimit: string;
     description: string;
     questions: Question[];
 

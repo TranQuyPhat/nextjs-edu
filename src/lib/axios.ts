@@ -4,7 +4,6 @@ const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api",
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
   },
   timeout: 10000,
 });
@@ -13,11 +12,11 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("accessToken");
       if (token && token !== "undefined" && token !== "") {
         config.headers.Authorization = `Bearer ${token}`;
       } else {
-        localStorage.removeItem("token");
+        localStorage.removeItem("accessToken");
       }
     }
     return config;

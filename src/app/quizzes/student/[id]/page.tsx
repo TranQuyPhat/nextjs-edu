@@ -63,7 +63,7 @@ export default function QuizPage() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // thêm token
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -94,23 +94,6 @@ export default function QuizPage() {
 
     fetchQuiz();
   }, [id]);
-
-  // useEffect(() => {
-  //   const stored = localStorage.getItem("quizStartTime");
-  //   const now = Date.now();
-
-  //   if (stored) {
-  //     const savedStartTime = parseInt(stored, 10);
-  //     setStartTime(savedStartTime);
-  //     const elapsed = Math.floor((now - savedStartTime) / 1000);
-  //     const remaining = quiz.timeLimit - elapsed;
-  //     setTimeLeft(remaining > 0 ? remaining : 0);
-  //   } else {
-  //     localStorage.setItem("quizStartTime", now.toString());
-  //     setStartTime(now);
-  //     setTimeLeft(quiz.timeLimit);
-  //   }
-  // }, []);
 
   useEffect(() => {
     if (timeLeft <= 0) {
@@ -205,9 +188,8 @@ export default function QuizPage() {
     // 4. Lấy studentId từ auth (ví dụ localStorage hoặc context)
     //    Tạm thời fallback random để bạn test (gỡ sau khi có auth thực)
     const fallbackIds = [12, 13, 11, 15, 16, 17];
-    const studentId =
-      Number(localStorage.getItem("student_id")) ||
-      fallbackIds[Math.floor(Math.random() * fallbackIds.length)];
+    const user = localStorage.getItem("user");
+    const studentId = user ? Number(JSON.parse(user).userId) : 0;
 
     const submissionPayload = {
       quizId: parseInt(id as string, 10),
@@ -244,6 +226,7 @@ export default function QuizPage() {
       const durationMs = Math.max(0, end - start);
       const durationMinutes = Math.floor(durationMs / 60000);
       const durationSeconds = Math.floor((durationMs % 60000) / 1000);
+      console.log(result);
 
       setQuizResult({
         studentName: result.studentName,
