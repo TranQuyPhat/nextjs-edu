@@ -142,6 +142,7 @@ export const AssignmentsTab = ({ assignments, classData }: AssignmentsTabProps) 
                 if (parsedUser) {
                     setUser(parsedUser);
                 }
+                console.log("Parsed user:", parsedUser);
             } catch (e) {
                 console.error("Lỗi parse user:", e);
             }
@@ -243,13 +244,13 @@ export const AssignmentsTab = ({ assignments, classData }: AssignmentsTabProps) 
         // Đảm bảo không render khi chưa có user
         return <div>Loading...</div>;
     }
-    const role = user?.role || "student";
-
+    const role = user?.roles?.[0] || "student";
+    console.log("User role:", role);
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Bài tập lớp học</h3>
-                {user.role === "teacher" && (
+                {role === "teacher" && (
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button>
@@ -257,7 +258,7 @@ export const AssignmentsTab = ({ assignments, classData }: AssignmentsTabProps) 
                                 Tạo bài tập mới
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
+                        <DialogContent className="max-w-[600px] max-h-[400px] overflow-y-auto">
                             <DialogHeader>
                                 {/* <DialogTitle>Tạo bài tập cho</DialogTitle> */}
                                 <DialogTitle>Tạo bài tập cho {classes[0].className}</DialogTitle>
@@ -382,7 +383,7 @@ export const AssignmentsTab = ({ assignments, classData }: AssignmentsTabProps) 
                             <CardContent>
                                 <p className="text-gray-600 mb-4">{assignment.description}</p>
                                 <div className="flex gap-2">
-                                    {user.role === "teacher" ? (
+                                    {role === "teacher" ? (
                                         <>
                                             <Dialog>
                                                 <DialogTrigger asChild>

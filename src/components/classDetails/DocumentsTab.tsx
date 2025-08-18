@@ -104,6 +104,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                 if (parsedUser) {
                     setUser(parsedUser);
                 }
+                console.log("User data loaded:", parsedUser);
             } catch (e) {
                 console.error("Lỗi parse user:", e);
             }
@@ -128,8 +129,8 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
             formData.append("title", data.title)
             formData.append("description", data.description || "")
             formData.append("classId", data.classId.toString())
-            formData.append("createdBy", user.id.toString())
-
+            formData.append("createdBy", user.userId.toString())
+            console.log("Submitting document data:", formData);
             if (data.file) {
                 formData.append("file", data.file)
             }
@@ -182,13 +183,13 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
         // Đảm bảo không render khi chưa có user
         return <div>Loading...</div>;
     }
-    const role = user?.role || "student";
+    const role = user?.roles?.[0] || "student";
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold">Tài liệu lớp học</h3>
-                {user.role === "teacher" && (
+                {role === "teacher" && (
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button>
@@ -196,7 +197,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                                 Tải lên tài liệu
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="max-w-[600px] max-h-[400px] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle>Tải lên tài liệu cho {classes[0]?.className}</DialogTitle>
                                 <DialogDescription>Chọn tệp tài liệu để chia sẻ với học sinh</DialogDescription>
@@ -294,7 +295,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                                     <Download className="h-3 w-3 mr-1" />
                                     Tải về
                                 </Button>
-                                {user.role === "teacher" && (
+                                {role === "teacher" && (
                                     <Button size="sm" variant="ghost">
                                         <Settings className="h-3 w-3" />
                                     </Button>

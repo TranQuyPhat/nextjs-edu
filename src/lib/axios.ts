@@ -4,6 +4,7 @@ const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/api",
   headers: {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem("accessToken") || ""}`,
   },
   timeout: 10000,
 });
@@ -25,18 +26,18 @@ apiClient.interceptors.request.use(
 );
 
 // Interceptor xử lý lỗi 401 (token hết hạn hoặc invalid)
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Xóa token cũ và redirect về login
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       // Xóa token cũ và redirect về login
+//       if (typeof window !== "undefined") {
+//         localStorage.removeItem("token");
+//         window.location.href = "/login";
+//       }
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export default apiClient;

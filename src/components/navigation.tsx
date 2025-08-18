@@ -45,8 +45,9 @@ export default function Navigation() {
     localStorage.removeItem("role");
     router.push("/");
   };
-
+console.log("User data:", user);
   if (!user) {
+
     return <NavigationSkeleton />;
   }
 
