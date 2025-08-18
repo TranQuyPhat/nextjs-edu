@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/untils/utils";
 import { Progress } from "@radix-ui/react-progress";
 import React from "react";
 

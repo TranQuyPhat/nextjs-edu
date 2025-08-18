@@ -23,9 +23,7 @@ import {
   Timer,
   BarChart2,
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
-import StatCard from "./components/StatCard";
+import StatCard from "@/components/StatCard";
 interface QuizSubmission {
   id: number;
   quizId: number;

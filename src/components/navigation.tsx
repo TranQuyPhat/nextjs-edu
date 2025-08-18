@@ -23,29 +23,30 @@ import {
   X,
 } from "lucide-react";
 import Image from "next/image";
+import { NavigationSkeleton } from "@/app/quizzes/components/NavigationSkeleton";
 
 export default function Navigation() {
+  const [user, setUser] = useState<any>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
 
   // Lấy user từ localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      router.push("/auth/login");
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
-  }, [router]);
-
-  if (!user) return null; // hoặc loading UI
+  }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
-    router.push("/auth/login");
+    localStorage.removeItem("user");
+    router.push("/");
   };
+
+  if (!user) {
+    return <NavigationSkeleton />;
+  }
 
   const teacherNavItems = [
     { href: "/dashboard/teacher", label: "Trang chủ", icon: Home },
@@ -62,9 +63,7 @@ export default function Navigation() {
     { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar },
   ];
 
-  const navItems = user.roles?.includes("teacher")
-    ? teacherNavItems
-    : studentNavItems;
+  const navItems = user.role === "teacher" ? teacherNavItems : studentNavItems;
 
   return (
     <nav className="bg-white shadow-sm border-b whitespace-nowrap">
@@ -72,7 +71,13 @@ export default function Navigation() {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/dashboard" className="flex-shrink-0 flex items-center">
-              <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className=""
+              />
               <span className="ml-2 text-xl font-bold text-gray-900">
                 EduSystem
               </span>
@@ -89,7 +94,7 @@ export default function Navigation() {
                   href={item.href}
                   className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     pathname === item.href
-                      ? "text-green-600 bg-blue-50"
+                      ? "text-hover:text-green-600 bg-blue-50"
                       : "text-gray-700 hover:text-green-600 hover:bg-gray-50"
                   }`}
                 >
@@ -109,20 +114,22 @@ export default function Navigation() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>
-                      {user.username?.charAt(0).toUpperCase() || "U"}
+                      {user.fullName?.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
-                <div className="flex flex-col gap-1 p-2">
-                  <p className="font-medium">{user.username}</p>
-                  <p className="truncate text-sm text-muted-foreground">
-                    {user.email}
-                  </p>
-                  <p className="text-xs text-green-600">
-                    {user.roles?.includes("teacher") ? "Giáo viên" : "Học sinh"}
-                  </p>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1 leading-none">
+                    <p className="font-medium">{user.fullName}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
+                    <p className="text-xs text-green-600">
+                      {user.role === "teacher" ? "Giáo viên" : "Học sinh"}
+                    </p>
+                  </div>
                 </div>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
@@ -137,7 +144,11 @@ export default function Navigation() {
               className="md:hidden ml-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X /> : <Menu />}
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </Button>
           </div>
         </div>
