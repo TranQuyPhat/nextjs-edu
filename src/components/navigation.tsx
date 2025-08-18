@@ -31,6 +31,7 @@ export default function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Lấy user từ localStorage
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
