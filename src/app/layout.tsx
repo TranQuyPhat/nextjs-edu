@@ -20,23 +20,26 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      {/* <body className={inter.className}>{children}</body> */}
       <body className={inter.className}>
-        {children}
-        <Footer />
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-          transition={Bounce}
-        />
+        <Providers>
+          {" "}
+          {/* 👉 Bọc ở đây */}
+          {children}
+          <Footer />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+            transition={Bounce}
+          />
+        </Providers>
       </body>
     </html>
   );

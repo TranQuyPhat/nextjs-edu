@@ -32,7 +32,20 @@ export default function StudentQuizzesPage() {
     }
     const fetchQuizzes = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/quizzes"); // ⚠️ sửa lại endpoint
+        const token = localStorage.getItem("accessToken"); // hoặc nơi bạn đang lưu token
+
+        const response = await fetch("http://localhost:8080/api/quizzes", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // thêm access token
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         console.log("data ", data);
 

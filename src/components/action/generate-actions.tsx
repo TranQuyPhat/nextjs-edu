@@ -81,7 +81,7 @@ export function GenerateActions() {
 
       const token =
         typeof window !== "undefined"
-          ? localStorage.getItem("access_token") ?? undefined
+          ? localStorage.getItem("accessToken") ?? undefined
           : undefined;
       console.log(token);
 

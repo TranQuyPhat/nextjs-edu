@@ -30,6 +30,13 @@ export default function HomePage() {
   const { reset } = useQuizzStorage();
   useEffect(() => {
     reset(); // xóa tất cả, kể cả questions
+    const userId = Number(localStorage.getItem("user_id")) || 2; // fallback nếu chưa có login
+    const classId = Number(localStorage.getItem("class_id")) || 2;
+
+    setData({
+      classId,
+      createdBy: userId,
+    });
   }, []);
   useEffect(() => {
     if (setIsOpen) {

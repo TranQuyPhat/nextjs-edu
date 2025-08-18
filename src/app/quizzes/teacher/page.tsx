@@ -28,7 +28,6 @@ export default function TeacherQuizzesPage() {
     if (userData) setUser(JSON.parse(userData));
   }, []);
 
-  // ví dụ filters từ state hoặc URLSearchParams
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string | undefined>();
   const [page, setPage] = useState(1);

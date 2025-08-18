@@ -53,10 +53,24 @@ export default function QuizPage() {
   const [showResultDialog, setShowResultDialog] = useState(false);
   const [quizResult, setQuizResult] = useState<QuizResultData | null>(null);
   const [isResultOpen, setIsResultOpen] = useState(false);
+  const token = localStorage.getItem("accessToken");
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/quizzes/${id}`);
+        // hoặc chỗ bạn lưu token
+
+        const res = await fetch(`http://localhost:8080/api/quizzes/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // thêm token
+          },
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
         console.log(data);
 
@@ -164,76 +178,93 @@ export default function QuizPage() {
 
   const handleSubmit = useCallback(async () => {
     if (!startTime || isSubmitting) return;
-    const studentIds = [12, 13, 11, 15, 16, 17];
-    setIsSubmitting(true);
-    const randomStudentId =
-      studentIds[Math.floor(Math.random() * studentIds.length)];
-    const quizAnswerss = {
-      33: "B",
-      34: "C",
-      35: "D",
-      36: "D",
-      37: "B",
-      38: "C",
-    };
+
+    // 1. Lấy token đúng lúc submit (tránh đọc ở top-level)
+    const token = localStorage.getItem("accessToken");
+
+    // 2. Validate: phải có quiz và có câu hỏi
+    if (!quiz || !quiz.questions?.length) return;
+
+    // 3. Gom đáp án từ state (Record<questionId, optionLabel>)
+    //    Chỉ gửi những câu đã chọn; hoặc nếu backend yêu cầu đủ
+    //    thì có thể fill "" cho câu chưa chọn (đang là như vậy).
+    const answersPayload: Record<number, string> = {};
+    for (const q of quiz.questions) {
+      answersPayload[q.id] = quizAnswers[q.id] || ""; // "" nếu chưa chọn
+    }
+
+    // (Tuỳ chọn) Cảnh báo nếu còn câu chưa làm
+    const unanswered = Object.values(answersPayload).filter((v) => !v).length;
+    if (unanswered > 0) {
+      const ok = confirm(
+        `Bạn còn ${unanswered} câu chưa làm. Bạn vẫn muốn nộp chứ?`
+      );
+      if (!ok) return;
+    }
+
+    // 4. Lấy studentId từ auth (ví dụ localStorage hoặc context)
+    //    Tạm thời fallback random để bạn test (gỡ sau khi có auth thực)
+    const fallbackIds = [12, 13, 11, 15, 16, 17];
+    const studentId =
+      Number(localStorage.getItem("student_id")) ||
+      fallbackIds[Math.floor(Math.random() * fallbackIds.length)];
+
     const submissionPayload = {
-      quizId: parseInt(id as string),
-      studentId: randomStudentId,
+      quizId: parseInt(id as string, 10),
+      studentId,
       startAt: startTime.toISOString(),
       submittedAt: new Date().toISOString(),
       endAt: new Date().toISOString(),
-      answers: quizAnswerss,
+      answers: answersPayload, // <-- dùng đáp án từ form
     };
-    console.log(submissionPayload);
 
     try {
       const res = await fetch("http://localhost:8080/api/quiz-submissions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(submissionPayload),
       });
 
-      if (res.ok) {
-        setIsSubmited(true);
-        const result = await res.json();
-
-        const start = new Date(result.startAt).getTime();
-        const end = new Date(result.endAt).getTime();
-        const durationMs = end - start;
-
-        const durationMinutes = Math.floor(durationMs / 60000);
-        const durationSeconds = Math.floor((durationMs % 60000) / 1000);
-        console.log(result);
-        setQuizResult({
-          studentName: result.studentName,
-          className: result.className,
-          subject: result.subjectName,
-          duration: `${durationMinutes} phút ${durationSeconds} giây`,
-          startTime: formatDateTime(result.startAt),
-          endTime: formatDateTime(result.endAt),
-          score: result.score,
-          totalQuestions: quiz.questions.length,
-          title: quiz.title,
-        });
-
-        setIsResultOpen(true);
-        setShowResultDialog(true);
-      } else {
-        const error = await res.json();
-
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
         console.error("Lỗi khi nộp bài:", error);
-        // alert("Nộp bài thất bại! Vui lòng thử lại.");
         setIsSubmitting(false);
+        return;
       }
+
+      setIsSubmited(true);
+      const result = await res.json();
+
+      // Tính duration đẹp hơn
+      const start = new Date(result.startAt).getTime();
+      const end = new Date(result.endAt).getTime();
+      const durationMs = Math.max(0, end - start);
+      const durationMinutes = Math.floor(durationMs / 60000);
+      const durationSeconds = Math.floor((durationMs % 60000) / 1000);
+
+      setQuizResult({
+        studentName: result.studentName,
+        className: result.className,
+        subject: result.subjectName,
+        duration: `${durationMinutes} phút ${durationSeconds} giây`,
+        startTime: formatDateTime(result.startAt),
+        endTime: formatDateTime(result.endAt),
+        score: result.score,
+        totalQuestions: quiz.questions.length,
+        title: quiz.title,
+      });
+
+      setIsResultOpen(true);
+      setShowResultDialog(true);
     } catch (err) {
       console.error("Lỗi kết nối:", err);
-      // alert("Lỗi mạng! Vui lòng kiểm tra kết nối.");
+    } finally {
       setIsSubmitting(false);
     }
-  }, [id, startTime, quizAnswers, router, isSubmitting]);
-
+  }, [id, startTime, quiz, quizAnswers, isSubmitting]);
   if (!quiz) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">

@@ -13,7 +13,7 @@ import {
     updateQuiz,
     type QuizFilters,
 } from "./api";
-import type { QuizCard } from "./types";
+import { QuizCard } from "@/types/quiz.type";
 
 export function useQuizzesQuery(filters: QuizFilters = {}) {
     return useQuery({

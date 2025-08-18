@@ -48,9 +48,19 @@ export default function QuizResultsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const token = localStorage.getItem("accessToken"); // hoặc nơi bạn lưu token
+
         const res = await fetch(
-          `http://localhost:8080/api/quiz-submissions/by-quiz/${quizId}`
+          `http://localhost:8080/api/quiz-submissions/by-quiz/${quizId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
         if (!res.ok) throw new Error("Failed to fetch");
 
         const data = await res.json();

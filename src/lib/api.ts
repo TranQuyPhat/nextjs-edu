@@ -125,47 +125,39 @@ export async function api<T = unknown>(path: string, options: ApiOptions = {}): 
         headers["Content-Type"] = "application/json";
     }
 
-    try {
-        const res = await fetch(`${API_BASE}${path}`, {
-            credentials: "include",
-            ...options,
-            headers,
-        });
-
-        if (!res.ok) {
-            const contentType = res.headers.get('content-type');
-            let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
-
-            try {
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await res.json();
-                    errorMessage = errorData.error || errorData.message || errorMessage;
-                } else {
-                    const textResponse = await res.text();
-                    if (textResponse.includes('<!DOCTYPE')) {
-                        errorMessage = 'Server error - check backend logs';
-                    } else {
-                        errorMessage = textResponse || errorMessage;
-                    }
-                }
-            } catch {
-                // Cannot parse error response
-            }
-
-            throw new Error(errorMessage);
-        }
-
-        if (options.asText) return (await res.text()) as T;
-        if (res.status === 204) return null as T;
-
-        return (await res.json()) as T;
-
-    } catch (error) {
-        if (error instanceof TypeError && error.message.includes('fetch')) {
-            throw new Error(`Cannot connect to API at ${API_BASE}`);
-        }
-        throw error;
+    // ⬇️ Tự động thêm token nếu chưa có Authorization
+    if (!headers["Authorization"] && typeof window !== "undefined") {
+        const token = localStorage.getItem("accessToken");
+        if (token) headers["Authorization"] = `Bearer ${token}`;
     }
+
+    const res = await fetch(`${API_BASE}${path}`, {
+        credentials: "include", // hoặc "same-origin" nếu không dùng cookie
+        ...options,
+        headers,
+    });
+
+    if (!res.ok) {
+        const contentType = res.headers.get('content-type');
+        let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+
+        try {
+            if (contentType?.includes('application/json')) {
+                const errorData = await res.json();
+                errorMessage = errorData.error || errorData.message || errorMessage;
+            } else {
+                const textResponse = await res.text();
+                errorMessage = textResponse || errorMessage;
+            }
+        } catch { }
+
+        throw new Error(errorMessage);
+    }
+
+    if (options.asText) return (await res.text()) as T;
+    if (res.status === 204) return null as T;
+
+    return (await res.json()) as T;
 }
 
 export function validateFile(file: File): { valid: boolean; error?: string } {

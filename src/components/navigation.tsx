@@ -30,17 +30,19 @@ export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
-
-  // Lấy user từ localStorage
   useEffect(() => {
+    const role = localStorage.getItem("role");
     const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
+
+    if (role && userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser({ ...parsedUser, role });
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("role");
     router.push("/");
   };
 
@@ -84,7 +86,6 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -138,7 +139,6 @@ export default function Navigation() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile menu button */}
             <Button
               variant="ghost"
               className="md:hidden ml-2"
@@ -154,7 +154,6 @@ export default function Navigation() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
       {isMobileMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-50">

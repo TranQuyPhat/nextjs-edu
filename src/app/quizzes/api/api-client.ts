@@ -11,6 +11,7 @@ export async function apiClient<T>(path: string, options: RequestInit = {}): Pro
         headers,
         credentials: "include",
     });
+    console.log(res);
 
     if (!res.ok) {
         throw new Error(await res.text());

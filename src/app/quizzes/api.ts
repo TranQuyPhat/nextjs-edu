@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import type { QuizCard } from "./types";
+import { QuizCard } from "@/types/quiz.type";
 
 export type QuizFilters = {
     page?: number;
