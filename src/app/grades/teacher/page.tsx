@@ -630,15 +630,15 @@ export default function TeacherGradesPage() {
                             <div className="flex items-center space-x-3">
                               <Avatar className="h-8 w-8">
                                 <AvatarFallback>
-                                  {student.name.charAt(0)}
+                                  {student.studentName.charAt(0)}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
                                 <div className="font-medium">
-                                  {student.name}
+                                  {student.studentName}
                                 </div>
                                 <div className="text-sm text-gray-500">
-                                  {student.email}
+                                  {student.studentEmail}
                                 </div>
                               </div>
                             </div>
