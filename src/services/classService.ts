@@ -26,6 +26,9 @@ export const getClasses = async (): Promise<ClassItem[]> => {
   console.log("Dữ liệu lớp học trả về từ API:", response.data);
   return response.data;
 };
+
+
+
 export const searchClasses = async (query: string) => {
   const res = await apiClient.get(`/auth/classes/search`, {
     params: { q: query }
