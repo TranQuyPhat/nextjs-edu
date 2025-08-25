@@ -36,6 +36,9 @@ import {
   getTeacherClasses,
   createClass,
   getAllSubjects,
+  createSubject,
+  updateSubject,
+  deleteSubject,
 } from "@/services/classService";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -125,31 +128,31 @@ export default function TeacherClassesPage() {
     }
   };
 
-  const onCreateSubject = async (data: any) => {
-    try {
-      const payload = {
-        ...data,
-        createdById: user.userId,
-      };
-      
-      if (editingSubject) {
-        // API call để cập nhật môn học
-        // await updateSubject(editingSubject.id, payload);
-        console.log("Cập nhật môn học:", payload);
-      } else {
-        // API call để tạo môn học mới
-        // await createSubject(payload);
-        console.log("Tạo môn học mới:", payload);
-      }
-      
-      loadSubjects();
-      subjectForm.reset();
-      setEditingSubject(null);
-      setIsSubjectDialogOpen(false);
-    } catch (err) {
-      console.error("Lỗi tạo/cập nhật môn học:", err);
+const onCreateSubject = async (data: any) => {
+  try {
+    const payload = {
+      ...data,
+      createdById: user.userId,
+    };
+
+    if (editingSubject) {
+      // API call để cập nhật môn học
+      await updateSubject(editingSubject.id, payload);
+      console.log("Cập nhật môn học thành công:", payload);
+    } else {
+      // API call để tạo môn học mới
+      await createSubject(payload);
+      console.log("Tạo môn học mới thành công:", payload);
     }
-  };
+
+    await loadSubjects(); // load lại danh sách môn học
+    subjectForm.reset();
+    setEditingSubject(null);
+    setIsSubjectDialogOpen(false);
+  } catch (err) {
+    console.error("Lỗi tạo/cập nhật môn học:", err);
+  }
+};
 
   const handleEditSubject = (subject: any) => {
     setEditingSubject(subject);
@@ -158,18 +161,20 @@ export default function TeacherClassesPage() {
     setIsSubjectDialogOpen(true);
   };
 
-  const handleDeleteSubject = async (subjectId: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa môn học này?")) {
-      try {
-        // API call để xóa môn học
-        // await deleteSubject(subjectId);
-        console.log("Xóa môn học ID:", subjectId);
-        loadSubjects();
-      } catch (err) {
-        console.error("Lỗi xóa môn học:", err);
-      }
+  
+const handleDeleteSubject = async (subjectId: number) => {
+  if (confirm("Bạn có chắc chắn muốn xóa môn học này?")) {
+    try {
+      // API call để xóa môn học
+      await deleteSubject(subjectId);
+      console.log("Xóa môn học thành công, ID:", subjectId);
+
+      await loadSubjects(); // load lại danh sách sau khi xóa
+    } catch (err) {
+      console.error("Lỗi xóa môn học:", err);
     }
-  };
+  }
+};
 
   const handleCloseSubjectDialog = () => {
     setIsSubjectDialogOpen(false);
@@ -370,6 +375,7 @@ export default function TeacherClassesPage() {
                         <SelectContent>
                           <SelectItem value="Học kỳ 1">Học kỳ 1</SelectItem>
                           <SelectItem value="Học kỳ 2">Học kỳ 2</SelectItem>
+                          <SelectItem value="Học kỳ hè">Học kỳ hè</SelectItem>
                         </SelectContent>
                       </Select>
                       {classForm.formState.errors.semester && (

@@ -47,7 +47,30 @@ export const getAllSubjects = async () => {
   return response.data; // Giả sử API trả về { data: [...] }
 };
 
+export const createSubject = (payload: {
+  name: string;
+  description?: string;
+  createdById: number;
+}) => {
+  console.log("Payload tạo môn học:", payload);
+  return apiClient.post(`/auth/subjects`, payload);
+};
 
+// Cập nhật môn học
+export const updateSubject = (id: number, payload: {
+  name: string;
+  description?: string;
+  createdById: number;
+}) => {
+  console.log("Payload cập nhật môn học:", payload);
+  return apiClient.put(`/auth/subjects/${id}`, payload);
+};
+
+// Xóa môn học
+export const deleteSubject = (id: number) => {
+  console.log("Xóa môn học ID:", id);
+  return apiClient.delete(`/auth/subjects/${id}`);
+};
 
 // export const getTeacherClasses = async (teacherId: number) => {
 //   const response = await apiClient.get(`/auth/classes/teacher/${teacherId}`, {
