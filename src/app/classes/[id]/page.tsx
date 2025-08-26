@@ -19,6 +19,7 @@ import { AssignmentsTab } from "@/components/classDetails/AssignmentsTab"
 import { getAssignmentsByClassId } from "@/services/assignmentService"
 import { getDocumentsByClassId } from "@/services/documentService"
 import { DocumentsTab } from "@/components/classDetails/DocumentsTab"
+import AssignmentNotificationToast from "@/components/assignment/AssignmentNotificationToast";
 
 export default function ClassDetailPage() {
   const params = useParams()
@@ -134,6 +135,14 @@ export default function ClassDetailPage() {
               </div>
             </div>
 
+
+{
+            (localStorage.role === "student") &&
+            <AssignmentNotificationToast classId={classData.id} />
+}
+            
+            
+            
             {/* Bên phải: Dropdown lịch học */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
