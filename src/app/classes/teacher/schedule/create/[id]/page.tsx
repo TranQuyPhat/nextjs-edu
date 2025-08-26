@@ -141,7 +141,7 @@ const dayOfWeekMapping: { [key: string]: string } = {
 export default function ClassSchedulePage() {
   const router = useRouter();
   const params = useParams();
-  const classId = params.classId as string;
+  const classId = params.id as string;
 
   const [locations, setLocations] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -245,10 +245,10 @@ export default function ClassSchedulePage() {
           locationId: slot.locationId!,
         })),
       };
-
+      console.log("Payload gửi đi:", payload);
       await createClassSchedule(payload);
       toast.success("Tạo lịch học thành công!");
-      router.push("/teacher/classes");
+      router.push(`/classes/${classId}`);
     } catch (err) {
       console.error("Lỗi khi tạo lịch học:", err);
       toast.error("Có lỗi xảy ra khi tạo lịch học.");
