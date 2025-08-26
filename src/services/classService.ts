@@ -61,12 +61,12 @@ export const getAllSubjects = async () => {
 // };
 export const getTeacherClasses = async (teacherId: number, page: number, size: number) => {
   const response = await apiClient.get(`/auth/classes/teacher/${teacherId}?page=${page}&size=${size}`, {
-  headers: {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-  },
-});
-console.log("Dữ liệu lớp học trả về từ API:", response.data);
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    },
+  });
+  console.log("Dữ liệu lớp học trả về từ API:", response.data);
   return response.data; // giả sử API trả về { data: [...] }
 };
 export const createClass = (payload: {
@@ -125,6 +125,8 @@ export async function createJoinRequest(classId: number, studentId: number) {
 // };
 export const getStudentClasses = async (studentId: number, page: number, size: number) => {
   const response = await apiClient.get(`/auth/classes/student/${studentId}/classesPaginated?page=${page}&size=${size}`);
+  console.log(response.data);
+
   return response.data; // <-- Lấy đúng mảng lớp học
 };
 // export const joinClass = async (studentId: number, code: string) => {
