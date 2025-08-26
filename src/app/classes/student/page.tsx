@@ -51,7 +51,7 @@ export default function StudentClassesPage() {
       setUser(parsedUser);
       console.log("parsedUser :", parsedUser);
 
-      getStudentClasses(parsedUser.id, currentPage, pageSize)
+      getStudentClasses(parsedUser.userId, currentPage, pageSize)
         .then((res) => {
           setClasses(Array.isArray(res.data) ? res.data : res.data || []);
           setTotalPages(res.totalPages || 1);
