@@ -144,7 +144,6 @@ export default function LoginPage() {
       if (res.roles && res.roles.length === 1) {
         const role = res.roles[0].toLowerCase();
         localStorage.setItem("role", role);
-        localStorage.setItem("role", role);
         router.push(`/dashboard/${role}`);
       } else {
         router.push("/select-role");
