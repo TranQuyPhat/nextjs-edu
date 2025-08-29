@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Clock, MapPin, UserCheck } from "lucide-react";
 import { formatDateShort, getDayOfWeek, dayOfWeekMapping } from "@/untils/datetime";
+import Link from "next/link";
 
 interface SessionData {
   id: number;
@@ -19,6 +20,10 @@ interface SessionData {
 }
 
 export default function SessionListView({ sessions, classId }: { sessions: SessionData[]; classId: string }) {
+  const sortedSessions = [...sessions].sort(
+    (a, b) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime()
+  );
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "COMPLETED":
@@ -32,11 +37,6 @@ export default function SessionListView({ sessions, classId }: { sessions: Sessi
       default:
         return <Badge variant="secondary">Không rõ</Badge>;
     }
-  };
-
-  const handleAttendance = (sessionId: number) => {
-    console.log("Navigate to attendance:", sessionId);
-    // window.location.href = `/teacher/classes/${classId}/sessions/${sessionId}/attendance`;
   };
 
   return (
@@ -62,7 +62,7 @@ export default function SessionListView({ sessions, classId }: { sessions: Sessi
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sessions.map((s, i) => {
+              {sortedSessions.map((s, i) => {
                 const d = new Date(s.sessionDate);
                 const dow = getDayOfWeek(s.sessionDate);
                 const isToday = d.toDateString() === new Date().toDateString();
@@ -87,15 +87,16 @@ export default function SessionListView({ sessions, classId }: { sessions: Sessi
                     <TableCell>{getStatusBadge(s.status)}</TableCell>
                     <TableCell>{s.note || "-"}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAttendance(s.id)}
-                        disabled={s.status === "SCHEDULED" || s.status === "CANCELLED"}
-                        className="bg-green-700 hover:bg-green-800 disabled:opacity-50"
-                      >
-                        <UserCheck className="h-4 w-4 mr-1" />
-                        Điểm danh
-                      </Button>
+                      <Link href={`/classes/${classId}/session/${s.id}/attendance`}>
+                        <Button
+                          size="sm"
+                          disabled={s.status === "CANCELLED"}
+                          className="bg-green-700 hover:bg-green-800 disabled:opacity-50"
+                        >
+                          <UserCheck className="h-4 w-4 mr-1" />
+                          Điểm danh
+                        </Button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 );

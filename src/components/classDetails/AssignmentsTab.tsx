@@ -491,247 +491,178 @@ export const AssignmentsTab = ({
     }
   };
 
-  if (!user) {
-    // Đảm bảo không render khi chưa có user
-    return <div>Loading...</div>;
-  }
-  const role = user?.roles?.[0] || "student";
-  console.log("User role:", role);
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Bài tập lớp học</h3>
-        {role === "teacher" && (
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Tạo bài tập mới
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-[600px] max-h-[400px] overflow-y-auto">
-              <DialogHeader>
-                {/* <DialogTitle>Tạo bài tập cho</DialogTitle> */}
-                <DialogTitle>
-                  Tạo bài tập cho {classes[0].className}
-                </DialogTitle>
-                <DialogDescription>
-                  Nhập thông tin bài tập cho học sinh trong lớp này
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-4">
-                  {/* Tiêu đề */}
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Tiêu đề bài tập</Label>
-                    <Input
-                      id="title"
-                      {...register("title")}
-                      placeholder="VD: Bài tập Chương 1"
-                    />
-                    {errors.title && (
-                      <p className="text-red-500 text-sm">
-                        {errors.title.message}
-                      </p>
-                    )}
-                  </div>
-                  {/* Mô tả */}
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Mô tả</Label>
-                    <Textarea
-                      id="description"
-                      {...register("description")}
-                      placeholder="Mô tả chi tiết về bài tập..."
-                      rows={4}
-                    />
-                    {errors.description && (
-                      <p className="text-red-500 text-sm">
-                        {errors.description.message}
-                      </p>
-                    )}
-                  </div>
-                  {/* Hạn nộp */}
-                  <div className="space-y-2">
-                    <Label htmlFor="dueDate">Hạn nộp</Label>
-                    <Input
-                      id="dueDate"
-                      type="datetime-local"
-                      {...register("dueDate", {
-                        valueAsDate: true, // Quan trọng: chuyển đổi giá trị input date thành Date object
-                      })}
-                    />
-                    {errors.dueDate && (
-                      <p className="text-red-500 text-sm">
-                        {errors.dueDate.message}
-                      </p>
-                    )}
-                  </div>
-                  {/* Điểm tối đa */}
-                  <div className="space-y-2">
-                    <Label htmlFor="maxScore">Điểm tối đa</Label>
-                    <Input
-                      id="maxScore"
-                      type="number"
-                      {...register("maxScore", {
-                        valueAsNumber: true, // Quan trọng: chuyển đổi giá trị input number thành number
-                      })}
-                      placeholder="VD: 100"
-                    />
-                    {errors.maxScore && (
-                      <p className="text-red-500 text-sm">
-                        {errors.maxScore.message}
-                      </p>
-                    )}
-                  </div>
-                  {/* Chọn lớp */}
-                  <div className="space-y-2">
-                    <Label htmlFor="classId">Chọn lớp</Label>
-                    <Select
-                      onValueChange={(value) =>
-                        setValue("classId", parseInt(value))
-                      }
-                      value={watchedClassId ? watchedClassId.toString() : ""}
-                    >
-                      <SelectTrigger
-                        className={errors.classId ? "border-red-500" : ""}
-                      >
-                        <SelectValue placeholder="Chọn lớp học" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classes.map((cls) => (
-                          <SelectItem key={cls.id} value={cls.id.toString()}>
-                            {cls.className}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.classId && (
-                      <p className="text-red-500 text-sm">
-                        {errors.classId.message}
-                      </p>
-                    )}
-                  </div>
-                  {/* File đính kèm */}
-                  <div className="space-y-2">
-                    <Label htmlFor="file">Tệp đính kèm</Label>
-                    <div
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
-                      onClick={() => document.getElementById("file")?.click()}
-                    >
-                      <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">
-                        Kéo thả tệp hoặc click để chọn
-                      </p>
-                      {watchedFile && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          {watchedFile.name}
-                        </p>
-                      )}
-                    </div>
-                    <input
-                      id="file"
-                      type="file"
-                      className="hidden"
-                      onChange={(e) => {
-                        setValue("file", e.target.files?.[0] || null); // Lấy file đầu tiên hoặc null
-                      }}
-                    />
-                    {errors.file && (
-                      <p className="text-red-500 text-sm">
-                        {errors.file.message}
-                      </p>
-                    )}
-                  </div>
-                  {/* Submit */}
-                  <Button type="submit" className="w-full">
-                    Tạo bài tập
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        {assignmentList.length > 0 ? (
-          assignmentList.map((assignment) => {
-            const userSubmission = getUserSubmissionForAssignment(
-              assignment.id
-            );
-            const hasSubmitted = hasUserSubmitted(assignment.id);
-            return (
-              <Card key={assignment.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">
-                        {assignment.title}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        Hạn nộp: {formatDateTime(assignment.dueDate)}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      {getStatusBadge(assignment.status, assignment.dueDate)}
-                      {role === "teacher" && (
-                        <Badge variant="outline">
-                          {assignment.submissions}/{assignment.totalStudents}{" "}
-                          bài nộp
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <CardContent>
-                  <p className="text-gray-600 mb-4">{assignment.description}</p>
-                  <div className="flex items-center justify-between text-sm mb-4">
-                    <span className="text-gray-600">Tệp đính kèm:</span>
-                    <div
-                      className="flex items-center space-x-2 cursor-pointer hover:underline"
-                      onClick={() =>
-                        handleDownloadAssignment(
-                          assignment.id,
-                          assignment.filePath ?? ""
-                        )
-                      }
-                    >
-                      <FileText className="h-4 w-4" />
-                      <span>
-                        {getFileName(assignment.filePath ?? "")} (
-                        {assignment.fileSize})
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    {role === "teacher" ? (
-                      <>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                fetchSubmissionsForAssignment(assignment.id)
-                              }
-                            >
-                              <FileText className="h-4 w-4 mr-1" />
-                              Xem bài nộp (
-                              {submissionsByAssignment[assignment.id]?.length ||
-                                0}
-                              )
+    if (!user) {
+        // Đảm bảo không render khi chưa có user
+        return <div>Loading...</div>;
+    }
+    const role = user?.roles?.[0] || "student";
+    console.log("User role:", role);
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Bài tập lớp học</h3>
+                {role === "teacher" && (
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Tạo bài tập mới
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent className="w-full sm:max-w-screen-lg max-h-[90vh] overflow-y-auto">
+                        </DialogTrigger>
+                        <DialogContent className="max-w-[600px] max-h-[400px] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>
-                                Bài nộp - {assignment.title}
-                              </DialogTitle>
-                              <DialogDescription>
-                                Danh sách bài nộp và chấm điểm
-                              </DialogDescription>
+                                {/* <DialogTitle>Tạo bài tập cho</DialogTitle> */}
+                                <DialogTitle>Tạo bài tập cho {classes[0].className}</DialogTitle>
+                                <DialogDescription>Nhập thông tin bài tập cho học sinh trong lớp này</DialogDescription>
                             </DialogHeader>
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                                <div className="space-y-4">
+                                    {/* Tiêu đề */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title">Tiêu đề bài tập</Label>
+                                        <Input id="title" {...register("title")} placeholder="VD: Bài tập Chương 1" />
+                                        {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+                                    </div>
+                                    {/* Mô tả */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="description">Mô tả</Label>
+                                        <Textarea
+                                            id="description"
+                                            {...register("description")}
+                                            placeholder="Mô tả chi tiết về bài tập..."
+                                            rows={4}
+                                        />
+                                        {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+                                    </div>
+                                    {/* Hạn nộp */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="dueDate">Hạn nộp</Label>
+                                        <Input
+                                            id="dueDate"
+                                            type="datetime-local"
+                                            {...register("dueDate", {
+                                                valueAsDate: true, // Quan trọng: chuyển đổi giá trị input date thành Date object
+                                            })}
+                                        />
+                                        {errors.dueDate && <p className="text-red-500 text-sm">{errors.dueDate.message}</p>}
+                                    </div>
+                                    {/* Điểm tối đa */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="maxScore">Điểm tối đa</Label>
+                                        <Input
+                                            id="maxScore"
+                                            type="number"
+                                            {...register("maxScore", {
+                                                valueAsNumber: true, // Quan trọng: chuyển đổi giá trị input number thành number
+                                            })}
+                                            placeholder="VD: 100"
+                                        />
+                                        {errors.maxScore && <p className="text-red-500 text-sm">{errors.maxScore.message}</p>}
+                                    </div>
+                                    {/* Chọn lớp */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="classId">Chọn lớp</Label>
+                                        <Select
+                                            onValueChange={(value) => setValue("classId", parseInt(value))}
+                                            value={watchedClassId ? watchedClassId.toString() : ""}
+                                        >
+                                            <SelectTrigger className={errors.classId ? "border-red-500" : ""}>
+                                                <SelectValue placeholder="Chọn lớp học" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {classes.map((cls) => (
+                                                    <SelectItem key={cls.id} value={cls.id.toString()}>
+                                                        {cls.className}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.classId && <p className="text-red-500 text-sm">{errors.classId.message}</p>}
+
+                                    </div>
+                                    {/* File đính kèm */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="file">Tệp đính kèm</Label>
+                                        <div
+                                            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
+                                            onClick={() => document.getElementById("file")?.click()}
+                                        >
+                                            <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                                            <p className="text-sm text-gray-600">Kéo thả tệp hoặc click để chọn</p>
+                                            {watchedFile && <p className="text-xs text-gray-500 mt-2">{watchedFile.name}</p>}
+                                        </div>
+                                        <input
+                                            id="file"
+                                            type="file"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                setValue("file", e.target.files?.[0] || null) // Lấy file đầu tiên hoặc null
+                                            }}
+                                        />
+                                        {errors.file && <p className="text-red-500 text-sm">{errors.file.message}</p>}
+                                    </div>
+                                    {/* Submit */}
+                                    <Button type="submit" className="w-full">
+                                        Tạo bài tập
+                                    </Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+                )}
+            </div>
+
+            <div className="space-y-4">
+                {assignmentList.length > 0 ? (
+                    assignmentList.map((assignment) => {
+                        const userSubmission = getUserSubmissionForAssignment(assignment.id)
+                        const hasSubmitted = hasUserSubmitted(assignment.id)
+                        return (
+                            <Card key={assignment.id} >
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <CardTitle className="text-lg">{assignment.title}</CardTitle>
+                                            <CardDescription className="mt-1">Hạn nộp: {formatDateTime(assignment.dueDate)}</CardDescription>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            {getStatusBadge(assignment.status, assignment.dueDate)}
+                                            {role === "teacher" && (
+                                                <Badge variant="outline">
+                                                    {assignment.submissions}/{assignment.totalStudents} bài nộp
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent>
+                                    <p className="text-gray-600 mb-4">{assignment.description}</p>
+                                    <div className="flex items-center justify-between text-sm mb-4">
+                                        <span className="text-gray-600">Tệp đính kèm:</span>
+                                        <div
+                                            className="flex items-center space-x-2 cursor-pointer hover:underline"
+                                            onClick={() => handleDownloadAssignment(assignment.id, assignment.filePath ?? "")}
+                                        >
+                                            <FileText className="h-4 w-4" />
+                                            <span>{getFileName(assignment.filePath ?? "")} ({assignment.fileSize})</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {role === "TEACHER" ? (
+                                            <>
+                                                <Dialog>
+                                                    <DialogTrigger asChild>
+                                                        <Button size="sm" variant="outline" onClick={() => fetchSubmissionsForAssignment(assignment.id)}>
+                                                            <FileText className="h-4 w-4 mr-1" />
+                                                            Xem bài nộp ({submissionsByAssignment[assignment.id]?.length || 0})
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="w-full sm:max-w-screen-lg max-h-[90vh] overflow-y-auto">
+                                                        <DialogHeader>
+                                                            <DialogTitle>Bài nộp - {assignment.title}</DialogTitle>
+                                                            <DialogDescription>Danh sách bài nộp và chấm điểm</DialogDescription>
+                                                        </DialogHeader>
 
                             <div className="space-y-4">
                               {loadingSubmissions[assignment.id] ? (
