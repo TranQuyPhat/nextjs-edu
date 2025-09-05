@@ -34,7 +34,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Plus, X, Calendar as CalendarIcon, Eye } from "lucide-react";
 import { createClassSchedule, getAllLocations } from "@/services/classScheduleService";
-import { toast } from "sonner";
+import { toast } from 'react-toastify';
+// import { toast } from "sonner";
 
 // Utility function thay thế cho cn
 const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');
@@ -256,12 +257,18 @@ export default function ClassSchedulePage() {
       };
       console.log("Payload gửi đi:", payload);
       await createClassSchedule(payload);
-      toast.success("Tạo lịch học thành công!");
-      router.push(`/classes/${classId}`);
-    } catch (err) {
-      console.error("Lỗi khi tạo lịch học:", err);
+    toast.success("Tạo lịch học thành công!");
+    router.push(`/classes/${classId}`);
+  } catch (err: any) {
+    console.error("Lỗi khi tạo lịch học:", err);
+
+    // Nếu backend trả message "Lớp này đã có lịch học" thì hiển thị cảnh báo
+    if (err.response?.status === 400 || err.response?.status === 409) {
+      toast.error(err.response.data?.message || "Lớp này đã có lịch học, không thể tạo mới.");
+    } else {
       toast.error("Có lỗi xảy ra khi tạo lịch học.");
     }
+  }
   };
 
   return (
