@@ -30,67 +30,30 @@ export function useQuizzesQuery() {
         },
     });
 }
-
 export function useQuiz(id: string | number | undefined) {
     return useQuery({
-        queryKey: ["quiz", id],
+        queryKey: ["quiz", String(id)], // cố định kiểu để tránh key thay đổi
         enabled: !!id,
         staleTime: 60_000,
         queryFn: async () => {
             if (!id) throw new Error("ID bài quiz không hợp lệ");
-
-            try {
-                const res = await apiClient.get<ApiResp<QuizDetail>>(`/quizzes/${id}`);
-
-                if (!res.success) {
-                    throw new Error(res.message || "Yêu cầu không thành công");
-                }
-
-                if (!res.data) {
-                    throw new Error("Không có dữ liệu bài quiz");
-                }
-
-                return res.data;
-            } catch (error: any) {
-                // Kiểm tra xem có response data không (cho cả 4xx và 5xx)
-                if (error.response?.data) {
-                    const responseData = error.response.data as ApiResp<any>;
-
-                    // Ưu tiên lấy message từ response body
-                    if (responseData.message) {
-                        throw new Error(responseData.message);
-                    }
-                }
-
-                // Fallback cho các trường hợp khác
-                if (error.response?.status === 404) {
-                    throw new Error("Không tìm thấy bài quiz");
-                }
-                if (error.response?.status === 403) {
-                    throw new Error("Bạn không có quyền truy cập bài quiz này");
-                }
-                if (error.response?.status >= 500) {
-                    throw new Error("Lỗi máy chủ, vui lòng thử lại sau");
-                }
-
-                // Nếu đã có message từ business logic
-                if (error.message && error.message !== "Network Error") {
-                    throw error;
-                }
-
-                throw new Error("Không thể tải bài quiz, vui lòng kiểm tra kết nối mạng");
-            }
+            const res = await apiClient.get<ApiResp<QuizDetail>>(`/quizzes/${id}`);
+            if (!res.success || !res.data) throw new Error(res.message || "Không có dữ liệu bài quiz");
+            return res.data;
         },
+        // 👉 Chỉ retry khi lỗi mạng (không có response), tối đa 1 lần
         retry: (failureCount, error: any) => {
-            // Không retry với các lỗi business logic hoặc 4xx
-            if (error.response?.status >= 400 && error.response?.status < 500) {
-                return false;
-            }
-            return failureCount < 2;
+            const isNetworkError = !error?.response;
+            return isNetworkError && failureCount < 1;
         },
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+        // 👉 Ngăn các refetch “ngoài ý muốn”
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: true, // hoặc 'always' nếu bạn muốn
     });
 }
+
 
 export function extractApiError(error: any): string {
     if (error?.response?.data?.message) {
