@@ -243,3 +243,10 @@ export const rejectJoinRequest = async (
   );
   return response.data;
 };
+
+
+export const finalizeAttendanceScoreForClass = async (classId: number): Promise<string> => {
+  const response = await apiClient.post<string>(`/auth/classes/finalize/${classId}`);
+  console.log(`Finalize attendance score for class ${classId}:`, response.data);
+  return response.data;
+};

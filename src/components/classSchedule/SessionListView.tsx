@@ -24,6 +24,7 @@ import Link from "next/link";
 import { formatDateShort, getDayOfWeek, dayOfWeekMapping } from "@/untils/datetime";
 import { sessionApi, SessionCreateDTO } from "@/services/sessionApi";
 import { getAllLocations } from "@/services/classScheduleService";
+import { finalizeAttendanceScoreForClass } from "@/services/classService";
 
 // Kiểu dữ liệu buổi học
 interface SessionData {
@@ -138,6 +139,21 @@ export default function SessionListView({
     (a, b) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime()
   );
 
+  const handleAttendanceScore = async () => {
+    const confirm = window.confirm("Bạn có chắc chắn muốn tổng hợp điểm chuyên cần cho lớp này?");
+    if (!confirm) return;
+    try {
+      const result = await finalizeAttendanceScoreForClass(parseInt(classId));
+      console.log("Kết quả tính điểm chuyên cần:", result);
+      alert("Tổng hợp điểm chuyên cần thành công!");
+    } catch (error) {
+      console.error("Lỗi khi tổng hợp điểm chuyên cần:", error);
+      alert("Có lỗi xảy ra khi tổng hợp điểm chuyên cần!");
+    }
+  }
+
+
+
   return (
     <Card>
       <CardHeader className="flex justify-between">
@@ -146,13 +162,10 @@ export default function SessionListView({
           Danh sách buổi học
         </CardTitle>
         <Button
-          onClick={() => {
-            setForm({ ...form, patternId: 0, sessionDate: "", note: "", location: "" });
-            setShowDialog(true);
-          }}
+          onClick={() => handleAttendanceScore() }
           className="bg-blue-600 hover:bg-blue-700"
         >
-          <PlusCircle className="h-4 w-4 mr-1" /> Thêm buổi học
+          <PlusCircle className="h-4 w-4 mr-1" /> Tổng hợp điểm chuyên cần
         </Button>
       </CardHeader>
       <CardContent>
