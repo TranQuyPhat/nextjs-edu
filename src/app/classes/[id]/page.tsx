@@ -20,6 +20,8 @@ import { getAssignmentsByClassId } from "@/services/assignmentService";
 import { getDocumentsByClassId } from "@/services/documentService";
 import { DocumentsTab } from "@/components/classDetails/DocumentsTab";
 import AssignmentNotificationToast from "@/components/assignment/AssignmentNotificationToast";
+import { getSubmissionsByClassId } from "@/services/submissionService";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export default function ClassDetailPage() {
   const params = useParams();
@@ -104,7 +106,21 @@ export default function ClassDetailPage() {
   };
 
   // if (!user || !classData) return <div>Đang tải dữ liệu...</div>
-  if (!classData) return <div>Đang tải dữ liệu...</div>;
+  // if (!classData) return <div>Đang tải dữ liệu...</div>
+  if (!classData) {
+    return (
+      <div>
+        <Navigation />
+        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+          <DotLottieReact
+            src="/animations/loading.lottie"
+            loop
+            autoplay
+          />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -192,7 +208,8 @@ export default function ClassDetailPage() {
           </TabsContent>
 
           <TabsContent value="assignments">
-            <AssignmentsTab assignments={assignments} classData={classData} />
+            <AssignmentsTab assignments={assignments} classData={classData} countstudents={students.length} />
+
           </TabsContent>
 
           <TabsContent value="documents">
