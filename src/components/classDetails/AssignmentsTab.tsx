@@ -88,53 +88,6 @@ interface AssignmentsTabProps {
   countstudents: number;
 }
 
-const assignmentSchema = yup.object().shape({
-  title: yup
-    .string()
-    .required("Tiêu đề là bắt buộc")
-    .max(255, "Tiêu đề không được vượt quá 255 ký tự"),
-
-  description: yup
-    .string()
-    .nullable()
-    .optional()
-    .max(2000, "Mô tả không được vượt quá 2000 ký tự"),
-
-  dueDate: yup
-    .date()
-    .required("Hạn nộp là bắt buộc")
-    .min(new Date(), "Hạn nộp phải lớn hơn hoặc bằng hôm nay"),
-
-  maxScore: yup
-    .number()
-    .required("Điểm tối đa là bắt buộc")
-    .min(0, "Điểm tối đa phải lớn hơn hoặc bằng 0")
-    .typeError("Điểm tối đa phải là một số"),
-  classId: yup
-    .number()
-    .required("Lớp là bắt buộc")
-    .typeError("Vui lòng chọn một lớp"),
-
-  file: yup
-    .mixed<File>() // Chấp nhận File hoặc null
-    .test("fileSize", "Tệp quá lớn (tối đa 10MB)", (value) => {
-      return value ? value.size <= 10 * 1024 * 1024 : true;
-    })
-    .test("fileType", "Định dạng tệp không hợp lệ", (value) => {
-      return value
-        ? [
-          "application/pdf",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "application/vnd.ms-excel",
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "image/jpeg",
-          "image/png",
-        ].includes(value.type)
-        : true;
-    }),
-});
-
 export const AssignmentsTab = ({
   assignments,
   classData,
@@ -718,315 +671,302 @@ export const AssignmentsTab = ({
                                           <div className="text-right">
                                             {submission.status?.toLowerCase() ===
                                               "graded" ? (
-
-//                                               <div>
-//                                                 <h4 className="font-medium">
-//                                                   {submission.student.fullName}
-//                                                 </h4>
-//                                                 <p className="text-sm text-gray-500">
-//                                                   {submission.student.email}
-//                                                 </p>
-//                                               </div>
-//                                             </div>
-//                                             <div className="text-right">
-//                                               {submission.status?.toLowerCase() ===
-//                                               "graded" ? (
-                                                <div>
-                                                  <Badge className="bg-green-500 mb-1">
-                                                    Đã chấm
-                                                  </Badge>
-                                                  <p
-                                                    className={`text-lg font-bold ${getGradeColor(
-                                                      submission.score ?? 0
-                                                    )}`}
-                                                  >
-                                                    {submission.score}/10
-                                                  </p>
-                                                </div>
-                                              ) : (
-                                                <Badge variant="secondary">
-                                                  Chờ chấm
+                                              <div>
+                                                <Badge className="bg-green-500 mb-1">
+                                                  Đã chấm
                                                 </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </CardHeader>
-                                        <CardContent className="pt-0">
-                                          <div className="space-y-3">
-                                            <div className="flex items-center justify-between text-sm">
-                                              <span className="text-gray-600">
-                                                Tệp đính kèm:
-                                              </span>
-                                              <div className="flex items-center space-x-2">
-                                                <FileText className="h-4 w-4" />
-                                                <span>
-                                                  {getFileName(
-                                                    submission.filePath ?? ""
-                                                  )}
-                                                </span>
-                                                <span className="text-gray-500">
-                                                  ({submission.fileSize})
-                                                </span>
+                                                <p
+                                                  className={`text-lg font-bold ${getGradeColor(
+                                                    submission.score ?? 0
+                                                  )}`}
+                                                >
+                                                  {submission.score}/10
+                                                </p>
                                               </div>
-                                            </div>
-                                            <div className="flex items-center justify-between text-sm">
-                                              <span className="text-gray-600">
-                                                Nộp lúc:
-                                              </span>
+                                            ) : (
+                                              <Badge variant="secondary">
+                                                Chờ chấm
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </CardHeader>
+                                      <CardContent className="pt-0">
+                                        <div className="space-y-3">
+                                          <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-600">
+                                              Tệp đính kèm:
+                                            </span>
+                                            <div className="flex items-center space-x-2">
+                                              <FileText className="h-4 w-4" />
                                               <span>
-                                                {formatDateTime(
-                                                  submission.submittedAt
+                                                {getFileName(
+                                                  submission.filePath ?? ""
                                                 )}
                                               </span>
+                                              <span className="text-gray-500">
+                                                ({submission.fileSize})
+                                              </span>
                                             </div>
+                                          </div>
+                                          <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-600">
+                                              Nộp lúc:
+                                            </span>
+                                            <span>
+                                              {formatDateTime(
+                                                submission.submittedAt
+                                              )}
+                                            </span>
+                                          </div>
 
-                                            {submission.status === "GRADED" && (
+                                          {submission.status === "GRADED" && (
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                              <p className="text-sm font-medium mb-1">
+                                                Nhận xét:
+                                              </p>
+                                              <p className="text-sm text-gray-700">
+                                                {submission.teacherComment}
+                                              </p>
+                                              <p className="text-xs text-gray-500 mt-2">
+                                                Chấm bài lúc{" "}
+                                                {submission.gradedAt}
+                                              </p>
+                                            </div>
+                                          )}
+
+                                          <div className="flex gap-2 pt-2">
+                                            <Button
+                                              onClick={() =>
+                                                handleDownloadSubmission(
+                                                  submission.id,
+                                                  submission.filePath ?? ""
+                                                )
+                                              }
+                                              size="sm"
+                                              variant="outline"
+                                            >
+                                              <Download className="h-3 w-3 mr-1" />
+                                              Tải về
+                                            </Button>
+
+                                            {submission.status ===
+                                              "SUBMITTED" ? (
+                                              // Chấm bài
+                                              <AssignmentScore
+                                                assignment={assignment}
+                                                submission={submission}
+                                                onScoreUpdated={(
+                                                  submissionId,
+                                                  score,
+                                                  teacherComment
+                                                ) =>
+                                                  handleScoreUpdated(
+                                                    assignment.id,
+                                                    submissionId,
+                                                    score,
+                                                    teacherComment
+                                                  )
+                                                }
+                                              />
+                                            ) : (
+                                              // Chỉnh sửa bài chấm
+                                              <EditScoreAssignment
+                                                assignment={assignment}
+                                                submission={submission}
+                                                onScoreUpdated={(
+                                                  submissionId,
+                                                  score,
+                                                  teacherComment
+                                                ) =>
+                                                  handleScoreUpdated(
+                                                    assignment.id,
+                                                    submissionId,
+                                                    score,
+                                                    teacherComment
+                                                  )
+                                                }
+                                              />
+                                            )}
+                                          </div>
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                    // table chấm bài
+                                    // <SubmissionsTable key={submission.id}
+                                    //     assignmentId={assignment.id}
+                                    //     submissions={submissionsByAssignment[assignment.id] || []}
+                                    //     onScoreUpdated={handleScoreUpdated}
+                                    // />
+                                  )
+                                )
+                              )}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleComments(assignment.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          {visibleComments[assignment.id]
+                            ? "Ẩn bình luận"
+                            : "Bình luận"}
+                        </Button>
+                        <UpdateAssignment
+                          assignment={assignment} // bài tập hiện tại
+                          classData={classes} // danh sách lớp
+                          onSuccess={(updated) => {
+                            // Callback khi update thành công
+                            setAssignmentList((prev) =>
+                              prev.map((item) =>
+                                item.id === updated.id ? updated : item
+                              )
+                            );
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        {/* Nộp bài */}
+                        <div className="flex items-center gap-3">
+                          {loadingSubmissions[assignment.id] ? (
+                            <div className="text-sm text-gray-500">
+                              Đang kiểm tra trạng thái nộp bài...
+                            </div>
+                          ) : hasSubmitted ? (
+                            <div className="flex items-center gap-2">
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-800"
+                              >
+                                Đã nộp bài
+                              </Badge>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="outline">
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    Xem lại bài nộp
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      Bài nộp của bạn - {assignment.title}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                      Chi tiết bài nộp và điểm số
+                                    </DialogDescription>
+                                  </DialogHeader>
+
+                                  {userSubmission && (
+                                    <Card className="border">
+                                      <CardHeader className="pb-3">
+                                        <div className="flex justify-between items-start">
+                                          <div>
+                                            <h4 className="font-medium">
+                                              Bài nộp của bạn
+                                            </h4>
+                                            <p className="text-sm text-gray-500">
+                                              Nộp lúc:{" "}
+                                              {formatDateTime(
+                                                userSubmission.submittedAt
+                                              )}
+                                            </p>
+                                          </div>
+                                          <div className="text-right">
+                                            {userSubmission.status?.toLowerCase() ===
+                                              "graded" ? (
+                                              <div>
+                                                <Badge className="bg-green-500 mb-1">
+                                                  Đã chấm
+                                                </Badge>
+                                                <p
+                                                  className={`text-lg font-bold ${getGradeColor(
+                                                    userSubmission.score ?? 0
+                                                  )}`}
+                                                >
+                                                  {userSubmission.score}/10
+                                                </p>
+                                              </div>
+                                            ) : (
+                                              <Badge variant="secondary">
+                                                Chờ chấm
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </CardHeader>
+                                      <CardContent className="pt-0">
+                                        <div className="space-y-3">
+                                          <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-600">
+                                              Tệp đính kèm:
+                                            </span>
+                                            <div className="flex items-center space-x-2">
+                                              <FileText className="h-4 w-4" />
+                                              <span>
+                                                {getFileName(
+                                                  userSubmission.filePath ??
+                                                  ""
+                                                )}
+                                              </span>
+                                              <span className="text-gray-500">
+                                                ({userSubmission.fileSize})
+                                              </span>
+                                            </div>
+                                          </div>
+
+                                          {userSubmission.status ===
+                                            "GRADED" &&
+                                            userSubmission.teacherComment && (
                                               <div className="bg-gray-50 p-3 rounded-lg">
                                                 <p className="text-sm font-medium mb-1">
                                                   Nhận xét:
                                                 </p>
                                                 <p className="text-sm text-gray-700">
-                                                  {submission.teacherComment}
+                                                  {
+                                                    userSubmission.teacherComment
+                                                  }
                                                 </p>
                                                 <p className="text-xs text-gray-500 mt-2">
                                                   Chấm bài lúc{" "}
-                                                  {submission.gradedAt}
+                                                  {formatDateTime(
+                                                    userSubmission.gradedAt
+                                                  )}
                                                 </p>
                                               </div>
                                             )}
 
-                                            <div className="flex gap-2 pt-2">
-                                              <Button
-                                                onClick={() =>
-                                                  handleDownloadSubmission(
-                                                    submission.id,
-                                                    submission.filePath ?? ""
-                                                  )
-                                                }
-                                                size="sm"
-                                                variant="outline"
-                                              >
-                                                <Download className="h-3 w-3 mr-1" />
-                                                Tải về
-                                              </Button>
-
-                                              {submission.status ===
-                                              "SUBMITTED" ? (
-                                                // Chấm bài
-                                                <AssignmentScore
-                                                  assignment={assignment}
-                                                  submission={submission}
-                                                  onScoreUpdated={(
-                                                    submissionId,
-                                                    score,
-                                                    teacherComment
-                                                  ) =>
-                                                    handleScoreUpdated(
-                                                      assignment.id,
-                                                      submissionId,
-                                                      score,
-                                                      teacherComment
-                                                    )
-                                                  }
-                                                />
-                                              ) : (
-                                                // Chỉnh sửa bài chấm
-                                                <EditScoreAssignment
-                                                  assignment={assignment}
-                                                  submission={submission}
-                                                  onScoreUpdated={(
-                                                    submissionId,
-                                                    score,
-                                                    teacherComment
-                                                  ) =>
-                                                    handleScoreUpdated(
-                                                      assignment.id,
-                                                      submissionId,
-                                                      score,
-                                                      teacherComment
-                                                    )
-                                                  }
-                                                />
-                                              )}
-                                            </div>
+                                          <div className="flex gap-2 pt-2">
+                                            <Button
+                                              onClick={() =>
+                                                handleDownloadSubmission(
+                                                  userSubmission.id,
+                                                  userSubmission.filePath ??
+                                                  ""
+                                                )
+                                              }
+                                              size="sm"
+                                              variant="outline"
+                                            >
+                                              <Download className="h-3 w-3 mr-1" />
+                                              Tải về bài nộp
+                                            </Button>
+                                            <UpdateUploadSubmission
+                                              assignment={assignment}
+                                              submission={userSubmission}
+                                              onSuccess={
+                                                handleSubmissionSuccess
+                                              }
+                                              disabled={
+                                                userSubmission.status?.toUpperCase() ===
+                                                "GRADED"
+                                              }
+                                            />
                                           </div>
-                                        </CardContent>
-                                      </Card>
-                                      // table chấm bài
-                                      // <SubmissionsTable key={submission.id}
-                                      //     assignmentId={assignment.id}
-                                      //     submissions={submissionsByAssignment[assignment.id] || []}
-                                      //     onScoreUpdated={handleScoreUpdated}
-                                      // />
-                                    )
-                                  )
-                                )}
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleComments(assignment.id)}
-                          >
-                            <MessageCircle className="h-4 w-4 mr-1" />
-                            {visibleComments[assignment.id]
-                              ? "Ẩn bình luận"
-                              : "Bình luận"}
-                          </Button>
-                          <UpdateAssignment
-                            assignment={assignment} // bài tập hiện tại
-                            classData={classes} // danh sách lớp
-                            onSuccess={(updated) => {
-                              // Callback khi update thành công
-                              setAssignmentList((prev) =>
-                                prev.map((item) =>
-                                  item.id === updated.id ? updated : item
-                                )
-                              );
-                            }}
-                          />
-                        </>
-                      ) : (
-                        <>
-                          {/* Nộp bài */}
-                          <div className="flex items-center gap-3">
-                            {loadingSubmissions[assignment.id] ? (
-                              <div className="text-sm text-gray-500">
-                                Đang kiểm tra trạng thái nộp bài...
-                              </div>
-                            ) : hasSubmitted ? (
-                              <div className="flex items-center gap-2">
-                                <Badge
-                                  variant="secondary"
-                                  className="bg-green-100 text-green-800"
-                                >
-                                  Đã nộp bài
-                                </Badge>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline">
-                                      <Eye className="h-4 w-4 mr-1" />
-                                      Xem lại bài nộp
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-2xl">
-                                    <DialogHeader>
-                                      <DialogTitle>
-                                        Bài nộp của bạn - {assignment.title}
-                                      </DialogTitle>
-                                      <DialogDescription>
-                                        Chi tiết bài nộp và điểm số
-                                      </DialogDescription>
-                                    </DialogHeader>
-
-                                    {userSubmission && (
-                                      <Card className="border">
-                                        <CardHeader className="pb-3">
-                                          <div className="flex justify-between items-start">
-                                            <div>
-                                              <h4 className="font-medium">
-                                                Bài nộp của bạn
-                                              </h4>
-                                              <p className="text-sm text-gray-500">
-                                                Nộp lúc:{" "}
-                                                {formatDateTime(
-                                                  userSubmission.submittedAt
-                                                )}
-                                              </p>
-                                            </div>
-                                            <div className="text-right">
-                                              {userSubmission.status?.toLowerCase() ===
-                                              "graded" ? (
-                                                <div>
-                                                  <Badge className="bg-green-500 mb-1">
-                                                    Đã chấm
-                                                  </Badge>
-                                                  <p
-                                                    className={`text-lg font-bold ${getGradeColor(
-                                                      userSubmission.score ?? 0
-                                                    )}`}
-                                                  >
-                                                    {userSubmission.score}/10
-                                                  </p>
-                                                </div>
-                                              ) : (
-                                                <Badge variant="secondary">
-                                                  Chờ chấm
-                                                </Badge>
-                                              )}
-                                            </div>
-                                          </div>
-                                        </CardHeader>
-                                        <CardContent className="pt-0">
-                                          <div className="space-y-3">
-                                            <div className="flex items-center justify-between text-sm">
-                                              <span className="text-gray-600">
-                                                Tệp đính kèm:
-                                              </span>
-                                              <div className="flex items-center space-x-2">
-                                                <FileText className="h-4 w-4" />
-                                                <span>
-                                                  {getFileName(
-                                                    userSubmission.filePath ??
-                                                      ""
-                                                  )}
-                                                </span>
-                                                <span className="text-gray-500">
-                                                  ({userSubmission.fileSize})
-                                                </span>
-                                              </div>
-                                            </div>
-
-                                            {userSubmission.status ===
-                                              "GRADED" &&
-                                              userSubmission.teacherComment && (
-                                                <div className="bg-gray-50 p-3 rounded-lg">
-                                                  <p className="text-sm font-medium mb-1">
-                                                    Nhận xét:
-                                                  </p>
-                                                  <p className="text-sm text-gray-700">
-                                                    {
-                                                      userSubmission.teacherComment
-                                                    }
-                                                  </p>
-                                                  <p className="text-xs text-gray-500 mt-2">
-                                                    Chấm bài lúc{" "}
-                                                    {formatDateTime(
-                                                      userSubmission.gradedAt
-                                                    )}
-                                                  </p>
-                                                </div>
-                                              )}
-
-                                            <div className="flex gap-2 pt-2">
-                                              <Button
-                                                onClick={() =>
-                                                  handleDownloadSubmission(
-                                                    userSubmission.id,
-                                                    userSubmission.filePath ??
-                                                      ""
-                                                  )
-                                                }
-                                                size="sm"
-                                                variant="outline"
-                                              >
-                                                <Download className="h-3 w-3 mr-1" />
-                                                Tải về bài nộp
-                                              </Button>
-                                              <UpdateUploadSubmission
-                                                assignment={assignment}
-                                                submission={userSubmission}
-                                                onSuccess={
-                                                  handleSubmissionSuccess
-                                                }
-                                                disabled={
-                                                  userSubmission.status?.toUpperCase() ===
-                                                  "GRADED"
-                                                }
-                                              />
-                                            </div>
-                                          </div>
+                                        </div>
                                       </CardContent>
                                     </Card>
                                   )}
@@ -1045,57 +985,56 @@ export const AssignmentsTab = ({
                             </div>
                           )}
                         </div>
-                        
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleComments(assignment.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          {visibleComments[assignment.id]
+                            ? "Ẩn câu hỏi"
+                            : "Hỏi bài"}
+                        </Button>
+
+                        {userSubmission && (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => toggleComments(assignment.id)}
+                            disabled={
+                              userSubmission.status?.toUpperCase() ===
+                              "GRADED"
+                            }
+                            className={
+                              userSubmission.status?.toUpperCase() ===
+                                "GRADED"
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }
+                            onClick={() =>
+                              handleDeleteSubmission(
+                                assignment.id,
+                                userSubmission.id
+                              )
+                            }
                           >
-                            <MessageCircle className="h-4 w-4 mr-1" />
-                            {visibleComments[assignment.id]
-                              ? "Ẩn câu hỏi"
-                              : "Hỏi bài"}
+                            <Delete className="h-4 w-4 mr-1" />
+                            Xóa bài nộp
                           </Button>
-
-                          {userSubmission && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={
-                                userSubmission.status?.toUpperCase() ===
-                                "GRADED"
-                              }
-                              className={
-                                userSubmission.status?.toUpperCase() ===
-                                "GRADED"
-                                  ? "opacity-50 cursor-not-allowed"
-                                  : ""
-                              }
-                              onClick={() =>
-                                handleDeleteSubmission(
-                                  assignment.id,
-                                  userSubmission.id
-                                )
-                              }
-                            >
-                              <Delete className="h-4 w-4 mr-1" />
-                              Xóa bài nộp
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    {/* <CommentSection assignment={assignment} /> */}
-                  </CardContent>
-                  <CommentSection
-                    assignmentId={assignment.id}
-                    assignmentTitle={assignment.title}
-                    isVisible={visibleComments[assignment.id] || false}
-                    onClose={() => toggleComments(assignment.id)}
-                    userRole={role}
-                  />
-                </Card>
-              </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  {/* <CommentSection assignment={assignment} /> */}
+                </CardContent>
+                <CommentSection
+                  assignmentId={assignment.id}
+                  assignmentTitle={assignment.title}
+                  isVisible={visibleComments[assignment.id] || false}
+                  onClose={() => toggleComments(assignment.id)}
+                  userRole={role}
+                />
+              </Card>
             );
           })
         ) : (
