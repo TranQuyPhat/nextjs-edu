@@ -1,19 +1,7 @@
-import { api } from "@/lib/api";
+import { apiCall } from "@/lib/api";
+import { ApiResp, QuizFilters } from "@/lib/type";
 import { QuizCard } from "@/types/quiz.type";
 
-export type QuizFilters = {
-    page?: number;
-    pageSize?: number;
-    classId?: number;
-    status?: string;
-    search?: string;
-};
-export type ApiResp<T> = {
-    success: boolean;
-    message: string;
-    data: T;
-    timestamp: number;
-};
 export function buildQueryString(filters: QuizFilters) {
     const qs = new URLSearchParams();
     if (filters.page) qs.set("page", String(filters.page));
@@ -31,71 +19,37 @@ export function toQuizCard(quiz: any): QuizCard {
         title: quiz.title || "Không có tiêu đề",
         description: quiz.description || "Không có mô tả",
         className: quiz.className || "Chưa rõ lớp",
-        duration: quiz.timeLimit || 0,
-        totalQuestions: quiz.questions?.length || quiz.totalQuestions || 0,
+        timeLimit: quiz.timeLimit || 0,
+        totalQuestions: quiz.totalQuestion || 0,
         totalStudents: quiz.totalStudents ?? 0,
-        createdAt: quiz.createdAt ?? null,
-        dueDate: quiz.endDate ?? quiz.dueDate ?? "",
+        startDate: quiz.startDate ?? null,
+        endDate: quiz.endDate ?? "",
         subject: quiz.subject ?? "Chưa có môn",
         studentsSubmitted: quiz.studentsSubmitted || 0,
-        status: quiz.status ?? "open",
-        classID: quiz.classID ?? quiz.classId,
-        createBy: quiz.createBy,
-        grade: quiz.grade,
+        studentsUnSubmitted: quiz.studentsUnSubmitted || 0,
+        status: "open",
+        classID: quiz.classId,
+        createdBy: quiz.createdBy,
     };
 }
-
 // endpoints
 
 export async function fetchQuizzes(filters: QuizFilters = {}) {
-    const qs = buildQueryString(filters); // tạo query string từ filters
-    const data = await api<any>(`/api/quizzes${qs}`);
+    const qs = buildQueryString(filters);
+    const data = await apiCall<any>(`/api/quizzes${qs}`);
     return data ?? [];
 }
 export async function fetchQuizzesByTeacher() {
-    const data = await api<ApiResp<any[]>>(`/api/quizzes/teacher`);
-    console.log('data :', data);
+    const data = await apiCall<ApiResp<any[]>>(`/api/quizzes/teacher`);
+
     return data.data ?? [];
 }
 export async function fetchQuizById(id: number) {
-    return api<any>(`/api/quizzes/${id}`);
-}
-
-// lib/api.ts
-export async function createQuiz(payload: any) {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
-    const token =
-        typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-
-    const res = await fetch(`${baseUrl}/api/quizzes`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "Tạo quiz thất bại");
-    }
-    return res.json();
+    return apiCall<ApiResp<any>>(`/api/quizzes/${id}`);
 }
 
 
-export async function updateQuiz(id: number, payload: any) {
-    return api<any>(`/api/quizzes/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-    });
-}
 
-export async function deleteQuiz(id: number) {
-    return api<void>(`/api/quizzes/${id}`, {
-        method: "DELETE",
-    });
-}
 export class ApiError extends Error {
     status?: number;
     body?: unknown;
@@ -106,7 +60,6 @@ export class ApiError extends Error {
     }
 }
 
-// utils/api-error.ts
 export async function handleFetchError(res: Response) {
     // Server trả JSON dạng { success:false, message, ... }
     let payload: any = null;

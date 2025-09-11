@@ -99,7 +99,7 @@ export const createClass = (payload: {
   description: string;
   teacherId: number;
   subjectId: number;
-  join_mode: 'AUTO' | 'APPROVAL' ;
+  join_mode: 'AUTO' | 'APPROVAL';
 }) => {
   console.log("Payload tạo lớp:", payload);
   return apiClient.post(`/auth/classes`, payload);
@@ -232,7 +232,6 @@ export const approveJoinRequest = async (requestId: number): Promise<JoinRequest
   return response.data;
 };
 
-// Reject request
 export const rejectJoinRequest = async (
   requestId: number,
   reason?: string
