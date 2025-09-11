@@ -27,12 +27,15 @@ export const getClasses = async (): Promise<ClassItem[]> => {
   return response.data;
 };
 
-
+export const getLatestClasses = async () => {
+  const response = await apiClient.get<ClassItem[]>('/auth/classes/latest');
+  console.log("Dữ liệu 10 lớp học trả về từ API:", response.data);
+  return response.data;
+};
 
 export const searchClasses = async (query: string) => {
-  const res = await apiClient.get(`/auth/classes/search`, {
-    params: { q: query }
-  });
+  const res = await apiClient.get(`/auth/classes/search?keyword=${query}`);
+  console.log("Dữ liệu tìm lớp học trả về từ API:", res.data);
   return res.data;
 };
 
