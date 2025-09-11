@@ -3,17 +3,19 @@ import { ApiResp, QuizFilters } from "@/lib/type";
 import { QuizCard } from "@/types/quiz.type";
 
 export function buildQueryString(filters: QuizFilters) {
-    const qs = new URLSearchParams();
-    if (filters.page) qs.set("page", String(filters.page));
-    if (filters.pageSize) qs.set("pageSize", String(filters.pageSize));
-    if (filters.classId) qs.set("classId", String(filters.classId));
-    if (filters.status) qs.set("status", filters.status);
-    if (filters.search) qs.set("search", filters.search);
-    const s = qs.toString();
-    return s ? `?${s}` : "";
+  const qs = new URLSearchParams();
+  if (filters.page) qs.set("page", String(filters.page));
+  if (filters.pageSize) qs.set("pageSize", String(filters.pageSize));
+  if (filters.classId) qs.set("classId", String(filters.classId));
+  if (filters.status) qs.set("status", filters.status);
+  if (filters.search) qs.set("search", filters.search);
+  const s = qs.toString();
+  return s ? `?${s}` : "";
 }
 
 export function toQuizCard(quiz: any): QuizCard {
+
+
     return {
         id: quiz.id,
         title: quiz.title || "Không có tiêu đề",
@@ -31,6 +33,7 @@ export function toQuizCard(quiz: any): QuizCard {
         classID: quiz.classId,
         createdBy: quiz.createdBy,
     };
+
 }
 // endpoints
 
@@ -49,26 +52,29 @@ export async function fetchQuizById(id: number) {
 }
 
 
-
 export class ApiError extends Error {
-    status?: number;
-    body?: unknown;
-    constructor(msg: string, status?: number, body?: unknown) {
-        super(msg);
-        this.status = status;
-        this.body = body;
-    }
+  status?: number;
+  body?: unknown;
+  constructor(msg: string, status?: number, body?: unknown) {
+    super(msg);
+    this.status = status;
+    this.body = body;
+  }
 }
 
 export async function handleFetchError(res: Response) {
-    // Server trả JSON dạng { success:false, message, ... }
-    let payload: any = null;
-    try { payload = await res.json(); } catch { /* ignore */ }
+  // Server trả JSON dạng { success:false, message, ... }
+  let payload: any = null;
+  try {
+    payload = await res.json();
+  } catch {
+    /* ignore */
+  }
 
-    const msg =
-        payload?.message ||
-        `Request failed with status ${res.status}`;
+  const msg =
+    payload?.message ||
+    payload?.message?.[0] ||
+    `Request failed with status ${res.status}`;
 
-    throw new ApiError(msg, res.status, payload);
+  throw new ApiError(msg, res.status, payload);
 }
-

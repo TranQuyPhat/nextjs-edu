@@ -51,6 +51,10 @@ import {
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+
+
 // Schema validate form lớp học
 const classSchema = yup.object().shape({
   className: yup.string().required("Tên lớp không được để trống"),
@@ -118,7 +122,12 @@ export default function TeacherClassesPage() {
         setPageNumber(res.pageNumber);
         setTotalPages(res.totalPages);
       })
-      .catch((err) => console.error("Lỗi khi lấy lớp:", err));
+      .catch((err) => {
+        console.error("Lỗi khi lấy lớp:", err);
+        toast.error(
+          err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách lớp!"
+        );
+      });
   };
 
   const loadSubjects = () => {
@@ -126,7 +135,12 @@ export default function TeacherClassesPage() {
       .then((data) => {
         setSubjects(data);
       })
-      .catch((err) => console.error("Lỗi khi lấy môn học:", err));
+      .catch((err) => {
+        console.error("Lỗi khi lấy môn học:", err);
+        toast.error(
+          err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách lớp!"
+        );
+      });
   };
 
   // Hàm mở form tạo mới
@@ -179,7 +193,7 @@ export default function TeacherClassesPage() {
         };
 
         await updateClass(editingClass.id, payload);
-        alert("Cập nhật lớp học thành công!");
+        toast.success("Cập nhật lớp học thành công!");
       } else {
         // Tạo lớp học mới
         const payload = {
@@ -188,7 +202,7 @@ export default function TeacherClassesPage() {
         };
 
         await createClass(payload);
-        alert("Tạo lớp học thành công!");
+        toast.success("Tạo lớp học thành công!");
       }
 
       // load lại danh sách lớp
@@ -198,33 +212,46 @@ export default function TeacherClassesPage() {
       classForm.reset();
       setIsModalOpen(false);
       setEditingClass(null);
-    } catch (err) {
+
+    } catch (err: any) {
+
       console.error(
         editingClass ? "Lỗi cập nhật lớp học:" : "Lỗi tạo lớp học:",
         err
       );
-      alert(
-        editingClass ? "Cập nhật lớp học thất bại!" : "Tạo lớp học thất bại!"
-      );
+      const backendMessage =
+        err?.response?.data?.messages?.[0] ??
+        (editingClass ? "Cập nhật lớp học thất bại!" : "Tạo lớp học thất bại!");
+
+      toast.error(backendMessage);
+
     }
   };
 
   const handleDeleteClass = async (id: number) => {
-    if (confirm("Bạn có chắc chắn muốn xóa lớp này?")) {
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn?",
+      text: "Lớp sẽ bị xóa vĩnh viễn!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+
+    if (result.isConfirmed) {
       try {
         await deleteClass(id);
         await loadClasses(user.userId, pageNumber);
-        alert("Xóa lớp thành công!");
-      } catch (err) {
-        console.error("Lỗi xóa lớp:", err);
-        alert("Xóa lớp thất bại!");
+        toast.success("Xóa lớp thành công!");
+      } catch {
+        Swal.fire("Thất bại!", "Xóa lớp thất bại.", "error");
       }
     }
   };
 
   const copyClassCode = (code: string) => {
     navigator.clipboard.writeText(code);
-    alert("Đã sao chép mã lớp!");
+    toast.success("Đã sao chép mã lớp!");
   };
 
   if (!user) {
@@ -263,6 +290,7 @@ export default function TeacherClassesPage() {
                 subjects={uniqueSubjects}
                 reloadSubjects={async () => loadSubjects()}
               />
+
 
               <Button
                 className="bg-green-700 hover:bg-green-800"
