@@ -1,4 +1,5 @@
 // src/hooks/quiz-hooks.ts
+
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { ApiResp } from "@/lib/type";
@@ -39,6 +40,7 @@ export function useQuizzesQuery() {
         },
     });
 }
+
 
 export function useQuiz(id: string | number | undefined) {
     return useQuery({
@@ -83,13 +85,22 @@ export function useQuizById(id: number, role: "student" | "teacher" = "student")
     });
 }
 
-export function useQuizQuestionsPage(quizId: number, page: number = 1, size: number = 10) {
+export function useQuizQuestionsPage(
+    quizId: number,
+    page: number = 1,
+    size: number = 10
+) {
     return useQuery({
         queryKey: ["quiz", quizId, "questions", page, size],
         queryFn: async () => {
             const res = await apiClient.get<ApiResp<any>>(
                 `api/quizzes/${quizId}/questions?page=${page}&size=${size}`
             );
+            if (!res.success) {
+                const error: any = new Error(res.message || "Lỗi khi tải câu hỏi quiz");
+                error.response = { data: res };
+                throw error;
+            }
             return res.data;
         },
         placeholderData: keepPreviousData,
@@ -97,10 +108,18 @@ export function useQuizQuestionsPage(quizId: number, page: number = 1, size: num
     });
 }
 
+
+
+// ==== Mutations ====
 export function useApproveQuiz() {
     return useMutation({
         mutationFn: async (quizData: any) => {
             const res = await apiClient.post<ApiResp<any>>("api/quizzes", quizData);
+            if (!res.success) {
+                const error: any = new Error(res.message || "Lỗi khi duyệt quiz");
+                error.response = { data: res };
+                throw error;
+            }
             return res.data;
         },
     });

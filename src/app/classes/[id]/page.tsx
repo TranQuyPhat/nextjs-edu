@@ -21,6 +21,12 @@ import { getDocumentsByClassId } from "@/services/documentService";
 import { DocumentsTab } from "@/components/classDetails/DocumentsTab";
 import AssignmentNotificationToast from "@/components/assignment/AssignmentNotificationToast";
 
+import { toast } from "react-toastify";
+
+import { getSubmissionsByClassId } from "@/services/submissionService";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+
+
 export default function ClassDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -86,8 +92,14 @@ export default function ClassDetailPage() {
         //   { id: 1, title: "Tài liệu giải tích" },
         //   { id: 2, title: "Đề thi giữa kỳ" },
         // ])
-      } catch (error) {
+
+      } catch (error: any) {
         console.error("Lỗi khi tải dữ liệu lớp học:", error);
+        toast.error(
+          error?.response?.data?.messages?.[0] ??
+            "Không thể tải dữ liệu lớp học!"
+        );
+
       }
     };
 
@@ -99,12 +111,30 @@ export default function ClassDetailPage() {
   const handleCopyClassCode = () => {
     if (classData?.code) {
       navigator.clipboard.writeText(classData.code);
-      alert("Đã sao chép mã lớp: " + classData.code);
+
+      toast.success("Đã sao chép mã lớp: " + classData.code);
+
     }
   };
 
   // if (!user || !classData) return <div>Đang tải dữ liệu...</div>
-  if (!classData) return <div>Đang tải dữ liệu...</div>;
+
+  // if (!classData) return <div>Đang tải dữ liệu...</div>
+  if (!classData) {
+    return (
+      <div>
+        <Navigation />
+        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+          <DotLottieReact
+            src="/animations/loading.lottie"
+            loop
+            autoplay
+          />
+        </div>
+      </div>
+    )
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -147,7 +177,9 @@ export default function ClassDetailPage() {
                     <Link
                       href={`/classes/teacher/schedule/create/${classData.id}`}
                     >
+
                       Tạo lịch
+
                     </Link>
                   </DropdownMenuItem>
                 )}
@@ -155,6 +187,7 @@ export default function ClassDetailPage() {
                   <Link
                     href={`/classes/teacher/schedule/session/${classData.id}`}
                   >
+
                     Xem lịch
                   </Link>
                 </DropdownMenuItem>
@@ -192,7 +225,8 @@ export default function ClassDetailPage() {
           </TabsContent>
 
           <TabsContent value="assignments">
-            <AssignmentsTab assignments={assignments} classData={classData} />
+            <AssignmentsTab assignments={assignments} classData={classData} countstudents={students.length} />
+
           </TabsContent>
 
           <TabsContent value="documents">

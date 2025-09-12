@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { fetchTeacherDashboard } from "@/services/dashboardService";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -89,8 +90,11 @@ export default function TeacherDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div>
+        <Navigation />
+        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+        </div>
       </div>
     );
   }
