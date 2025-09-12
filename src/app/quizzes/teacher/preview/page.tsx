@@ -17,6 +17,7 @@ import {
   useUpdateQuizMeta,
   useCreateQuiz,
   useQuiz,
+  useReplaceQuizContent,
 } from "../../hook/quiz-hooks";
 import { toast } from "react-toastify";
 
@@ -41,8 +42,9 @@ export default function QuizEditPage() {
   }, [mode, quizData, setData]);
 
   const approveMutation = useApproveQuiz();
-  const updateMutation = useCreateQuiz();
   const createMutation = useCreateQuiz();
+  const updateMetaMutation = useUpdateQuizMeta(Number(quizId));
+  const replaceContentMutation = useReplaceQuizContent(Number(quizId));
 
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -50,13 +52,45 @@ export default function QuizEditPage() {
   const currentMutation = useMemo(() => {
     switch (mode) {
       case "edit":
-        return updateMutation;
+        return {
+          mutate: async (data: any) => {
+            // Split data into meta and content
+            const {
+              title,
+              classId,
+              timeLimit,
+              description,
+              questions,
+              ...rest
+            } = data;
+
+            await updateMetaMutation.mutateAsync({
+              title,
+              classId,
+              timeLimit: Number(timeLimit),
+              description,
+            });
+
+            if (questions && questions.length > 0) {
+              await replaceContentMutation.mutateAsync({ questions });
+            }
+          },
+          isPending:
+            updateMetaMutation.isPending || replaceContentMutation.isPending,
+        };
       case "create":
         return createMutation;
       default:
         return approveMutation;
     }
-  }, [mode, updateMutation, createMutation, approveMutation]);
+  }, [
+    mode,
+    createMutation,
+    approveMutation,
+    updateMetaMutation,
+    replaceContentMutation,
+    quizId,
+  ]);
 
   const title = useMemo(() => {
     const n = quiz?.questions.length ?? 0;
