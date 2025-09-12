@@ -93,14 +93,10 @@ export default function TeacherDashboard() {
       <div>
         <Navigation />
         <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact
-            src="/animations/loading.lottie"
-            loop
-            autoplay
-          />
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
-    )
+    );
   }
 
   if (!user || !dashboardData) {
@@ -324,7 +320,7 @@ export default function TeacherDashboard() {
                           {" "}
                           {Math.round(
                             (deadline.submittedCount / deadline.totalStudents) *
-                            100
+                              100
                           )}{" "}
                           %{" "}
                         </span>{" "}

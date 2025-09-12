@@ -23,6 +23,8 @@ import { fetchStudentDashboard } from "@/services/dashboardService";
 import { useRecentScoreOfStudent } from "../hooks/useRecentScoreOfStudent";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+
+import { toast } from "react-toastify";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export default function StudentDashboard() {
@@ -139,8 +141,12 @@ export default function StudentDashboard() {
             classProgress: data.classProgress,
           }));
         })
-        .catch(() => {
+        .catch((error: any) => {
           console.error("Không thể load dashboard student");
+          toast.error(
+            error?.response?.data?.messages?.[0] ??
+              "Không thể load dashboard student"
+          );
         })
         .finally(() => setLoading(false));
     } catch {
@@ -165,14 +171,10 @@ export default function StudentDashboard() {
       <div>
         <Navigation />
         <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact
-            src="/animations/loading.lottie"
-            loop
-            autoplay
-          />
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
-    )
+    );
   }
   if (!user) return null;
 
@@ -442,7 +444,7 @@ export default function StudentDashboard() {
                     {Math.round(
                       (dashboardData.completedAssignments /
                         dashboardData.totalAssignments) *
-                      100
+                        100
                     )}
                     %
                   </div>

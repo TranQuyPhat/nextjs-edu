@@ -11,7 +11,7 @@ export type Question = {
     questionText: string;
     questionType: string
     options: Option[];
-    correctOption: string | null;
+    correctOptions: string | null;
     score: null;
     explanation?: string | null;
     correctAnswerTexts: null;

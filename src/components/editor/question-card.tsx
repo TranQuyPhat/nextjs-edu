@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import { Edit3, Plus, Save, Trash2, X } from "lucide-react";
 import { Label } from "@radix-ui/react-label";
 import { Textarea } from "../ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "../ui/input";
 import {
   Select,
@@ -46,6 +46,18 @@ export default function QuestionCard({
     setIsEditing(false);
   };
 
+  // Kiểm tra và set đáp án đúng nếu chưa có
+  useEffect(() => {
+    if (!question.correctOptions && question.options.length > 0) {
+      const updated = {
+        ...question,
+        correctOptions: question.options[0].optionLabel, // Mặc định chọn đáp án đầu tiên
+      };
+      onUpdate(updated);
+      setEditedQuestion(updated);
+    }
+  }, [question, onUpdate]);
+
   const updateOption = (optionIndex: number, newText: string) => {
     if (isEditing) {
       setEditedQuestion((prev) => ({
@@ -81,7 +93,7 @@ export default function QuestionCard({
   const deleteOption = (optionIndex: number) => {
     if (editedQuestion.options.length <= 2) return; // Minimum 2 options
 
-    const currentAnswerLabel = editedQuestion.correctOption; // "A" | "B" | ...
+    const currentAnswerLabel = editedQuestion.correctOptions; // "A" | "B" | ...
     const currentAnswerIndex = editedQuestion.options.findIndex(
       (opt) => opt.optionLabel === currentAnswerLabel
     );
@@ -115,12 +127,16 @@ export default function QuestionCard({
     setEditedQuestion({
       ...editedQuestion,
       options: relabeledOptions,
-      correctOption: newAnswerLabel,
+      correctOptions: newAnswerLabel,
     });
   };
 
   const setCorrectAnswer = (optionLabel: string) => {
-    setEditedQuestion({ ...editedQuestion, correctOption: optionLabel });
+    const updated = { ...editedQuestion, correctOptions: optionLabel };
+    setEditedQuestion(updated);
+    if (!isEditing) {
+      onUpdate(updated); // Cập nhật ngay lập tức nếu không trong chế độ editing
+    }
   };
 
   return (
@@ -232,7 +248,7 @@ export default function QuestionCard({
 
           {isEditing ? (
             <RadioGroup
-              value={editedQuestion.correctOption}
+              value={editedQuestion.correctOptions ?? ""}
               onValueChange={setCorrectAnswer}
               className="space-y-3"
             >
@@ -278,19 +294,19 @@ export default function QuestionCard({
                 <div
                   key={option.optionLabel}
                   className={`flex items-center gap-3 p-3 border rounded-lg transition-colors ${
-                    option.optionLabel === question.correctOption
+                    option.optionLabel === question.correctOptions
                       ? "bg-green-50 border-green-200"
                       : "bg-background"
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      option.optionLabel === question.correctOption
+                      option.optionLabel === question.correctOptions
                         ? "border-green-500 bg-green-500"
                         : "border-muted-foreground"
                     }`}
                   >
-                    {option.optionLabel === question.correctOption && (
+                    {option.optionLabel === question.correctOptions && (
                       <div className="w-2 h-2 rounded-full bg-white" />
                     )}
                   </div>
