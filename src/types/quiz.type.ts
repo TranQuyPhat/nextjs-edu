@@ -1,3 +1,4 @@
+import { QuestionType } from './setting.type';
 export type Quiz = {
     id: number;
     title: string;
@@ -74,6 +75,7 @@ export interface AiQuizSettings {
 export interface BackendQuizResponse {
     quizTitle: string;
     questions: Array<{
+        QuestionType: string;
         questionText: string;
         options: Option[];
         correctIndex: number;

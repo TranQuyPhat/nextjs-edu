@@ -110,7 +110,7 @@ export default function TeacherDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Chào mừng, {user.username}!
+            Chào mừng, {user.fullName}!
           </h1>
           <p className="text-gray-600">
             Tổng quan về hoạt động giảng dạy của bạn
