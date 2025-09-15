@@ -72,6 +72,8 @@ import UpdateUploadSubmission from "./assi/UpdateUploadSubmission";
 import UpdateAssignment from "./assi/UpdateAssignment";
 import type { Comment } from "@/types/assignment";
 import { assignmentSchema } from "./assi/schema";
+import { publishAssignment } from "@/services/assignmentService"
+
 // Định nghĩa interface cho dữ liệu form
 interface CreateAssignmentFormData {
   title: string;
@@ -826,6 +828,31 @@ export const AssignmentsTab = ({
                             );
                           }}
                         />
+                        <Button
+                          size="sm"
+                          variant={assignment.published ? "default" : "outline"}
+                          className={assignment.published ? "bg-green-500 text-white" : ""}
+                          disabled={assignment.published}
+                          onClick={async () => {
+                            try {
+                              await publishAssignment(assignment.id);
+                              setAssignmentList((prev) =>
+                                prev.map((item) =>
+                                  item.id === assignment.id
+                                    ? { ...item, published: true }
+                                    : item
+                                )
+                              );
+                              toast.success("Đã công bố điểm cho " + assignment.title);
+                            } catch (error) {
+                              console.error("Lỗi khi công bố điểm:", error);
+                              toast.error("Công bố điểm thất bại!");
+                            }
+                          }}
+                        >
+                          {assignment.published ? "Đã công bố điểm" : "Công bố điểm"}
+                        </Button>
+
                       </>
                     ) : (
                       <>
@@ -876,26 +903,29 @@ export const AssignmentsTab = ({
                                             </p>
                                           </div>
                                           <div className="text-right">
-                                            {userSubmission.status?.toLowerCase() ===
-                                              "graded" ? (
-                                              <div>
-                                                <Badge className="bg-green-500 mb-1">
-                                                  Đã chấm
-                                                </Badge>
-                                                <p
-                                                  className={`text-lg font-bold ${getGradeColor(
-                                                    userSubmission.score ?? 0
-                                                  )}`}
-                                                >
-                                                  {userSubmission.score}/10
-                                                </p>
-                                              </div>
+                                            {userSubmission.status?.toLowerCase() === "graded" ? (
+                                              assignment.published ? (
+                                                <div>
+                                                  <Badge className="bg-green-500 mb-1">Đã chấm</Badge>
+                                                  <p
+                                                    className={`text-lg font-bold ${getGradeColor(
+                                                      userSubmission.score ?? 0
+                                                    )}`}
+                                                  >
+                                                    {userSubmission.score}/10
+                                                  </p>
+                                                </div>
+                                              ) : (
+                                                <div>
+                                                  <Badge variant="secondary" className="mb-1">Chờ công bố</Badge>
+                                                  <p className="text-sm text-gray-500">Giáo viên chưa công bố điểm</p>
+                                                </div>
+                                              )
                                             ) : (
-                                              <Badge variant="secondary">
-                                                Chờ chấm
-                                              </Badge>
+                                              <Badge variant="secondary">Chờ chấm</Badge>
                                             )}
                                           </div>
+
                                         </div>
                                       </CardHeader>
                                       <CardContent className="pt-0">
@@ -918,26 +948,33 @@ export const AssignmentsTab = ({
                                             </div>
                                           </div>
 
-                                          {userSubmission.status ===
-                                            "GRADED" &&
-                                            userSubmission.teacherComment && (
+                                          {userSubmission.status === "GRADED" && (
+                                            assignment.published ? (
+                                              userSubmission.teacherComment ? (
+                                                <div className="bg-gray-50 p-3 rounded-lg">
+                                                  <p className="text-sm font-medium mb-1">Nhận xét:</p>
+                                                  <p className="text-sm text-gray-700">
+                                                    {userSubmission.teacherComment}
+                                                  </p>
+                                                  <p className="text-xs text-gray-500 mt-2">
+                                                    Chấm bài lúc {formatDateTime(userSubmission.gradedAt)}
+                                                  </p>
+                                                </div>
+                                              ) : (
+                                                <div className="bg-gray-50 p-3 rounded-lg">
+                                                  <p className="text-sm text-gray-500 italic">
+                                                    Không có nhận xét từ giáo viên
+                                                  </p>
+                                                </div>
+                                              )
+                                            ) : (
                                               <div className="bg-gray-50 p-3 rounded-lg">
-                                                <p className="text-sm font-medium mb-1">
-                                                  Nhận xét:
-                                                </p>
-                                                <p className="text-sm text-gray-700">
-                                                  {
-                                                    userSubmission.teacherComment
-                                                  }
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                  Chấm bài lúc{" "}
-                                                  {formatDateTime(
-                                                    userSubmission.gradedAt
-                                                  )}
+                                                <p className="text-sm text-gray-500 italic">
+                                                  Giáo viên chưa công bố nhận xét
                                                 </p>
                                               </div>
-                                            )}
+                                            )
+                                          )}
 
                                           <div className="flex gap-2 pt-2">
                                             <Button

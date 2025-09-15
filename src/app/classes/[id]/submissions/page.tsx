@@ -38,6 +38,7 @@ import UpdateUploadSubmission from "@/components/classDetails/assi/UpdateUploadS
 import Link from "next/link"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { DotLottieReact } from "@lottiefiles/dotlottie-react"
+import { publishAssignment } from "@/services/assignmentService"
 
 const SubmissionPage = () => {
   const params = useParams()
@@ -55,7 +56,6 @@ const SubmissionPage = () => {
   const [classes, setClasses] = useState<ClassItem | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true)
-
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -250,6 +250,25 @@ const SubmissionPage = () => {
     setGradeDialogOpen(true)
   }
 
+  // Công bố điểm
+  const handlePublishAssignment = async (assignmentId: number) => {
+    try {
+      await publishAssignment(assignmentId);
+      toast.success("Đã công bố điểm cho bài tập!");
+
+      // reload submissions để có assignment.isPublished mới
+      if (role === "teacher") {
+        const updated = await getSubmissionsByClassId(classes!.id);
+        setSubmissions(Array.isArray(updated) ? updated : [updated]);
+      } else {
+        const updated = await getSubmissionStudentByClass(classes!.id, user.userId);
+        setSubmissions(Array.isArray(updated) ? updated : [updated]);
+      }
+    } catch (err) {
+      toast.error("Lỗi khi công bố điểm");
+    }
+  };
+
   if (loading) {
     return (
       <div>
@@ -282,6 +301,31 @@ const SubmissionPage = () => {
             {role === "teacher" ? "Xem và chấm điểm các bài nộp của học sinh" : "Xem lại các bài nộp của bạn"}
           </p>
         </div>
+
+        {role === "teacher" && (() => {
+          const grouped: { [key: number]: Submission[] } = {};
+          submissions.forEach((sub) => {
+            if (!grouped[sub.assignment.id]) grouped[sub.assignment.id] = [];
+            grouped[sub.assignment.id].push(sub);
+          });
+
+          const readyToPublishAssignments = Object.entries(grouped)
+            .filter(([_, subs]) =>
+              subs.every((s) => s.status === "GRADED") && !subs[0].assignment.published
+            )
+            .map(([assignmentId, subs]) => ({
+              id: Number(assignmentId),
+              title: subs[0].assignment.title,
+            }));
+
+          return readyToPublishAssignments.map((ass) => (
+            <div key={ass.id} className="mb-4">
+              <Button onClick={() => handlePublishAssignment(ass.id)} variant="default" className="cursor-pointer">
+                Đã chấm xong - {ass.title}
+              </Button>
+            </div>
+          ));
+        })()}
 
         {/* Filters */}
         <Card className="mb-6">
@@ -326,6 +370,8 @@ const SubmissionPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        
 
         {/* Submissions List */}
         <Card>
@@ -383,10 +429,14 @@ const SubmissionPage = () => {
 
                       <TableCell>
                         {submission.score !== null ? (
-                          <div className="flex items-center gap-1 font-medium text-green-600">
-                            <CheckCircle className="h-4 w-4" />
-                            {submission.score}/10
-                          </div>
+                          role === "teacher" || submission.assignment.published ? (
+                            <div className="flex items-center gap-1 font-medium text-green-600">
+                              <CheckCircle className="h-4 w-4" />
+                              {submission.score}/10
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">Chờ công bố</span>
+                          )
                         ) : (
                           <span className="text-gray-400">Chưa chấm</span>
                         )}
@@ -394,10 +444,13 @@ const SubmissionPage = () => {
 
                       <TableCell>
                         {submission.teacherComment ? (
-                          <div className="max-w-xs truncate" title={submission.teacherComment}>
-                            {submission.teacherComment}
-                          </div>
-                        ) : (
+                          role === "teacher" || submission.assignment.published ? (
+                            <div className="max-w-xs truncate" title={submission.teacherComment}>
+                              {submission.teacherComment}
+                            </div>
+                          ) : (
+                            <span className="text-gray-400">Chờ công bố</span>
+                          )) : (
                           <span className="text-gray-400">Không có</span>
                         )}
                       </TableCell>
@@ -558,16 +611,23 @@ const SubmissionPage = () => {
                     </div>
                     <div className="text-right">
                       {selectedSubmission.status?.toLowerCase() === "graded" ? (
-                        <div>
-                          <Badge className="bg-green-500 mb-1">Đã chấm</Badge>
-                          <p
-                            className={`text-lg font-bold ${getGradeColor(
-                              selectedSubmission.score ?? 0
-                            )}`}
-                          >
-                            {selectedSubmission.score}/10
-                          </p>
-                        </div>
+                        selectedSubmission.assignment?.published ? (
+                          <div>
+                            <Badge className="bg-green-500 mb-1">Đã chấm</Badge>
+                            <p
+                              className={`text-lg font-bold ${getGradeColor(
+                                selectedSubmission.score ?? 0
+                              )}`}
+                            >
+                              {selectedSubmission.score}/10
+                            </p>
+                          </div>
+                        ) : (
+                          <div>
+                            <Badge variant="secondary" className="mb-1">Chờ công bố</Badge>
+                            <p className="text-sm text-gray-500">Giáo viên chưa công bố điểm</p>
+                          </div>
+                        )
                       ) : (
                         <Badge variant="secondary">Chờ chấm</Badge>
                       )}
@@ -592,7 +652,17 @@ const SubmissionPage = () => {
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <p className="text-sm font-medium mb-1">Nhận xét:</p>
                           <p className="text-sm text-gray-700">
-                            {selectedSubmission.teacherComment}
+                            {/* {selectedSubmission.teacherComment} */}
+                            {selectedSubmission.teacherComment ? (
+                              role === "teacher" || selectedSubmission.assignment.published ? (
+                                <div className="max-w-xs truncate" title={selectedSubmission.teacherComment}>
+                                  {selectedSubmission.teacherComment}
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">Chờ công bố</span>
+                              )) : (
+                              <span className="text-gray-400">Không có</span>
+                            )}
                           </p>
                           <p className="text-xs text-gray-500 mt-2">
                             Chấm bài lúc{" "}
