@@ -93,14 +93,15 @@ export default function StudentClassesPage() {
     try {
       // Lấy thông tin chi tiết lớp học trước
       const classInfo = await getClassById(Number(joinCode));
+      console.log("classInfo", classInfo);
 
       // Gửi yêu cầu tham gia lớp
       await createJoinRequest(Number(joinCode), user.userId);
 
       // Hiển thị thông báo tùy theo join_mode
-      if (classInfo?.join_mode === "AUTO") {
+      if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
-      } else if (classInfo?.join_mode === "APPROVAL") {
+      } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
@@ -127,9 +128,9 @@ export default function StudentClassesPage() {
       await createJoinRequest(classId, user.userId);
 
       // Hiển thị thông báo tùy theo join_mode
-      if (classInfo?.join_mode === "AUTO") {
+      if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
-      } else if (classInfo?.join_mode === "APPROVAL") {
+      } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );

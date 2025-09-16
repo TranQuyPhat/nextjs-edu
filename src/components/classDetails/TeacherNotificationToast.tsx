@@ -9,12 +9,9 @@ import { getJoinRequests } from "@/services/classService";
 import { useRouter } from "next/navigation";
 // Interface thông báo join request
 export interface JoinRequestDTO {
-  id: number;
   classId: number;
-  studentId: number;
-  className: string;
   studentName: string;
-  status: string;
+  message: string;
   // Thêm các trường khác nếu cần
 }
 
@@ -59,8 +56,9 @@ export default function TeacherNotificationToast({
                 className="cursor-pointer hover:underline"
                 onClick={() => router.push(`/classes/teacher`)}
               >
-                Yêu cầu mới: {payload.studentName} muốn tham gia lớp{" "}
-                {payload.className}
+                {payload.message} <br />
+                Học sinh: {payload.studentName} <br />
+                Lớp: {payload.classId}
               </div>,
               {
                 position: "bottom-right",

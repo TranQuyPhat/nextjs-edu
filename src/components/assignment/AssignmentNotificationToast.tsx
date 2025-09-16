@@ -31,12 +31,12 @@ class WebSocketManager {
 
   async connect(studentId: number) {
     if (this.isConnecting || this.client?.connected) {
-      console.log("⚠️ Already connected or connecting");
+      console.log("Already connected or connecting");
       return;
     }
 
     this.isConnecting = true;
-    console.log("🔌 Starting new connection for student:", studentId);
+    console.log("Starting new connection for student:", studentId);
 
     // Cleanup existing connection
     this.disconnect();
@@ -44,7 +44,7 @@ class WebSocketManager {
     try {
       const classes = await getStudentClassesOf(studentId);
       const classIds = classes.map((c: { id: any }) => c.id);
-      console.log("📚 Classes of student:", classIds);
+      console.log("Classes of student:", classIds);
 
       const sockjsUrl = `http://localhost:8080/ws`;
       const stompClient = new Client({
@@ -54,7 +54,7 @@ class WebSocketManager {
         heartbeatOutgoing: 4000,
 
         onConnect: (frame) => {
-          console.log("✅ WebSocket Connected!", frame);
+          console.log("WebSocket Connected!", frame);
           
           // Subscribe to all classes
           classIds.forEach((cid: any) => {
@@ -62,15 +62,15 @@ class WebSocketManager {
             stompClient.subscribe(topicPath, (message) => {
               try {
                 const payload: NotificationAssignmentDTO = JSON.parse(message.body);
-                console.log(`📢 Broadcasting to ${this.subscribers.size} subscribers:`, payload);
+                console.log(`Broadcasting to ${this.subscribers.size} subscribers:`, payload);
                 
                 // Broadcast to all subscribers
                 this.subscribers.forEach(callback => callback(payload));
               } catch (err) {
-                console.error("❌ Error parsing message:", err);
+                console.error("Error parsing message:", err);
               }
             });
-            console.log("📡 Subscribed to:", topicPath);
+            console.log("Subscribed to:", topicPath);
           });
           
           this.isConnecting = false;
@@ -97,13 +97,13 @@ class WebSocketManager {
       stompClient.activate();
       this.client = stompClient;
     } catch (err) {
-      console.error("❌ Error connecting:", err);
+      console.error("Error connecting:", err);
       this.isConnecting = false;
     }
   }
 
   disconnect() {
-    console.log("🧹 Disconnecting WebSocket...");
+    console.log("Disconnecting WebSocket...");
     if (this.client) {
       this.client.deactivate();
       this.client = null;
@@ -113,11 +113,11 @@ class WebSocketManager {
 
   subscribe(callback: (notification: NotificationAssignmentDTO) => void) {
     this.subscribers.add(callback);
-    console.log("➕ Subscriber added. Total:", this.subscribers.size);
+    console.log("Subscriber added. Total:", this.subscribers.size);
     
     return () => {
       this.subscribers.delete(callback);
-      console.log("➖ Subscriber removed. Total:", this.subscribers.size);
+      console.log("Subscriber removed. Total:", this.subscribers.size);
     };
   }
 
@@ -126,7 +126,7 @@ class WebSocketManager {
       WebSocketManager.instance.disconnect();
       WebSocketManager.instance.subscribers.clear();
       WebSocketManager.instance = null;
-      console.log("🗑️ WebSocket Manager cleaned up");
+      console.log("WebSocket Manager cleaned up");
     }
   }
 }
@@ -142,7 +142,7 @@ export default function AssignmentNotificationToast({
   useEffect(() => {
     if (!studentId) return;
 
-    console.log("🎯 Setting up notification for student:", studentId);
+    console.log("Setting up notification for student:", studentId);
 
     // Subscribe to notifications
     const unsubscribe = wsManager.subscribe((notification: NotificationAssignmentDTO) => {
@@ -150,11 +150,11 @@ export default function AssignmentNotificationToast({
       
       // Check if toast already exists
       if (toast.isActive(toastId)) {
-        console.log("🚫 Toast already active, skipping:", toastId);
+        console.log("Toast already active, skipping:", toastId);
         return;
       }
 
-      console.log("🍞 Creating toast:", toastId);
+      console.log("Creating toast:", toastId);
       toast.info(
         <div
           className="cursor-pointer hover:underline"

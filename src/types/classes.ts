@@ -9,5 +9,5 @@ export interface ClassItem {
   updatedAt: string;
   teacherId: number;
   subjectId: number;
-  join_mode: 'AUTO' | 'APPROVAL' ;
+  joinMode: 'AUTO' | 'APPROVAL' ;
 }
