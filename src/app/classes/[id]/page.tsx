@@ -159,11 +159,6 @@ export default function ClassDetailPage() {
                 <p className="text-gray-600">{classData.description}</p>
               </div>
             </div>
-
-            {localStorage.role === "student" && (
-              <AssignmentNotificationToast classId={classData.id} />
-            )}
-
             {/* Bên phải: Dropdown lịch học */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

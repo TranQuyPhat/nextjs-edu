@@ -187,7 +187,7 @@ export default function StudentClassesPage() {
               </h1>
               <p className="text-gray-600">Các lớp học bạn đã tham gia</p>
             </div>
-            <StudentNotificationToast studentId={user.userId} />
+            
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-green-700 hover:bg-green-800">

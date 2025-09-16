@@ -135,7 +135,7 @@ export default function QuizEditPage() {
           default:
             toast("Duyệt quiz thành công");
         }
-        useQuizzStorage.getState().reset();
+        // useQuizzStorage.getState().reset();
         router.push("/quizzes/teacher");
       },
       onError: (error) => {

@@ -167,10 +167,10 @@ export async function createJoinRequest(classId: number, studentId: number) {
   });
   return response.data;
 }
-// export const getStudentClasses = async (studentId: number) => {
-//   const response = await apiClient.get(`/auth/classes/student/${studentId}/classesPaginated`);
-//   return response.data; // <-- Lấy đúng mảng lớp học
-// };
+export const getStudentClassesOf = async (studentId: number) => {
+  const response = await apiClient.get(`/auth/classes/students/${studentId}/classes`);
+  return response.data; // <-- Lấy đúng mảng lớp học
+};
 export const getStudentClasses = async (studentId: number, page: number, size: number) => {
   const response = await apiClient.get(`/auth/classes/student/${studentId}/classesPaginated?page=${page}&size=${size}`);
   console.log(response.data);

@@ -9,6 +9,7 @@ import "sweetalert2/dist/sweetalert2.js";
 import "katex/dist/katex.min.css";
 import "mathlive/static.css";
 import "./globals.css";
+import Notification from "@/components/notification/notification";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -42,6 +43,8 @@ export default function RootLayout({
             theme="light"
             transition={Bounce}
           />
+          <Notification />
+          
         </Providers>
       </body>
     </html>

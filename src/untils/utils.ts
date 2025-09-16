@@ -52,6 +52,18 @@ export function getCurrentUserId(): number | null {
     return null;
   }
 }
+export function getCurrentUser(): JwtPayload | null {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return null ;
+
+  try {
+    const payload: JwtPayload = jwtDecode(token);
+    return payload;
+  } catch (e) {
+    console.error("Invalid token", e);
+    return null;
+  }
+}
 /** ========= TÁCH VÀ THAY THẾ CÔNG THỨC ========= */
 export type Segment =
   | { type: "text"; content: string }

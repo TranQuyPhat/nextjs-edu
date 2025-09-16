@@ -283,7 +283,6 @@ export default function TeacherClassesPage() {
             </div>
             <div className="flex items-center gap-4">
               <DropdownNotificationBell teacherId={user.userId} />
-              <TeacherNotificationBell teacherId={user.userId} />
 
               <SubjectManager
                 userId={user.userId}
