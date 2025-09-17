@@ -100,3 +100,9 @@ export const downloadAssignmentFile = async (assignmentId: number): Promise<Blob
   });
   return response.data;
 };
+
+// Công bố điểm Assignment
+export const publishAssignment = async (assignmentId: number): Promise<Assignment> => {
+  const response = await apiClient.patch<Assignment>(`/assignments/${assignmentId}/publish`);
+  return response.data;
+};

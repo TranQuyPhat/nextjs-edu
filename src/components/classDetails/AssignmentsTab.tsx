@@ -32,6 +32,7 @@ import {
   Clock,
   Eye,
   Delete,
+  Edit, Trash
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -42,6 +43,8 @@ import {
   createAssignment,
   getAssignmentsByClassId,
   downloadAssignmentFile,
+  publishAssignment,
+  deleteAssignment
 } from "@/services/assignmentService";
 import { ClassItem } from "@/types/classes";
 import {
@@ -72,6 +75,13 @@ import UpdateUploadSubmission from "./assi/UpdateUploadSubmission";
 import UpdateAssignment from "./assi/UpdateAssignment";
 import type { Comment } from "@/types/assignment";
 import { assignmentSchema } from "./assi/schema";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
 // Định nghĩa interface cho dữ liệu form
 interface CreateAssignmentFormData {
   title: string;
@@ -338,19 +348,20 @@ export const AssignmentsTab = ({
 
   const handleDownloadAssignment = async (
     assignmentId: number,
-    filePath: string
+    filePath: string,
+    fileName: string,
+    fileType: string
   ) => {
     try {
-      // 1. Gọi API tải file
+      // 1. Gọi API tải file (trả blob từ backend)
       const blob = await downloadAssignmentFile(assignmentId);
 
-      // 2. Tạo URL từ blob
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      // 2. Tạo URL từ blob với type chuẩn
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: fileType })
+      );
 
-      // 3. Lấy tên file gốc
-      const fileName = getFileName(filePath);
-
-      // 4. Tạo thẻ <a> ẩn để tải
+      // 3. Dùng đúng tên gốc từ DB
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", fileName);
@@ -358,8 +369,8 @@ export const AssignmentsTab = ({
       document.body.appendChild(link);
       link.click();
 
-      // 5. Xóa DOM & URL
-      link.parentNode?.removeChild(link);
+      // 4. Xoá sau khi tải
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Tải file thất bại:", error);
@@ -368,19 +379,20 @@ export const AssignmentsTab = ({
 
   const handleDownloadSubmission = async (
     submissionId: number,
-    filePath: string
+    filePath: string,
+    fileName: string,
+    fileType: string
   ) => {
     try {
-      // 1. Gọi API tải file
+      // 1. Gọi API tải file (backend trả blob)
       const blob = await downloadSubmissionFile(submissionId);
 
-      // 2. Tạo URL từ blob
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      // 2. Tạo URL từ blob với đúng MIME type
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: fileType })
+      );
 
-      // 3. Lấy tên file gốc
-      const fileName = getFileName(filePath);
-
-      // 4. Tạo thẻ <a> ẩn để tải
+      // 3. Dùng tên file gốc từ DB
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", fileName);
@@ -388,8 +400,8 @@ export const AssignmentsTab = ({
       document.body.appendChild(link);
       link.click();
 
-      // 5. Xóa DOM & URL
-      link.parentNode?.removeChild(link);
+      // 4. Xoá sau khi tải
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Tải file thất bại:", error);
@@ -452,6 +464,44 @@ export const AssignmentsTab = ({
     }
   };
 
+  const handleDeleteAssignment = async (assignmentId: number) => {
+    const result = await Swal.fire({
+      title: "Bạn có chắc chắn?",
+      text: "Bài tập này sẽ bị xóa và không thể khôi phục!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Có, xóa ngay!",
+      cancelButtonText: "Hủy",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await deleteAssignment(assignmentId);
+      setAssignmentList((prev) =>
+        prev.filter((item) => item.id !== assignmentId)
+      );
+
+      Swal.fire({
+        title: "Đã xóa!",
+        text: "Bài tập đã được xóa thành công.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Lỗi khi xóa assignment:", error);
+      Swal.fire({
+        title: "Lỗi!",
+        text: "Không thể xóa bài tập. Vui lòng thử lại!",
+        icon: "error",
+      });
+    }
+  };
+
+
   if (!user) {
     // Đảm bảo không render khi chưa có user
     return <div>Loading...</div>;
@@ -470,9 +520,8 @@ export const AssignmentsTab = ({
                 Tạo bài tập mới
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-[600px] max-h-[400px] overflow-y-auto">
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
-                {/* <DialogTitle>Tạo bài tập cho</DialogTitle> */}
                 <DialogTitle>Tạo bài tập cho {classes[0].className}</DialogTitle>
                 <DialogDescription>Nhập thông tin bài tập cho học sinh trong lớp này</DialogDescription>
               </DialogHeader>
@@ -608,10 +657,15 @@ export const AssignmentsTab = ({
                     <span className="text-gray-600">Tệp đính kèm:</span>
                     <div
                       className="flex items-center space-x-2 cursor-pointer hover:underline"
-                      onClick={() => handleDownloadAssignment(assignment.id, assignment.filePath ?? "")}
+                      onClick={() => handleDownloadAssignment(
+                        assignment.id,
+                        assignment.filePath,
+                        assignment.fileName,
+                        assignment.fileType
+                      )}
                     >
                       <FileText className="h-4 w-4" />
-                      <span>{getFileName(assignment.filePath ?? "")} ({assignment.fileSize})</span>
+                      <span>{assignment.fileName} ({assignment.fileSize})</span>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -700,9 +754,7 @@ export const AssignmentsTab = ({
                                             <div className="flex items-center space-x-2">
                                               <FileText className="h-4 w-4" />
                                               <span>
-                                                {getFileName(
-                                                  submission.filePath ?? ""
-                                                )}
+                                                {submission.fileName}
                                               </span>
                                               <span className="text-gray-500">
                                                 ({submission.fileSize})
@@ -730,7 +782,7 @@ export const AssignmentsTab = ({
                                               </p>
                                               <p className="text-xs text-gray-500 mt-2">
                                                 Chấm bài lúc{" "}
-                                                {submission.gradedAt}
+                                                {formatDateTime(submission.gradedAt)}
                                               </p>
                                             </div>
                                           )}
@@ -740,7 +792,9 @@ export const AssignmentsTab = ({
                                               onClick={() =>
                                                 handleDownloadSubmission(
                                                   submission.id,
-                                                  submission.filePath ?? ""
+                                                  submission.filePath,
+                                                  submission.fileName,
+                                                  submission.fileType
                                                 )
                                               }
                                               size="sm"
@@ -814,18 +868,86 @@ export const AssignmentsTab = ({
                             ? "Ẩn bình luận"
                             : "Bình luận"}
                         </Button>
-                        <UpdateAssignment
-                          assignment={assignment} // bài tập hiện tại
-                          classData={classes} // danh sách lớp
-                          onSuccess={(updated) => {
-                            // Callback khi update thành công
-                            setAssignmentList((prev) =>
-                              prev.map((item) =>
-                                item.id === updated.id ? updated : item
-                              )
-                            );
+
+                        <Button
+                          size="sm"
+                          variant={
+                            assignment.published
+                              ? "default"
+                              : submissionsByAssignment[assignment.id]?.length === countstudents
+                                ? "default"
+                                : "outline"
+                          }
+                          className={
+                            assignment.published
+                              ? "bg-green-500 text-white"
+                              : submissionsByAssignment[assignment.id]?.length === countstudents
+                                ? "bg-blue-500 text-white"
+                                : "opacity-50 cursor-not-allowed"
+                          }
+                          disabled={
+                            assignment.published ||
+                            (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents
+                          }
+                          onClick={async () => {
+                            try {
+                              await publishAssignment(assignment.id);
+                              setAssignmentList((prev) =>
+                                prev.map((item) =>
+                                  item.id === assignment.id
+                                    ? { ...item, published: true }
+                                    : item
+                                )
+                              );
+                              toast.success("Đã công bố điểm cho " + assignment.title);
+                            } catch (error) {
+                              console.error("Lỗi khi công bố điểm:", error);
+                              toast.error("Công bố điểm thất bại!");
+                            }
                           }}
-                        />
+                        >
+                          {assignment.published
+                            ? "Đã công bố điểm"
+                            : (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents
+                              ? `Chưa đủ bài nộp (${submissionsByAssignment[assignment.id]?.length || 0}/${countstudents})`
+                              : "Công bố điểm"}
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="rounded-full hover:bg-gray-100"
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent align="end" className="w-44">
+                            {/* Update */}
+                            <DropdownMenuItem asChild>
+                              <UpdateAssignment
+                                assignment={assignment}
+                                classData={classes}
+                                onSuccess={(updated) => {
+                                  setAssignmentList((prev) =>
+                                    prev.map((item) => (item.id === updated.id ? updated : item))
+                                  )
+                                }}
+                                variant="menu"
+                              />
+                            </DropdownMenuItem>
+
+                            {/* Delete */}
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteAssignment(assignment.id)}
+                              className="text-red-600 focus:bg-red-50 cursor-pointer"
+                            >
+                              <Trash className="h-4 w-4 mr-2" />
+                              Xóa
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </>
                     ) : (
                       <>
@@ -876,26 +998,29 @@ export const AssignmentsTab = ({
                                             </p>
                                           </div>
                                           <div className="text-right">
-                                            {userSubmission.status?.toLowerCase() ===
-                                              "graded" ? (
-                                              <div>
-                                                <Badge className="bg-green-500 mb-1">
-                                                  Đã chấm
-                                                </Badge>
-                                                <p
-                                                  className={`text-lg font-bold ${getGradeColor(
-                                                    userSubmission.score ?? 0
-                                                  )}`}
-                                                >
-                                                  {userSubmission.score}/10
-                                                </p>
-                                              </div>
+                                            {userSubmission.status?.toLowerCase() === "graded" ? (
+                                              assignment.published ? (
+                                                <div>
+                                                  <Badge className="bg-green-500 mb-1">Đã chấm</Badge>
+                                                  <p
+                                                    className={`text-lg font-bold ${getGradeColor(
+                                                      userSubmission.score ?? 0
+                                                    )}`}
+                                                  >
+                                                    {userSubmission.score}/10
+                                                  </p>
+                                                </div>
+                                              ) : (
+                                                <div>
+                                                  <Badge variant="secondary" className="mb-1">Chờ công bố</Badge>
+                                                  <p className="text-sm text-gray-500">Giáo viên chưa công bố điểm</p>
+                                                </div>
+                                              )
                                             ) : (
-                                              <Badge variant="secondary">
-                                                Chờ chấm
-                                              </Badge>
+                                              <Badge variant="secondary">Chờ chấm</Badge>
                                             )}
                                           </div>
+
                                         </div>
                                       </CardHeader>
                                       <CardContent className="pt-0">
@@ -907,10 +1032,7 @@ export const AssignmentsTab = ({
                                             <div className="flex items-center space-x-2">
                                               <FileText className="h-4 w-4" />
                                               <span>
-                                                {getFileName(
-                                                  userSubmission.filePath ??
-                                                  ""
-                                                )}
+                                                {userSubmission.fileName}
                                               </span>
                                               <span className="text-gray-500">
                                                 ({userSubmission.fileSize})
@@ -918,34 +1040,42 @@ export const AssignmentsTab = ({
                                             </div>
                                           </div>
 
-                                          {userSubmission.status ===
-                                            "GRADED" &&
-                                            userSubmission.teacherComment && (
+                                          {userSubmission.status === "GRADED" && (
+                                            assignment.published ? (
+                                              userSubmission.teacherComment ? (
+                                                <div className="bg-gray-50 p-3 rounded-lg">
+                                                  <p className="text-sm font-medium mb-1">Nhận xét:</p>
+                                                  <p className="text-sm text-gray-700">
+                                                    {userSubmission.teacherComment}
+                                                  </p>
+                                                  <p className="text-xs text-gray-500 mt-2">
+                                                    Chấm bài lúc {formatDateTime(userSubmission.gradedAt)}
+                                                  </p>
+                                                </div>
+                                              ) : (
+                                                <div className="bg-gray-50 p-3 rounded-lg">
+                                                  <p className="text-sm text-gray-500 italic">
+                                                    Không có nhận xét từ giáo viên
+                                                  </p>
+                                                </div>
+                                              )
+                                            ) : (
                                               <div className="bg-gray-50 p-3 rounded-lg">
-                                                <p className="text-sm font-medium mb-1">
-                                                  Nhận xét:
-                                                </p>
-                                                <p className="text-sm text-gray-700">
-                                                  {
-                                                    userSubmission.teacherComment
-                                                  }
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                  Chấm bài lúc{" "}
-                                                  {formatDateTime(
-                                                    userSubmission.gradedAt
-                                                  )}
+                                                <p className="text-sm text-gray-500 italic">
+                                                  Giáo viên chưa công bố nhận xét
                                                 </p>
                                               </div>
-                                            )}
+                                            )
+                                          )}
 
                                           <div className="flex gap-2 pt-2">
                                             <Button
                                               onClick={() =>
                                                 handleDownloadSubmission(
                                                   userSubmission.id,
-                                                  userSubmission.filePath ??
-                                                  ""
+                                                  userSubmission.filePath,
+                                                  userSubmission.fileName,
+                                                  userSubmission.fileType
                                                 )
                                               }
                                               size="sm"

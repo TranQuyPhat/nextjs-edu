@@ -28,6 +28,13 @@ import {
   FileText,
 } from "lucide-react";
 import { useStudentResult } from "../hooks/useTeacherRanking";
+import { fetchStudentDashboard } from "@/services/dashboardService";
+interface OverallStats {
+  totalAssignments: number;
+  completedAssignments: number;
+  averageGrade: number;
+  improvement: string;
+}
 
 export default function GradesPage() {
   const [user, setUser] = useState<any>(null);
@@ -69,12 +76,24 @@ export default function GradesPage() {
   //   },
   // ])
 
-  const [overallStats] = useState({
-    totalAssignments: 6,
-    completedAssignments: 6,
-    averageGrade: 8.36,
-    improvement: "+0.3",
+const [overallStats, setOverallStats] = useState<OverallStats>({
+    totalAssignments: 0,
+    completedAssignments: 0,
+    averageGrade: 0,
+    improvement: "0.3",
   });
+
+  useEffect(() => {
+    fetchStudentDashboard()
+      .then((data: any) => {
+        setOverallStats({
+          totalAssignments: data.totalAssignments,
+          completedAssignments: data.completedAssignments,
+          averageGrade: data.avgScore,
+          improvement: "0.3", // mặc định
+        });
+      });
+  }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");

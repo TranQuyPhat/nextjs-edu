@@ -102,7 +102,7 @@ export const createClass = (payload: {
   description: string;
   teacherId: number;
   subjectId: number;
-  join_mode: 'AUTO' | 'APPROVAL';
+  joinMode: 'AUTO' | 'APPROVAL';
 }) => {
   console.log("Payload tạo lớp:", payload);
   return apiClient.post(`/auth/classes`, payload);
@@ -116,7 +116,7 @@ export const updateClass = (
     description: string;
     teacherId: number;
     subjectId: number;
-    join_mode: 'AUTO' | 'APPROVAL';
+    joinMode: 'AUTO' | 'APPROVAL';
   }
 ) => {
   console.log("Payload cập nhật lớp:", payload);
@@ -167,10 +167,10 @@ export async function createJoinRequest(classId: number, studentId: number) {
   });
   return response.data;
 }
-// export const getStudentClasses = async (studentId: number) => {
-//   const response = await apiClient.get(`/auth/classes/student/${studentId}/classesPaginated`);
-//   return response.data; // <-- Lấy đúng mảng lớp học
-// };
+export const getStudentClassesOf = async (studentId: number) => {
+  const response = await apiClient.get(`/auth/classes/students/${studentId}/classes`);
+  return response.data; // <-- Lấy đúng mảng lớp học
+};
 export const getStudentClasses = async (studentId: number, page: number, size: number) => {
   const response = await apiClient.get(`/auth/classes/student/${studentId}/classesPaginated?page=${page}&size=${size}`);
   console.log(response.data);

@@ -1,3 +1,4 @@
+import { is } from "date-fns/locale";
 import { LoginResponseDto } from "./auth";
 
 export interface Assignment {
@@ -7,9 +8,11 @@ export interface Assignment {
   classId: number;
   dueDate: string;
   maxScore: number;
-  filePath?: string | null;
-  fileType?: string | null;
+  filePath: string;
+  fileType: string;
   fileSize?: number | null;
+  fileName: string;
+  published: boolean;
 
   submissions?: Submission[];
 }
@@ -25,6 +28,7 @@ export interface Submission {
   filePath: string;
   fileType: string;
   fileSize?: number | null;
+  fileName: string;
   description?: string;
   status: SubmissionStatus;
   score?: number;
@@ -40,7 +44,8 @@ export interface Submission {
 
   assignment: {
     id: number;
-    title: string;  
+    title: string; 
+    published: boolean;
   };
 }
 

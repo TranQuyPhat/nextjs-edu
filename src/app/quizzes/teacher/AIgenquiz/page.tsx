@@ -31,6 +31,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+function toOffsetDateTime(localDateTime: string) {
+  if (!localDateTime) return "";
+  return localDateTime + ":00Z"; 
+}
 export default function HomePage() {
   const { setIsOpen } = useTour();
   const { isGenerating } = useQuizStore();
@@ -41,14 +45,21 @@ export default function HomePage() {
   const userId = userStr ? JSON.parse(userStr).userId : null;
 
   const { data: classes = [], isLoading } = useTeacherClasses(userId);
-
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
+function toInputDateTime(val?: string) {
+  if (!val) return "";
+  // Nếu có dạng YYYY-MM-DDTHH:MM:SSZ thì cắt bỏ phần giây và Z
+  return val.replace(/:00Z$/, "");
+}
+const handleChange = (
+  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = e.target;
+  if (name === "startDate" || name === "endDate") {
+    setData({ [name]: toOffsetDateTime(value) });
+  } else {
     setData({ [name]: value });
-  };
-
+  }
+};
   return (
     <main className="min-h-dvh bg-white">
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
@@ -143,7 +154,7 @@ export default function HomePage() {
                   <Input value={data.subject || ""} disabled />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label
                       className="text-sm font-medium text-muted-foreground"
@@ -153,9 +164,9 @@ export default function HomePage() {
                     </label>
                     <Input
                       id="startDate"
-                      type="date"
+                      type="datetime-local"
                       name="startDate"
-                      value={data.startDate}
+                      value={toInputDateTime(data.startDate)}
                       onChange={handleChange}
                     />
                   </div>
@@ -169,14 +180,16 @@ export default function HomePage() {
                     </label>
                     <Input
                       id="endDate"
-                      type="date"
+                      type="datetime-local"
                       name="endDate"
-                      value={data.endDate}
+                      value={toInputDateTime(data.endDate)}
                       onChange={handleChange}
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  
+                </div>
+<div className="space-y-1">
                     <label
                       className="text-sm font-medium text-muted-foreground"
                       htmlFor="timeLimit"
@@ -192,8 +205,6 @@ export default function HomePage() {
                       onChange={handleChange}
                     />
                   </div>
-                </div>
-
                 <div className="space-y-1">
                   <label
                     className="text-sm font-medium text-muted-foreground"

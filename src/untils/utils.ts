@@ -20,11 +20,12 @@ export function mapBackendToFormData(apiData: BackendQuizResponse): QuizzFormDat
     description: "",
     questions: apiData.questions.map((q) => ({
       questionText: q.questionText,
+      questionType: q.questionType ,
       options: q.options.map((opt, idx) => ({
         optionLabel: opt.optionLabel, // A, B, C, D
         optionText: opt.optionText, // Bỏ tiền tố "A. "
       })),
-      answer: String.fromCharCode(65 + q.correctIndex),
+      correctOptions: String.fromCharCode(65 + q.correctIndex),
       explanation: q.explanation,
       topic: q.topic,
       difficulty: q.difficulty,
@@ -46,6 +47,18 @@ export function getCurrentUserId(): number | null {
   try {
     const payload: JwtPayload = jwtDecode(token);
     return payload.id;
+  } catch (e) {
+    console.error("Invalid token", e);
+    return null;
+  }
+}
+export function getCurrentUser(): JwtPayload | null {
+  const token = localStorage.getItem("accessToken");
+  if (!token) return null ;
+
+  try {
+    const payload: JwtPayload = jwtDecode(token);
+    return payload;
   } catch (e) {
     console.error("Invalid token", e);
     return null;

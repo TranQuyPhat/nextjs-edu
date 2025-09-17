@@ -112,18 +112,21 @@ export function useQuizQuestionsPage(
 
 // ==== Mutations ====
 export function useApproveQuiz() {
-    return useMutation({
-        mutationFn: async (quizData: any) => {
-            const res = await apiClient.post<ApiResp<any>>("api/quizzes", quizData);
-            if (!res.success) {
-                const error: any = new Error(res.message || "Lỗi khi duyệt quiz");
-                error.response = { data: res };
-                throw error;
-            }
-            return res.data;
-        },
-    });
+  return useMutation({
+    mutationFn: async (quizData: any) => {
+      const res = await apiClient.post<ApiResp<any>>("api/quizzes", quizData);
+
+      if (!res.data.success) {
+        const error: any = new Error(res.data.message || "Lỗi khi duyệt quiz");
+        error.response = { data: res.data };
+        throw error;
+      }
+
+      return res.data; // đây mới là payload chuẩn
+    },
+  });
 }
+
 
 export function useCreateQuiz() {
     return useMutation({

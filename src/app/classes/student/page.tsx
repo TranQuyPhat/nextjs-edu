@@ -32,6 +32,7 @@ import {
 } from "@/services/classService";
 import StudentNotificationToast from "@/components/classDetails/StudentNotificationToast";
 import { toast } from "react-toastify";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export default function StudentClassesPage() {
   const [user, setUser] = useState<any>(null);
@@ -93,14 +94,15 @@ export default function StudentClassesPage() {
     try {
       // Lấy thông tin chi tiết lớp học trước
       const classInfo = await getClassById(Number(joinCode));
+      console.log("classInfo", classInfo);
 
       // Gửi yêu cầu tham gia lớp
       await createJoinRequest(Number(joinCode), user.userId);
 
       // Hiển thị thông báo tùy theo join_mode
-      if (classInfo?.join_mode === "AUTO") {
+      if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
-      } else if (classInfo?.join_mode === "APPROVAL") {
+      } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
@@ -127,9 +129,9 @@ export default function StudentClassesPage() {
       await createJoinRequest(classId, user.userId);
 
       // Hiển thị thông báo tùy theo join_mode
-      if (classInfo?.join_mode === "AUTO") {
+      if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
-      } else if (classInfo?.join_mode === "APPROVAL") {
+      } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
@@ -171,7 +173,18 @@ export default function StudentClassesPage() {
   };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Navigation />
+        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+          <DotLottieReact
+            src="/animations/loading.lottie"
+            loop
+            autoplay
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -187,7 +200,7 @@ export default function StudentClassesPage() {
               </h1>
               <p className="text-gray-600">Các lớp học bạn đã tham gia</p>
             </div>
-            <StudentNotificationToast studentId={user.userId} />
+            
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-green-700 hover:bg-green-800">

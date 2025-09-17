@@ -118,8 +118,6 @@ export default function ClassDetailPage() {
   };
 
   // if (!user || !classData) return <div>Đang tải dữ liệu...</div>
-
-  // if (!classData) return <div>Đang tải dữ liệu...</div>
   if (!classData) {
     return (
       <div>
@@ -134,7 +132,6 @@ export default function ClassDetailPage() {
       </div>
     )
   }
-
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -159,11 +156,6 @@ export default function ClassDetailPage() {
                 <p className="text-gray-600">{classData.description}</p>
               </div>
             </div>
-
-            {localStorage.role === "student" && (
-              <AssignmentNotificationToast classId={classData.id} />
-            )}
-
             {/* Bên phải: Dropdown lịch học */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
