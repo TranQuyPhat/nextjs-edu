@@ -877,20 +877,23 @@ export const AssignmentsTab = ({
                           variant={
                             assignment.published
                               ? "default"
-                              : submissionsByAssignment[assignment.id]?.length === countstudents
+                              : submissionsByAssignment[assignment.id]?.length === countstudents &&
+                                submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
                                 ? "default"
                                 : "outline"
                           }
                           className={
                             assignment.published
                               ? "bg-green-500 text-white"
-                              : submissionsByAssignment[assignment.id]?.length === countstudents
+                              : submissionsByAssignment[assignment.id]?.length === countstudents &&
+                                submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
                                 ? "bg-blue-500 text-white"
                                 : "opacity-50 cursor-not-allowed"
                           }
                           disabled={
                             assignment.published ||
-                            (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents
+                            (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents ||
+                            !submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
                           }
                           onClick={async () => {
                             try {
@@ -913,7 +916,9 @@ export const AssignmentsTab = ({
                             ? "Đã công bố điểm"
                             : (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents
                               ? `Chưa đủ bài nộp (${submissionsByAssignment[assignment.id]?.length || 0}/${countstudents})`
-                              : "Công bố điểm"}
+                              : !submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
+                                ? "Chưa chấm xong"
+                                : "Công bố điểm"}
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
