@@ -6,9 +6,11 @@ export type Quiz = {
     totalQuestions: number;
     classId?: number;
     createdAt: string;
+    questions: Question[];
 };
 
 export type Question = {
+    id: string;
     questionText: string;
     questionType: string
     options: Option[];
@@ -25,6 +27,8 @@ export type Option = {
     optionText: string;
 };
 export type QuizzFormData = {
+    className?: string;
+    subject?: string;
     title: string;
     startDate: string;
     endDate: string;

@@ -21,6 +21,8 @@ import GoogleLoginButton from "@/components/GoogleLoginButton";
 import { InputPassword } from "@/components/forms/InputPassword";
 import { authService } from "@/services/authService";
 import { useAuth } from "../hook/useAuth";
+import Navigation from "@/components/navigation";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 // Định nghĩa schema cho từng step
 const loginSchema = yup.object().shape({
@@ -123,8 +125,11 @@ export default function LoginPage() {
   }, [step, reset]);
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div>
+        <Navigation />
+        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+        </div>
       </div>
     );
   }

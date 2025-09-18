@@ -28,8 +28,8 @@ export function QuizSettingsForm() {
         <div className="space-y-2">
           <Label className="text-green-800">Chế độ sinh (Mode)</Label>
           <Select
-            defaultValue={settings.generationMode}
-            onValueChange={(v) => updateSettings({ generationMode: v as any })}
+            defaultValue={settings.studyMode}
+            onValueChange={(v) => updateSettings({ studyMode: v as any })}
           >
             <SelectTrigger className="border-green-500/30 focus:ring-green-500">
               <SelectValue placeholder="Chọn chế độ" />
@@ -93,40 +93,6 @@ export function QuizSettingsForm() {
             </SelectContent>
           </Select>
         </div>
-
-        <div className="space-y-2">
-          <Label className="text-green-800">Chế độ học</Label>
-          <Select
-            defaultValue={settings.mode}
-            onValueChange={(v) => updateSettings({ mode: v as any })}
-          >
-            <SelectTrigger className="border-green-500/30 focus:ring-green-500">
-              <SelectValue placeholder="Chọn mode" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Quiz">Quiz</SelectItem>
-              <SelectItem value="Flashcard">Flashcard</SelectItem>
-              <SelectItem value="Study Guide">Study Guide</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label className="text-green-800">Tác vụ</Label>
-          <Select
-            defaultValue={settings.task}
-            onValueChange={(v) => updateSettings({ task: v as any })}
-          >
-            <SelectTrigger className="border-green-500/30 focus:ring-green-500">
-              <SelectValue placeholder="Chọn tác vụ" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Generate Quiz">Generate Quiz</SelectItem>
-              <SelectItem value="Review">Review</SelectItem>
-              <SelectItem value="Test Knowledge">Test Knowledge</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       <Card className="border-green-500/20">
@@ -134,16 +100,14 @@ export function QuizSettingsForm() {
           <div className="grid gap-3">
             <div className="space-y-2">
               <Label className="text-green-800">
-                Số lượng câu hỏi: {settings.numberOfQuestions}
+                Số lượng câu hỏi: {settings.numQuestions}
               </Label>
               <Slider
-                defaultValue={[settings.numberOfQuestions]}
+                defaultValue={[settings.numQuestions || 10]}
                 min={1}
                 max={50}
                 step={1}
-                onValueChange={(v) =>
-                  updateSettings({ numberOfQuestions: v[0] })
-                }
+                onValueChange={(v) => updateSettings({ numQuestions: v[0] })}
                 className="[&_.range]:bg-green-500"
               />
             </div>
@@ -152,8 +116,8 @@ export function QuizSettingsForm() {
               <Input
                 placeholder="VD: Ôn tập chương 1 - Đại số"
                 className="border-green-500/30 focus-visible:ring-green-500"
-                value={settings.title ?? ""}
-                onChange={(e) => updateSettings({ title: e.target.value })}
+                value={settings.quizTitle ?? ""}
+                onChange={(e) => updateSettings({ quizTitle: e.target.value })}
               />
             </div>
           </div>

@@ -27,6 +27,7 @@ import {
   CheckCircle,
   Edit,
   Eye,
+  Trash2,
   Search,
   Filter,
   Calendar,
@@ -36,13 +37,32 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useQuizzesQuery } from "../hooks";
+import { useDeleteQuiz } from "../hook/quiz-hooks";
 import { TeacherQuizSkeleton } from "../components/TeacherQuizSkeleton";
 import { DataState } from "@/components/DataState";
 import { QuizCard } from "@/types/quiz.type";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 type QuizStatus = "upcoming" | "active" | "closed";
 
 export default function TeacherQuizzesPage() {
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const deleteQuizMutation = useDeleteQuiz(deleteId ?? 0);
+  const handleDeleteQuiz = async (id: number) => {
+    setDeleteId(id);
+    await deleteQuizMutation.mutateAsync();
+    setDeleteId(null);
+  };
+
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -63,8 +83,7 @@ export default function TeacherQuizzesPage() {
     error,
     refetch,
   } = useQuizzesQuery();
-
-  // Lấy danh sách unique subjects và classes
+  console.log("quizzes :", quizzes);
   const { subjects, classes } = useMemo(() => {
     const subjectSet = new Set<string>();
     const classSet = new Set<string>();
@@ -216,62 +235,84 @@ export default function TeacherQuizzesPage() {
   const renderQuizCards = (quizzes: QuizCard[]) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {quizzes.map((quiz: any) => (
-          <Card key={quiz.id} className="p-5 hover:shadow-md transition-shadow">
-            <div className="mb-4">
-              <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                {quiz.title}
-              </h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">{quiz.subject}</span>
-                {getStatusBadge(quiz)}
+        {quizzes.map((quiz: any) => {
+          const status = getQuizStatus(quiz);
+          return (
+            <Card
+              key={quiz.id}
+              className="p-5 rounded-xl shadow-sm hover:shadow-lg hover:-translate-y-1
+               transition duration-200 ease-in-out"
+            >
+              <div className="mb-4">
+                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {quiz.title}
+                </h3>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">{quiz.subject}</span>
+                  {getStatusBadge(quiz)}
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center text-sm text-gray-600">
-                <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                <span>
-                  {quiz.timeLimit} phút • {quiz.totalQuestions} câu
-                </span>
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center text-sm text-gray-600">
+                  <Clock className="h-4 w-4 mr-2 text-gray-400" />
+                  <span>
+                    {quiz.timeLimit} phút • {quiz.totalQuestions} câu
+                  </span>
+                </div>
+                <div className="flex items-center text-sm text-gray-600">
+                  <Users className="h-4 w-4 mr-2 text-gray-400" />
+                  <span>
+                    {quiz.studentsSubmitted}/{quiz.totalStudents} đã làm
+                  </span>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {status === "upcoming"
+                    ? `Bắt đầu: ${formatDateTime(quiz.startDate)}`
+                    : `Hết hạn: ${formatDateTime(quiz.endDate)}`}
+                </div>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Users className="h-4 w-4 mr-2 text-gray-400" />
-                <span>
-                  {quiz.studentsSubmitted}/{quiz.totalStudents} đã làm
-                </span>
-              </div>
-              <div className="text-sm text-gray-500">
-                {getQuizStatus(quiz) === "upcoming"
-                  ? `Bắt đầu: ${formatDateTime(quiz.startDate)}`
-                  : `Hết hạn: ${formatDateTime(quiz.endDate)}`}
-              </div>
-            </div>
 
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                className="flex-1"
-                onClick={() => handleXemKetQua(quiz.id)}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                Kết quả
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  router.push(`teacher/preview?mode=edit&id=${quiz.id}`)
-                }
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4" />
-              </Button>
-            </div>
-          </Card>
-        ))}
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="flex-1 text-green-700 bg-green-100 hover:bg-green-200
+                   border border-green-300 transition-colors duration-200"
+                  onClick={() => handleXemKetQua(quiz.id)}
+                >
+                  <Eye className="h-4 w-4 mr-1" />
+                  Kết quả
+                </Button>
+
+                {status === "upcoming" && (
+                  <>
+                    <Button
+                      size="sm"
+                      className="text-blue-700 bg-blue-100 hover:bg-blue-200
+                       border border-blue-300 transition-colors duration-200"
+                      onClick={() =>
+                        router.push(`teacher/preview?mode=edit&id=${quiz.id}`)
+                      }
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="ml-2"
+                      onClick={() => {
+                        setDeleteId(quiz.id);
+                        setShowDeleteConfirm(true); // mở dialog
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </Card>
+          );
+        })}
       </div>
     );
   };
@@ -457,6 +498,31 @@ export default function TeacherQuizzesPage() {
           <TeacherQuizView />
         </DataState>
       </div>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xoá bài kiểm tra</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xoá bài kiểm tra này? Thao tác này
+              <span className="font-semibold"> không thể hoàn tác</span>.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={async () => {
+                if (deleteId !== null) {
+                  await deleteQuizMutation.mutateAsync();
+                  setDeleteId(null);
+                }
+              }}
+            >
+              Xoá
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

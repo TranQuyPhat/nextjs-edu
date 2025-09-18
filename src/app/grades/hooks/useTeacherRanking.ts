@@ -31,16 +31,21 @@ export interface StudentResult {
 export function useTeacherRanking(teacherId: number) {
     return useQuery<StudentRanking[]>({
         queryKey: ["teacher-ranking", teacherId],
-        queryFn: () =>
-            apiClient<StudentRanking[]>(`api/stats/teacher/38/ranking`),
+        queryFn: async () => {
+            const res = await apiClient.get<StudentRanking[]>(`/api/stats/teacher/${teacherId}/ranking`);
+            return res;
+        },
         staleTime: 1000 * 60 * 2,
     });
 }
+
 export function useStudentResult() {
     return useQuery<StudentResult[]>({
         queryKey: ["student-grades"],
-        queryFn: () =>
-            apiClient<StudentResult[]>(`/api/student/grades`),
+        queryFn: async () => {
+            const res = await apiClient.get<StudentResult[]>(`/api/student/grades`);
+            return res;
+        },
         staleTime: 1000 * 60 * 2,
     });
 }

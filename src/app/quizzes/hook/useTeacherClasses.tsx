@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api";
+import { ClassEntity } from "@/lib/type";
 import { useQuery } from "@tanstack/react-query";
 
 export function useTeacherClasses(teacherId: number | null) {
@@ -6,7 +7,11 @@ export function useTeacherClasses(teacherId: number | null) {
     queryKey: ["teacher-classes", teacherId],
     queryFn: async () => {
       if (!teacherId) return [];
-      return apiClient<any[]>(`api/auth/classes/teachers/${teacherId}`);
+      const res = await apiClient<ClassEntity[]>(
+        `api/auth/classes/teachers/${teacherId}`
+      );
+
+      return res.data;
     },
     enabled: !!teacherId,
     staleTime: 5 * 60 * 1000,

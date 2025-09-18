@@ -1,111 +1,99 @@
 // hooks/useAuth.ts - FIXED VERSION
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-
+import apiClient from '@/lib/axios';
+import { useQuery } from '@tanstack/react-query';
+async function validateToken(token: string): Promise<boolean> {
+    const res = await apiClient.get('/auth/validate', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return res.status === 200;
+}
+type UserData = {
+    id: number;
+    username: string;
+    email: string;
+    roles: string[];
+    // bổ sung các field khác nếu có
+};
 export const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<UserData | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
+
     const router = useRouter();
-    const pathname = usePathname(); // Sử dụng usePathname cho App Router
+    const pathname = usePathname();
 
-    // Hàm validate token với Spring Boot backend
-    const validateToken = async (token: string): Promise<boolean> => {
-        try {
-            const response = await fetch('http://localhost:8080/api/auth/validate', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-            return response.ok;
-        } catch (error) {
-            console.error('Token validation failed:', error);
-            return false;
-        }
-    };
-
-    const redirectUser = (userData: any, role?: string) => {
-        const currentPath = pathname;
-        const shouldRedirect = ['/login', '/register', '/'].includes(currentPath);
-
-        if (shouldRedirect) {
-            if (role) {
-                router.replace(`/dashboard/${role}`);
-            } else {
-                if (userData.roles && userData.roles.length > 1) {
-                    router.replace('/select-role');
-                } else if (userData.roles && userData.roles.length === 1) {
-                    const userRole = userData.roles[0].toLowerCase();
-                    localStorage.setItem('role', userRole);
-                    setUserRole(userRole);
-                    router.replace(`/dashboard/${userRole}`);
-                }
-            }
-        }
-    };
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const token = localStorage.getItem('accessToken');
-                const userData = localStorage.getItem('user');
-                const role = localStorage.getItem('role');
-
-                if (token && userData) {
-                    const isValid = await validateToken(token);
-                    if (isValid) {
-                        const userObj = JSON.parse(userData);
-                        setIsAuthenticated(true);
-                        setUser(userObj);
-                        setUserRole(role);
-                        redirectUser(userObj, role);
-                    } else {
-                        clearAuthData();
-                        setIsAuthenticated(false);
-                    }
-                } else {
-                    setIsAuthenticated(false);
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                clearAuthData();
-                setIsAuthenticated(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        checkAuth();
-    }, [pathname, router]); // Thêm dependencies
-
-    const clearAuthData = () => {
+    const clearAuthData = useCallback(() => {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('user');
         localStorage.removeItem('role');
         setUser(null);
         setUserRole(null);
-    };
+        setIsAuthenticated(false);
+    }, []);
+
+    const redirectUser = useCallback((userData: UserData, role?: string) => {
+        const shouldRedirect = ['/login', '/register', '/'].includes(pathname);
+        if (!shouldRedirect) return;
+
+        if (role) {
+            router.replace(`/dashboard/${role}`);
+        } else {
+            if (userData.roles?.length > 1) {
+                router.replace('/select-role');
+            } else if (userData.roles?.length === 1) {
+                const r = userData.roles[0].toLowerCase();
+                localStorage.setItem('role', r);
+                setUserRole(r);
+                router.replace(`/dashboard/${r}`);
+            }
+        }
+    }, [pathname, router]);
+
+
+    const { isLoading: loading } = useQuery({
+        queryKey: ['auth', typeof window !== 'undefined' && localStorage.getItem('accessToken')],
+        queryFn: async () => {
+            const token = localStorage.getItem('accessToken');
+            const userData = localStorage.getItem('user');
+            const role = localStorage.getItem('role');
+
+            if (!token || !userData) throw new Error('No token or user');
+
+            const valid = await validateToken(token);
+            if (!valid) throw new Error('Token invalid');
+
+            const parsedUser: UserData = JSON.parse(userData);
+            setUser(parsedUser);
+            setUserRole(role);
+            setIsAuthenticated(true);
+            redirectUser(parsedUser, role || undefined);
+            return parsedUser;
+        },
+        onError: () => {
+            clearAuthData();
+        },
+        retry: false, // không retry khi token invalid
+    });
 
     const login = (userData: any) => {
         localStorage.setItem('accessToken', userData.accessToken);
         localStorage.setItem('user', JSON.stringify(userData));
-
         setIsAuthenticated(true);
         setUser(userData);
 
-        if (userData.roles && userData.roles.length === 1) {
-            const role = userData.roles[0].toLowerCase();
-            localStorage.setItem('role', role);
-            setUserRole(role);
+        if (userData.roles?.length === 1) {
+            const r = userData.roles[0].toLowerCase();
+            localStorage.setItem('role', r);
+            setUserRole(r);
         }
     };
 
     const logout = () => {
         clearAuthData();
-        setIsAuthenticated(false);
         router.push('/login');
     };
 
@@ -115,6 +103,6 @@ export const useAuth = () => {
         user,
         userRole,
         login,
-        logout
+        logout,
     };
 };

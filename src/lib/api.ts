@@ -6,7 +6,6 @@ import { mapBackendToFormData } from "@/untils/utils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-// Create Axios instance
 export const apiClient = axios.create({
     baseURL: API_BASE,
     withCredentials: true,
@@ -94,7 +93,7 @@ export async function callGenerateAPI(params: {
 
         console.log("API Response:", res);
 
-        const { questions, ...rest } = mapBackendToFormData(res);
+        const { questions, ...rest } = mapBackendToFormData(res.data);
         useQuizzStorage.getState().setData({
             ...useQuizzStorage.getState().data,
             questions,

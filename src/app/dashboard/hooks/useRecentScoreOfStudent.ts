@@ -13,7 +13,10 @@ export interface RecentScore {
 export function useRecentScoreOfStudent() {
     return useQuery<RecentScore[]>({
         queryKey: ["recent-scores"],
-        queryFn: () => apiClient<RecentScore[]>(`/api/student/recent-scores`),
+        queryFn: async () => {
+            const res = await apiClient.get<RecentScore[]>(`/api/student/recent-scores`);
+            return res;
+        },
         staleTime: 1000 * 60 * 5,
     });
 }

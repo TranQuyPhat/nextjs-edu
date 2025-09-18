@@ -14,9 +14,9 @@ export function useQuizzesQuery() {
         queryFn: () => {
             return fetchQuizzesByTeacher();
         },
-        select: (rows): QuizCard[] => rows.map(toQuizCard),
+        select: (rows) => rows.map(toQuizCard),
         placeholderData: keepPreviousData,
-        staleTime: 5 * 60 * 1000, // Cache 5 phút
+        staleTime: 5 * 60 * 1000,
         retry: 3,
     });
 }

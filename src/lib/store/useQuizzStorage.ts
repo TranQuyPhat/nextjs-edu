@@ -9,6 +9,8 @@ type QuizzStore = {
 };
 
 const defaultData: QuizzFormData = {
+    className: "",
+    subject: "",
     title: "",
     classId: 0,
     startDate: "",

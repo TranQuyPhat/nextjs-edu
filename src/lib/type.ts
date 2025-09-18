@@ -22,7 +22,19 @@ export type ApiResp<T> = {
     timestamp: number;
 };
 
-
+export interface ClassEntity {
+    id: number;
+    className: string;
+    createdAt: string;
+    description: string;
+    joinMode: string;
+    schoolYear: number;
+    semester: string;
+    slackInviteLink: string | null;
+    subject: { id: number; name: string };
+    teacher: { id: number; fullName: string };
+    updatedAt: string | null;
+}export type ClassesResponse = ApiResp<ClassEntity[]>;
 export interface PageResponse<T> {
     content: T[];
     totalElements: number;

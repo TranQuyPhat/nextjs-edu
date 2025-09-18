@@ -39,15 +39,14 @@ type Actions = {
     getBackendSettings: () => AiQuizSettings;
 };
 
-const defaultSettings: Settings = {
-    generationMode: "GENERATE",
-    language: "Tiếng Việt",
-    questionType: "Multiple Choice",
-    difficulty: "Medium",
-    mode: "Quiz",
-    task: "Generate Quiz",
-    numberOfQuestions: 10,
-    title: "",
+const defaultSettings: AiQuizSettings = {
+    language: "",
+    questionType: "",
+    difficulty: "",
+    studyMode: "",
+    userPrompt: "",
+    numQuestions: 0,
+    quizTitle: "",
 };
 
 export const useQuizStore = create<State & Actions>((set, get) => ({
@@ -143,7 +142,7 @@ export const useQuizStore = create<State & Actions>((set, get) => ({
         set((s) => {
             if (!s.quiz) return {};
             const updated = s.quiz.questions.map((q) => {
-                if (q.id !== qid || q.type !== "multiple_choice") return q;
+                if (q.id !== qid || q.questionType !== "multiple_choice") return q;
                 return { ...q, options: q.options.filter((o) => o.id !== optionId) };
             });
             return { quiz: { ...s.quiz, questions: updated }, hasUnsavedChanges: true };
@@ -174,11 +173,11 @@ export const useQuizStore = create<State & Actions>((set, get) => ({
 
         return {
             numQuestions: s.numQuestions,
-            quizTitle: s.title || "",
+            quizTitle: s.quizTitle || "",
             language: language || "Tiếng Việt",
             questionType: (questionTypeMap[s.questionType] ?? s.questionType) as any,
             difficulty: (difficultyMap[s.difficulty] ?? s.difficulty) as any,
-            studyMode: (studyModeMap[s.mode] ?? s.mode) as any,
+            studyMode: (studyModeMap[s.studyMode] ?? s.studyMode) as any,
             userPrompt: "",
         };
     },

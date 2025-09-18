@@ -37,6 +37,8 @@ export default function QuizPage() {
   const id = params.id;
 
   const { data: quiz, isLoading, error, refetch, isFetching } = useQuiz(id);
+  console.log("quiz :", quiz);
+
   const [quizAnswers, setQuizAnswers] = useState<
     Record<number, string | string[]>
   >({});

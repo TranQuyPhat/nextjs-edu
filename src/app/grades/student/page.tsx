@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useStudentResult } from "../hooks/useTeacherRanking";
 import { fetchStudentDashboard } from "@/services/dashboardService";
+import Loading from "@/components/loading";
 interface OverallStats {
   totalAssignments: number;
   completedAssignments: number;
@@ -76,7 +77,7 @@ export default function GradesPage() {
   //   },
   // ])
 
-const [overallStats, setOverallStats] = useState<OverallStats>({
+  const [overallStats, setOverallStats] = useState<OverallStats>({
     totalAssignments: 0,
     completedAssignments: 0,
     averageGrade: 0,
@@ -84,15 +85,14 @@ const [overallStats, setOverallStats] = useState<OverallStats>({
   });
 
   useEffect(() => {
-    fetchStudentDashboard()
-      .then((data: any) => {
-        setOverallStats({
-          totalAssignments: data.totalAssignments,
-          completedAssignments: data.completedAssignments,
-          averageGrade: data.avgScore,
-          improvement: "0.3", // mặc định
-        });
+    fetchStudentDashboard().then((data: any) => {
+      setOverallStats({
+        totalAssignments: data.totalAssignments,
+        completedAssignments: data.completedAssignments,
+        averageGrade: data.avgScore,
+        improvement: "0.3", // mặc định
       });
+    });
   }, []);
 
   useEffect(() => {
@@ -134,7 +134,7 @@ const [overallStats, setOverallStats] = useState<OverallStats>({
   };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   const OverviewTab = () => (

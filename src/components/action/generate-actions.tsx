@@ -74,17 +74,13 @@ export function GenerateActions() {
       setGenerating(true);
 
       const { settings, getBackendSettings } = useQuizStore.getState();
-      console.log("Form settings (UI):", settings);
-
       const aiQuizSettings = getBackendSettings();
-      console.log("Form settings (Backend format):", aiQuizSettings);
-
       await callGenerateAPI({
         file: realFile,
         settings: aiQuizSettings,
       });
 
-      router.push("quizzPreview");
+      router.push("preview?mode=create");
     } catch (err: any) {
       console.error("Generate quiz error:", err);
       toast.error(err?.message ?? "Không thể tạo quiz. Thử lại sau.");

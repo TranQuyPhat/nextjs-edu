@@ -42,7 +42,7 @@ export function useQuizzesQuery() {
 }
 
 
-export function useQuiz(id: string | number | undefined) {
+export function useQuiz(id: string | number | null | undefined) {
     return useQuery({
         queryKey: ["quiz", String(id)],
         enabled: !!id,
@@ -50,6 +50,8 @@ export function useQuiz(id: string | number | undefined) {
         queryFn: async () => {
             if (!id) throw new Error("ID bài quiz không hợp lệ");
             const res = await apiClient.get<ApiResp<QuizDetail>>(`api/quizzes/${id}`);
+            console.log('res :', res.data);
+
             if (!res.success || !res.data) throw new Error(res.message || "Không có dữ liệu bài quiz");
             return res.data;
         },
@@ -112,19 +114,20 @@ export function useQuizQuestionsPage(
 
 // ==== Mutations ====
 export function useApproveQuiz() {
-  return useMutation({
-    mutationFn: async (quizData: any) => {
-      const res = await apiClient.post<ApiResp<any>>("api/quizzes", quizData);
+    return useMutation({
+        mutationFn: async (quizData: any) => {
+            const res = await apiClient.post<any>("api/quizzes", quizData);
+            console.log('res :', res);
 
-      if (!res.data.success) {
-        const error: any = new Error(res.data.message || "Lỗi khi duyệt quiz");
-        error.response = { data: res.data };
-        throw error;
-      }
+            if (!res.success) {
+                const error: any = new Error(res.message || "Lỗi khi duyệt quiz");
+                error.response = { data: res.data };
+                throw error;
+            }
 
-      return res.data; // đây mới là payload chuẩn
-    },
-  });
+            return res.data; // đây mới là payload chuẩn
+        },
+    });
 }
 
 
@@ -150,7 +153,6 @@ export interface QuizContentUpdateDTO {
     replaceAll?: boolean;
 }
 
-// ==== Enhanced mutation hooks ====
 export function useUpdateQuizMeta(id: number) {
     const qc = useQueryClient();
     return useMutation({
@@ -159,7 +161,6 @@ export function useUpdateQuizMeta(id: number) {
             return res.data;
         },
         onSuccess: (data) => {
-            // Update cache optimistically
             qc.setQueryData(["quiz", String(id)], data);
             qc.invalidateQueries({ queryKey: ["quizzes"] });
         },
@@ -172,7 +173,7 @@ export function useReplaceQuizContent(id: number) {
         mutationFn: async (payload: QuizContentUpdateDTO) => {
             const res = await apiClient.put<ApiResp<QuizDetail>>(`api/quizzes/${id}/content`, {
                 ...payload,
-                replaceAll: true
+                replaceAll: false
             });
             return res.data;
         },

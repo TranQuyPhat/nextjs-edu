@@ -13,13 +13,14 @@ import { ConfirmLeaveDialog } from "@/components/shared/confirm-leave-dialog";
 import { useQuizzStorage } from "@/lib/store/useQuizzStorage";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  useApproveQuiz,
   useUpdateQuizMeta,
   useCreateQuiz,
   useQuiz,
   useReplaceQuizContent,
+  QuizQuestion,
 } from "../../hook/quiz-hooks";
 import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function QuizEditPage() {
   const router = useRouter();
@@ -29,38 +30,45 @@ export default function QuizEditPage() {
   const mode = searchParams.get("mode") || "create"; // default to create
   const quizId = searchParams.get("id");
 
-  // Fetch quiz data when in edit mode
   const { data: quizData, isLoading } = useQuiz(
     mode === "edit" ? quizId : undefined
   );
-
-  // Set quiz data to storage when fetched in edit mode
   useEffect(() => {
     if (mode === "edit" && quizData) {
       setData(quizData);
     }
   }, [mode, quizData, setData]);
-
-  const approveMutation = useApproveQuiz();
+  const queryClient = useQueryClient();
   const createMutation = useCreateQuiz();
   const updateMetaMutation = useUpdateQuizMeta(Number(quizId));
   const replaceContentMutation = useReplaceQuizContent(Number(quizId));
 
+  const [editedQuestions, setEditedQuestions] = useState<QuizQuestion[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Determine which mutation to use based on mode
+  const handleQuestionEdit = (updatedQuestion: QuizQuestion) => {
+    setEditedQuestions((prev: QuizQuestion[]) => {
+      const exists = prev.find((q) => q.id === updatedQuestion.id);
+      if (exists) {
+        return prev.map((q) =>
+          q.id === updatedQuestion.id ? updatedQuestion : q
+        );
+      }
+      return [...prev, updatedQuestion];
+    });
+  };
+
   const currentMutation = useMemo(() => {
     switch (mode) {
       case "edit":
         return {
-          mutate: async (data: any) => {
-            // Split data into meta and content
+          mutate: async (data) => {
             const {
               title,
               classId,
               timeLimit,
               description,
-              questions,
+              // questions,
               ...rest
             } = data;
 
@@ -71,8 +79,12 @@ export default function QuizEditPage() {
               description,
             });
 
-            if (questions && questions.length > 0) {
-              await replaceContentMutation.mutateAsync({ questions });
+            // Chỉ gửi các câu hỏi đã chỉnh sửa
+            if (editedQuestions.length > 0) {
+              await replaceContentMutation.mutateAsync({
+                questions: editedQuestions,
+                replaceAll: false,
+              });
             }
           },
           isPending:
@@ -81,15 +93,15 @@ export default function QuizEditPage() {
       case "create":
         return createMutation;
       default:
-        return approveMutation;
+        return createMutation;
     }
   }, [
     mode,
     createMutation,
-    approveMutation,
     updateMetaMutation,
     replaceContentMutation,
     quizId,
+    editedQuestions,
   ]);
 
   const title = useMemo(() => {
@@ -120,40 +132,56 @@ export default function QuizEditPage() {
   }
 
   async function onPrimaryAction() {
-    const mutation = currentMutation;
-    const payload = mode === "edit" ? { ...quiz, id: quizId } : quiz;
-
-    mutation.mutate(payload, {
-      onSuccess: (result) => {
-        switch (mode) {
-          case "edit":
-            toast("Cập nhật quiz thành công");
-            break;
-          case "create":
-            toast("Tạo quiz thành công");
-            break;
-          default:
-            toast("Duyệt quiz thành công");
+    if (mode === "edit") {
+      try {
+        // Update meta first
+        await updateMetaMutation.mutateAsync({
+          title: quiz.title,
+          classId: quiz.classId,
+          timeLimit: Number(quiz.timeLimit),
+          description: quiz.description,
+        });
+        // Then update questions if any edited
+        if (editedQuestions.length > 0) {
+          await replaceContentMutation.mutateAsync({
+            questions: editedQuestions,
+            replaceAll: false,
+          });
         }
-        // useQuizzStorage.getState().reset();
+        toast("Cập nhật quiz thành công");
         router.push("/quizzes/teacher");
-      },
-      onError: (error) => {
-        switch (mode) {
-          case "edit":
-            console.error("Cập nhật quiz thất bại:", error);
-            toast.error("Cập nhật quiz thất bại");
-            break;
-          case "create":
-            console.error("Tạo quiz thất bại:", error);
-            toast.error("Tạo quiz thất bại");
-            break;
-          default:
-            console.error("Gửi quiz thất bại:", error);
-            toast.error("Gửi quiz thất bại");
-        }
-      },
-    });
+      } catch (error) {
+        console.error("Cập nhật quiz thất bại:", error);
+        toast.error("Cập nhật quiz thất bại");
+      }
+    } else {
+      const mutation = currentMutation;
+      const payload = quiz;
+      mutation.mutate(payload, {
+        onSuccess: (result) => {
+          switch (mode) {
+            case "create":
+              toast("Tạo quiz thành công");
+              break;
+            default:
+              toast("Duyệt quiz thành công");
+          }
+          queryClient.invalidateQueries(["quizzes", "teacher"]);
+          router.push("/quizzes/teacher");
+        },
+        onError: (error) => {
+          switch (mode) {
+            case "create":
+              console.error("Tạo quiz thất bại:", error);
+              toast.error("Tạo quiz thất bại");
+              break;
+            default:
+              console.error("Gửi quiz thất bại:", error);
+              toast.error("Gửi quiz thất bại");
+          }
+        },
+      });
+    }
   }
 
   const primaryButtonConfig = useMemo(() => {
@@ -318,7 +346,9 @@ export default function QuizEditPage() {
                   <Label>ID lớp</Label>
                   <Input
                     value={quiz?.classId || ""}
-                    onChange={(e) => setData({ classId: e.target.value })}
+                    onChange={(e) =>
+                      setData({ classId: Number(e.target.value) })
+                    }
                     className={`${inputColorClass} mt-2`}
                     disabled={mode === "edit"} // Disable class ID editing in edit mode
                   />
@@ -354,7 +384,11 @@ export default function QuizEditPage() {
               </CardHeader>
               <CardContent>
                 <Separator className="mb-6" />
-                <QuizEditor />
+                {mode === "edit" ? (
+                  <QuizEditor onQuestionEdit={handleQuestionEdit} />
+                ) : (
+                  <QuizEditor />
+                )}
               </CardContent>
             </Card>
           </div>
@@ -364,11 +398,6 @@ export default function QuizEditPage() {
       <ConfirmLeaveDialog
         open={showConfirm}
         onCancel={() => setShowConfirm(false)}
-        onConfirm={() => {
-          setShowConfirm(false);
-          reset();
-          router.back();
-        }}
       />
     </main>
   );

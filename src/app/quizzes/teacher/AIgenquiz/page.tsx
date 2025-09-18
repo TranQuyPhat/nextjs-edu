@@ -21,7 +21,6 @@ import { Leaf, Sparkles } from "lucide-react";
 import { useQuizStore } from "@/lib/store/quizStore";
 import { useQuizzStorage } from "@/lib/store/useQuizzStorage";
 import { useTour } from "@reactour/tour";
-import { useTeacherClasses } from "../../hook/useTeacherClasses";
 import {
   Select,
   SelectContent,
@@ -31,9 +30,13 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import {
+  fetchTeacherClasses,
+  useTeacherClasses,
+} from "../../hook/useTeacherClasses";
 function toOffsetDateTime(localDateTime: string) {
   if (!localDateTime) return "";
-  return localDateTime + ":00Z"; 
+  return localDateTime + ":00Z";
 }
 export default function HomePage() {
   const { setIsOpen } = useTour();
@@ -45,21 +48,22 @@ export default function HomePage() {
   const userId = userStr ? JSON.parse(userStr).userId : null;
 
   const { data: classes = [], isLoading } = useTeacherClasses(userId);
-function toInputDateTime(val?: string) {
-  if (!val) return "";
-  // Nếu có dạng YYYY-MM-DDTHH:MM:SSZ thì cắt bỏ phần giây và Z
-  return val.replace(/:00Z$/, "");
-}
-const handleChange = (
-  e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-) => {
-  const { name, value } = e.target;
-  if (name === "startDate" || name === "endDate") {
-    setData({ [name]: toOffsetDateTime(value) });
-  } else {
-    setData({ [name]: value });
+  console.log("classes :", classes);
+  function toInputDateTime(val?: string) {
+    if (!val) return "";
+    // Nếu có dạng YYYY-MM-DDTHH:MM:SSZ thì cắt bỏ phần giây và Z
+    return val.replace(/:00Z$/, "");
   }
-};
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    if (name === "startDate" || name === "endDate") {
+      setData({ [name]: toOffsetDateTime(value) });
+    } else {
+      setData({ [name]: value });
+    }
+  };
   return (
     <main className="min-h-dvh bg-white">
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
@@ -186,25 +190,23 @@ const handleChange = (
                       onChange={handleChange}
                     />
                   </div>
-
-                  
                 </div>
-<div className="space-y-1">
-                    <label
-                      className="text-sm font-medium text-muted-foreground"
-                      htmlFor="timeLimit"
-                    >
-                      Thời gian (phút)
-                    </label>
-                    <Input
-                      id="timeLimit"
-                      type="number"
-                      name="timeLimit"
-                      value={data.timeLimit || ""}
-                      placeholder="VD: 45"
-                      onChange={handleChange}
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label
+                    className="text-sm font-medium text-muted-foreground"
+                    htmlFor="timeLimit"
+                  >
+                    Thời gian (phút)
+                  </label>
+                  <Input
+                    id="timeLimit"
+                    type="number"
+                    name="timeLimit"
+                    value={data.timeLimit || ""}
+                    placeholder="VD: 45"
+                    onChange={handleChange}
+                  />
+                </div>
                 <div className="space-y-1">
                   <label
                     className="text-sm font-medium text-muted-foreground"

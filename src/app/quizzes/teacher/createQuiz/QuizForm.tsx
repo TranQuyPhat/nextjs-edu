@@ -105,11 +105,13 @@ export function QuizFormm({
                   <SelectValue placeholder="Chọn lớp học" />
                 </SelectTrigger>
                 <SelectContent>
-                  {classOptions.map((cls) => (
-                    <SelectItem key={cls.id} value={cls.id.toString()}>
-                      {cls.className}
-                    </SelectItem>
-                  ))}
+                  {(Array.isArray(classOptions) ? classOptions : []).map(
+                    (cls) => (
+                      <SelectItem key={cls.id} value={cls.id.toString()}>
+                        {cls.className}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             )}

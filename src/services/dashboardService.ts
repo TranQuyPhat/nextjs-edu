@@ -4,7 +4,14 @@ import {
   TeacherDashboardResponse,
   StudentDashboardResponse,
 } from "@/types/dashboard";
-
+import { useQuery } from "@tanstack/react-query";
+export const useTeacherDashboard = (enabled: boolean = true) => {
+  return useQuery<TeacherDashboardResponse, Error>({
+    queryKey: ["teacher-dashboard"],
+    queryFn: fetchTeacherDashboard,
+    staleTime: 1000 * 60, // optional: cache 1 phút
+  });
+};
 // Lấy dashboard cho giáo viên
 export async function fetchTeacherDashboard(): Promise<TeacherDashboardResponse> {
   const res = await apiClient.get<TeacherDashboardResponse>(

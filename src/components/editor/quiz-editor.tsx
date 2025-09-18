@@ -20,7 +20,11 @@ import { useQuizzStorage } from "@/lib/store/useQuizzStorage";
 import { Question } from "@/types/quiz.type";
 import QuestionCard from "./question-card";
 
-export function QuizEditor() {
+interface QuizEditorProps {
+  onQuestionEdit?: (updatedQuestion: Question) => void;
+}
+
+export function QuizEditor({ onQuestionEdit }: QuizEditorProps) {
   const { data, setData } = useQuizzStorage();
 
   const items = data?.questions ?? [];
@@ -43,6 +47,9 @@ export function QuizEditor() {
       i === index ? updatedQuestion : q
     );
     setData({ questions: updatedQuestions });
+    if (onQuestionEdit) {
+      onQuestionEdit(updatedQuestion);
+    }
   };
   return (
     <div className="space-y-6">

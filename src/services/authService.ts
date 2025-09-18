@@ -32,7 +32,6 @@ export const authService = {
   requestForgotOtp: async (email: string): Promise<void> => {
     await apiClient.post("/auth/password/forgot/request-otp", { email });
   },
-
   verifyForgotOtp: async (data: { email: string; otp: string }): Promise<{ resetToken: string }> => {
     const res = await apiClient.post("/auth/password/forgot/verify-otp", data);
     return res.data;
