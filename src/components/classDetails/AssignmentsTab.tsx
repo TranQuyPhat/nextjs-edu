@@ -1039,7 +1039,9 @@ export const AssignmentsTab = ({
                                             </span>
                                             <div className="flex items-center space-x-2">
                                               <FileText className="h-4 w-4" />
-                                              <span>
+                                              <span 
+                                              className="text-blue-600 cursor-pointer hover:underline"
+                                              onClick={() => handleViewFile(userSubmission.filePath, userSubmission.fileType)}>
                                                 {userSubmission.fileName}
                                               </span>
                                               <span className="text-gray-500">
