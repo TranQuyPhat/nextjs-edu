@@ -23,8 +23,14 @@ import {
 import { useRouter } from "next/navigation";
 import { fetchTeacherDashboard } from "@/services/dashboardService";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { useTeacherRanking } from "@/app/grades/hooks/useTeacherRanking";
 
 export default function TeacherDashboard() {
+  const {
+    data: rankingData = [],
+    isLoading: rankingLoading,
+    error: rankingError,
+  } = useTeacherRanking();
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +45,13 @@ export default function TeacherDashboard() {
     recentActivities: any[];
     upcomingDeadlinesTeacher: any[];
     topPerformers: any[];
+    gradeDistribution?: {
+      xuatSac: number;
+      gioi: number;
+      kha: number;
+      canCaiThien: number;
+      totalStudents: number;
+    };
   }>({
     totalClasses: 0,
     totalStudents: 0,
@@ -47,12 +60,20 @@ export default function TeacherDashboard() {
     averageGrade: 8.6,
     recentActivities: [],
     upcomingDeadlinesTeacher: [],
-    topPerformers: [
-      { name: "Nguyễn Thị Mai", class: "Toán 12A1", grade: 9.5 },
-      { name: "Trần Văn Hùng", class: "Toán 12A1", grade: 9.2 },
-      { name: "Lê Thị Hoa", class: "Toán 12A2", grade: 9.0 },
-    ],
+    gradeDistribution: {
+      xuatSac: 0,
+      gioi: 0,
+      kha: 0,
+      canCaiThien: 0,
+      totalStudents: 0,
+    },
+    topPerformers: [],
   });
+  console.log("dashboardData :", dashboardData);
+
+  const total = dashboardData.gradeDistribution?.totalStudents ?? 0;
+  const percent = (value: number) =>
+    total > 0 ? `${((value * 100) / total).toFixed(0)}%` : "0%";
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -78,6 +99,7 @@ export default function TeacherDashboard() {
           averageGrade: data.averageGrade,
           recentActivities: data.recentActivities,
           upcomingDeadlinesTeacher: data.upcomingDeadlinesTeacher,
+          gradeDistribution: data.gradeDistribution,
           // topPerformers: data.topPerformers ?? prev.topPerformers,
         }));
         setLoading(false);
@@ -173,295 +195,265 @@ export default function TeacherDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {" "}
-          {/* Left Column */}{" "}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
-            {" "}
-            {/* Quick Actions */}{" "}
+            {/* Quick Actions */}
             <Card>
-              {" "}
               <CardHeader>
-                {" "}
-                <CardTitle>Thao tác nhanh</CardTitle>{" "}
-              </CardHeader>{" "}
+                <CardTitle>Thao tác nhanh</CardTitle>
+              </CardHeader>
               <CardContent>
-                {" "}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {" "}
                   <Link href="#">
-                    {" "}
                     <Button className="w-full h-20 flex flex-col gap-2">
-                      {" "}
-                      <Plus className="h-5 w-5" />{" "}
-                      <span className="text-xs">Tạo bài tập</span>{" "}
-                    </Button>{" "}
-                  </Link>{" "}
+                      <Plus className="h-5 w-5" />
+                      <span className="text-xs">Tạo bài tập</span>
+                    </Button>
+                  </Link>
                   <Link href="/classes/teacher">
-                    {" "}
                     <Button
                       variant="outline"
                       className="w-full h-20 flex flex-col gap-2 bg-transparent"
                     >
-                      {" "}
-                      <BookOpen className="h-5 w-5" />{" "}
-                      <span className="text-xs">Quản lý lớp</span>{" "}
-                    </Button>{" "}
-                  </Link>{" "}
+                      <BookOpen className="h-5 w-5" />
+                      <span className="text-xs">Quản lý lớp</span>
+                    </Button>
+                  </Link>
                   <Link href="/grades/teacher">
-                    {" "}
                     <Button
                       variant="outline"
                       className="w-full h-20 flex flex-col gap-2 bg-transparent"
                     >
-                      {" "}
-                      <Award className="h-5 w-5" />{" "}
-                      <span className="text-xs">Xem điểm</span>{" "}
-                    </Button>{" "}
-                  </Link>{" "}
+                      <Award className="h-5 w-5" />
+                      <span className="text-xs">Xem điểm</span>
+                    </Button>
+                  </Link>
                   <Link href="/quizzes/teacher">
-                    {" "}
                     <Button
                       variant="outline"
                       className="w-full h-20 flex flex-col gap-2 bg-transparent"
                     >
-                      {" "}
-                      <Target className="h-5 w-5" />{" "}
-                      <span className="text-xs">Tạo quiz</span>{" "}
-                    </Button>{" "}
-                  </Link>{" "}
-                </div>{" "}
-              </CardContent>{" "}
-            </Card>{" "}
-            {/* Recent Activities */}{" "}
+                      <Target className="h-5 w-5" />
+                      <span className="text-xs">Tạo quiz</span>
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Recent Activities */}
             <Card>
-              {" "}
               <CardHeader>
-                {" "}
-                <CardTitle>Hoạt động gần đây</CardTitle>{" "}
-              </CardHeader>{" "}
+                <CardTitle>Hoạt động gần đây</CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
-                {" "}
                 {dashboardData.recentActivities.map((activity, index) => (
                   <div
                     key={activity.id ?? index}
                     className="flex items-start space-x-3"
                   >
-                    {" "}
                     <div className="flex-shrink-0">
-                      {" "}
                       {activity.type === "submission" && (
                         <FileText className="h-5 w-5 text-blue-500" />
-                      )}{" "}
+                      )}
                       {activity.type === "grade" && (
                         <Award className="h-5 w-5 text-green-500" />
-                      )}{" "}
+                      )}
                       {activity.type === "question" && (
                         <AlertCircle className="h-5 w-5 text-orange-500" />
-                      )}{" "}
-                    </div>{" "}
+                      )}
+                    </div>
                     <div className="flex-1">
-                      {" "}
-                      <p className="text-sm font-medium">
-                        {activity.message}
-                      </p>{" "}
+                      <p className="text-sm font-medium">{activity.message}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        {" "}
                         <Badge variant="outline" className="text-xs">
-                          {" "}
-                          {activity.className}{" "}
-                        </Badge>{" "}
+                          {activity.className}
+                        </Badge>
                         <span className="text-xs text-muted-foreground">
-                          {" "}
-                          {activity.time}{" "}
-                        </span>{" "}
-                      </div>{" "}
-                    </div>{" "}
+                          {activity.time}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                ))}{" "}
-              </CardContent>{" "}
-            </Card>{" "}
-            {/* Upcoming Deadlines */}{" "}
+                ))}
+              </CardContent>
+            </Card>
+            {/* Upcoming Deadlines */}
             <Card>
-              {" "}
               <CardHeader>
-                {" "}
                 <CardTitle className="flex items-center gap-2">
-                  {" "}
-                  <Calendar className="h-5 w-5" /> Hạn nộp sắp tới{" "}
-                </CardTitle>{" "}
-              </CardHeader>{" "}
+                  <Calendar className="h-5 w-5" /> Hạn nộp sắp tới
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
-                {" "}
                 {dashboardData.upcomingDeadlinesTeacher.map((deadline) => (
                   <div key={deadline.id} className="border rounded-lg p-4">
-                    {" "}
                     <div className="flex justify-between items-start mb-2">
-                      {" "}
                       <div>
-                        {" "}
-                        <h4 className="font-medium">{deadline.title}</h4>{" "}
-                        <Badge variant="outline">{deadline.className}</Badge>{" "}
-                      </div>{" "}
+                        <h4 className="font-medium">{deadline.title}</h4>
+                        <Badge variant="outline">{deadline.className}</Badge>
+                      </div>
                       <span className="text-sm text-muted-foreground">
-                        {" "}
-                        {deadline.dueDate}{" "}
-                      </span>{" "}
-                    </div>{" "}
+                        {deadline.dueDate}
+                      </span>
+                    </div>
                     <div className="space-y-2">
-                      {" "}
                       <div className="flex justify-between text-sm">
-                        {" "}
                         <span>
-                          {" "}
                           Đã nộp: {deadline.submittedCount}/
-                          {deadline.totalStudents}{" "}
-                        </span>{" "}
+                          {deadline.totalStudents}
+                        </span>
                         <span>
-                          {" "}
                           {Math.round(
                             (deadline.submittedCount / deadline.totalStudents) *
                               100
-                          )}{" "}
-                          %{" "}
-                        </span>{" "}
-                      </div>{" "}
+                          )}
+                          %
+                        </span>
+                      </div>
                       <Progress
                         value={
                           (deadline.submittedCount / deadline.totalStudents) *
                           100
                         }
-                      />{" "}
-                    </div>{" "}
+                      />
+                    </div>
                   </div>
-                ))}{" "}
-              </CardContent>{" "}
-            </Card>{" "}
-          </div>{" "}
-          {/* Right Column */}{" "}
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          {/* Right Column */}
           <div className="space-y-6">
-            {" "}
-            {/* Performance Overview */}{" "}
+            {/* Performance Overview */}
             <Card>
-              {" "}
               <CardHeader>
-                {" "}
                 <CardTitle className="flex items-center gap-2">
-                  {" "}
-                  <TrendingUp className="h-5 w-5" /> Tổng quan thành tích{" "}
-                </CardTitle>{" "}
-              </CardHeader>{" "}
+                  <TrendingUp className="h-5 w-5" /> Tổng quan thành tích
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-4">
-                {" "}
-                <div className="text-center">
-                  {" "}
-                  <div className="text-3xl font-bold text-blue-600">
-                    {" "}
-                    {dashboardData.averageGrade}{" "}
-                  </div>{" "}
-                  <p className="text-sm text-muted-foreground">
-                    {" "}
-                    Điểm trung bình chung{" "}
-                  </p>{" "}
-                </div>{" "}
                 <div className="space-y-2">
-                  {" "}
                   <div className="flex justify-between text-sm">
-                    {" "}
-                    <span>Xuất sắc (≥9.0)</span>{" "}
-                    <span className="font-medium">25%</span>{" "}
-                  </div>{" "}
-                  <div className="flex justify-between text-sm">
-                    {" "}
-                    <span>Giỏi (8.0-8.9)</span>{" "}
-                    <span className="font-medium">45%</span>{" "}
-                  </div>{" "}
-                  <div className="flex justify-between text-sm">
-                    {" "}
-                    <span>Khá (6.5-7.9)</span>{" "}
-                    <span className="font-medium">25%</span>{" "}
-                  </div>{" "}
-                  <div className="flex justify-between text-sm">
-                    {" "}
-                    <span>Cần cải thiện</span>{" "}
-                    <span className="font-medium">5%</span>{" "}
-                  </div>{" "}
-                </div>{" "}
-              </CardContent>{" "}
-            </Card>{" "}
-            {/* Top Performers */}{" "}
-            <Card>
-              {" "}
-              <CardHeader>
-                {" "}
-                <CardTitle className="flex items-center gap-2">
-                  {" "}
-                  <Award className="h-5 w-5" /> Học sinh xuất sắc{" "}
-                </CardTitle>{" "}
-              </CardHeader>{" "}
-              <CardContent className="space-y-3">
-                {" "}
-                {dashboardData.topPerformers.map((student, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between"
-                  >
-                    {" "}
-                    <div>
-                      {" "}
-                      <p className="font-medium">{student.name}</p>{" "}
-                      <p className="text-sm text-muted-foreground">
-                        {" "}
-                        {student.class}{" "}
-                      </p>{" "}
-                    </div>{" "}
-                    <Badge className="bg-green-500">{student.grade}</Badge>{" "}
+                    <span>Xuất sắc (≥9.0)</span>
+                    <span className="font-medium">
+                      {percent(dashboardData.gradeDistribution?.xuatSac ?? 0)}
+                    </span>
                   </div>
-                ))}{" "}
-                <Link href="/grades/teacher">
-                  {" "}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-2 bg-transparent"
-                  >
-                    {" "}
-                    <Eye className="h-4 w-4 mr-2" /> Xem tất cả{" "}
-                  </Button>{" "}
-                </Link>{" "}
-              </CardContent>{" "}
-            </Card>{" "}
-            {/* Quick Stats */}{" "}
+
+                  <div className="flex justify-between text-sm">
+                    <span>Giỏi (8.0-8.9)</span>
+                    <span className="font-medium">
+                      {percent(dashboardData.gradeDistribution?.gioi ?? 0)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span>Khá (6.5-7.9)</span>
+                    <span className="font-medium">
+                      {percent(dashboardData.gradeDistribution?.kha ?? 0)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span>Cần cải thiện</span>
+                    <span className="font-medium">
+                      {percent(
+                        dashboardData.gradeDistribution?.canCaiThien ?? 0
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Top Performers from Ranking API */}
             <Card>
-              {" "}
               <CardHeader>
-                {" "}
-                <CardTitle>Thống kê nhanh</CardTitle>{" "}
-              </CardHeader>{" "}
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" /> Học sinh xuất sắc
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-3">
-                {" "}
+                {rankingLoading ? (
+                  <div className="text-center py-4">Đang tải...</div>
+                ) : rankingError ? (
+                  <div className="text-center text-red-500 py-4">
+                    Lỗi tải dữ liệu xếp hạng
+                  </div>
+                ) : (
+                  (() => {
+                    const excellentStudents = (rankingData || [])
+                      .filter((student) => Number(student.averageScore) > 8)
+                      .slice(0, 3);
+                    if (excellentStudents.length === 0) {
+                      return (
+                        <div className="text-center text-muted-foreground py-4">
+                          Không có học sinh xuất sắc nào (điểm {">"} 8)
+                        </div>
+                      );
+                    }
+                    return (
+                      <>
+                        {excellentStudents.map((student, index) => (
+                          <div
+                            key={
+                              student.studentId ??
+                              `${student.studentEmail}-${index}`
+                            }
+                            className="flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium">
+                                {student.studentName}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {student.className}
+                              </p>
+                            </div>
+                            <Badge className="bg-green-500">
+                              {student.averageScore}
+                            </Badge>
+                          </div>
+                        ))}
+                        <Link href="/grades/teacher">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full mt-2 bg-transparent"
+                          >
+                            <Eye className="h-4 w-4 mr-2" /> Xem tất cả
+                          </Button>
+                        </Link>
+                      </>
+                    );
+                  })()
+                )}
+              </CardContent>
+            </Card>
+            {/* Quick Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Thống kê nhanh</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  {" "}
-                  <span className="text-sm">Bài tập đã tạo tuần này</span>{" "}
-                  <span className="font-medium">5</span>{" "}
-                </div>{" "}
+                  <span className="text-sm">Bài tập đã tạo tuần này</span>
+                  <span className="font-medium">5</span>
+                </div>
                 <div className="flex justify-between">
-                  {" "}
-                  <span className="text-sm">Bài đã chấm tuần này</span>{" "}
-                  <span className="font-medium">23</span>{" "}
-                </div>{" "}
+                  <span className="text-sm">Bài đã chấm tuần này</span>
+                  <span className="font-medium">23</span>
+                </div>
                 <div className="flex justify-between">
-                  {" "}
-                  <span className="text-sm">Câu hỏi từ học sinh</span>{" "}
-                  <span className="font-medium text-orange-600">3</span>{" "}
-                </div>{" "}
+                  <span className="text-sm">Câu hỏi từ học sinh</span>
+                  <span className="font-medium text-orange-600">3</span>
+                </div>
                 <div className="flex justify-between">
-                  {" "}
-                  <span className="text-sm">Tài liệu đã tải lên</span>{" "}
-                  <span className="font-medium">12</span>{" "}
-                </div>{" "}
-              </CardContent>{" "}
-            </Card>{" "}
-          </div>{" "}
+                  <span className="text-sm">Tài liệu đã tải lên</span>
+                  <span className="font-medium">12</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

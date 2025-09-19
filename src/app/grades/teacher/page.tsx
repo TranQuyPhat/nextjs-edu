@@ -105,7 +105,6 @@ export default function TeacherGradesPage() {
     }));
   }, [ranking]);
 
-  // Danh sách lớp để filter (tạo từ API). Nếu không có data -> rỗng, UI sẽ vẫn render được.
   const classesFromApi = useMemo(() => {
     if (!apiStudents.length) {
       return [{ id: "all", name: "Tất cả lớp", avgGrade: 0, studentCount: 0 }];
@@ -399,37 +398,54 @@ export default function TeacherGradesPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {filteredStudents.slice(0, 3).map((student, index) => (
-                      <div
-                        key={student.id}
-                        className="text-center p-4 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex justify-center mb-3">
-                          {getRankIcon(index + 1)}
+                  {(() => {
+                    const excellentStudents = filteredStudents
+                      .filter((student) => student.avgGrade > 8)
+                      .slice(0, 3);
+                    if (excellentStudents.length === 0) {
+                      return (
+                        <div className="text-center text-muted-foreground py-4">
+                          Không có học sinh xuất sắc nào (điểm {">"} 8)
                         </div>
-                        <Avatar className="h-16 w-16 mx-auto mb-3">
-                          <AvatarFallback className="text-lg">
-                            {student?.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <h3 className="font-medium">{student?.name}</h3>
-                        <p className="text-sm text-gray-500 mb-2">
-                          {student.className}
-                        </p>
-                        <div className="flex items-center justify-center space-x-2">
-                          <span
-                            className={`text-xl font-bold ${getGradeColor(
-                              student.avgGrade
-                            )}`}
+                      );
+                    }
+                    return (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {excellentStudents.map((student, index) => (
+                          <div
+                            key={student.id}
+                            className="text-center p-4 bg-gray-50 rounded-lg"
                           >
-                            {student.avgGrade}
-                          </span>
-                          {getTrendIcon(student.trend)}
-                        </div>
+                            <div className="flex justify-center mb-3">
+                              {getRankIcon(index + 1)}
+                            </div>
+                            <Avatar className="h-16 w-16 mx-auto mb-3">
+                              <AvatarFallback className="text-lg">
+                                {student?.name?.charAt(0) ||
+                                  student?.studentName?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <h3 className="font-medium">
+                              {student?.name || student?.studentName}
+                            </h3>
+                            <p className="text-sm text-gray-500 mb-2">
+                              {student.className}
+                            </p>
+                            <div className="flex items-center justify-center space-x-2">
+                              <span
+                                className={`text-xl font-bold ${getGradeColor(
+                                  student.avgGrade
+                                )}`}
+                              >
+                                {student.avgGrade}
+                              </span>
+                              {getTrendIcon(student.trend)}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
 

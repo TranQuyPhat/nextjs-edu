@@ -28,11 +28,11 @@ export interface StudentResult {
 }
 
 
-export function useTeacherRanking(teacherId: number) {
+export function useTeacherRanking() {
     return useQuery<StudentRanking[]>({
-        queryKey: ["teacher-ranking", teacherId],
+        queryKey: ["teacher-ranking"],
         queryFn: async () => {
-            const res = await apiClient.get<StudentRanking[]>(`/api/stats/teacher/${teacherId}/ranking`);
+            const res = await apiClient.get<StudentRanking[]>(`/api/stats/teacher/ranking`);
             return res;
         },
         staleTime: 1000 * 60 * 2,

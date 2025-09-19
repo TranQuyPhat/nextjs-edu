@@ -49,4 +49,11 @@ export interface TeacherDashboardResponse {
   averageGrade: number;
   recentActivities: ActivityLogResponseDTO[];
   upcomingDeadlinesTeacher: UpcomingDeadlines[];
+  gradeDistribution?: {
+    xuatSac: number;
+    gioi: number;
+    kha: number;
+    canCaiThien: number;
+    totalStudents: number;
+  };
 }
