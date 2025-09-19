@@ -954,7 +954,10 @@ export const AssignmentsTab = ({
                             assignment.published
                               ? "default"
                               : submissionsByAssignment[assignment.id]
-                                  ?.length === countstudents
+                                  ?.length === countstudents &&
+                                submissionsByAssignment[assignment.id]?.every(
+                                  (s) => s.status === "GRADED"
+                                )
                               ? "default"
                               : "outline"
                           }
@@ -962,14 +965,20 @@ export const AssignmentsTab = ({
                             assignment.published
                               ? "bg-green-500 text-white"
                               : submissionsByAssignment[assignment.id]
-                                  ?.length === countstudents
+                                  ?.length === countstudents &&
+                                submissionsByAssignment[assignment.id]?.every(
+                                  (s) => s.status === "GRADED"
+                                )
                               ? "bg-blue-500 text-white"
                               : "opacity-50 cursor-not-allowed"
                           }
                           disabled={
                             assignment.published ||
                             (submissionsByAssignment[assignment.id]?.length ??
-                              0) < countstudents
+                              0) < countstudents ||
+                            !submissionsByAssignment[assignment.id]?.every(
+                              (s) => s.status === "GRADED"
+                            )
                           }
                           onClick={async () => {
                             try {
@@ -998,6 +1007,10 @@ export const AssignmentsTab = ({
                                 submissionsByAssignment[assignment.id]
                                   ?.length || 0
                               }/${countstudents})`
+                            : !submissionsByAssignment[assignment.id]?.every(
+                                (s) => s.status === "GRADED"
+                              )
+                            ? "Chưa chấm xong"
                             : "Công bố điểm"}
                         </Button>
                         <DropdownMenu>
@@ -1134,7 +1147,15 @@ export const AssignmentsTab = ({
                                             </span>
                                             <div className="flex items-center space-x-2">
                                               <FileText className="h-4 w-4" />
-                                              <span>
+                                              <span
+                                                className="text-blue-600 cursor-pointer hover:underline"
+                                                onClick={() =>
+                                                  handleViewFile(
+                                                    userSubmission.filePath,
+                                                    userSubmission.fileType
+                                                  )
+                                                }
+                                              >
                                                 {userSubmission.fileName}
                                               </span>
                                               <span className="text-gray-500">
