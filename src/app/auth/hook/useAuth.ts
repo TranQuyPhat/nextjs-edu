@@ -1,8 +1,9 @@
-// hooks/useAuth.ts - FIXED VERSION
-import { useState, useEffect, useCallback } from 'react';
+// hooks/useAuth.ts - FIXED VERSION (đã đổi id -> userId)
+import { useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import apiClient from '@/lib/axios';
 import { useQuery } from '@tanstack/react-query';
+
 async function validateToken(token: string): Promise<boolean> {
     const res = await apiClient.get('/auth/validate', {
         headers: {
@@ -11,13 +12,16 @@ async function validateToken(token: string): Promise<boolean> {
     });
     return res.status === 200;
 }
+
+// ✅ đổi field id -> userId để khớp với dữ liệu bạn lưu ở localStorage
 type UserData = {
-    id: number;
+    userId: number;
     username: string;
+    fullName?: string;   // nếu bạn có lưu fullName
     email: string;
     roles: string[];
-    // bổ sung các field khác nếu có
 };
+
 export const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [user, setUser] = useState<UserData | null>(null);
@@ -36,6 +40,7 @@ export const useAuth = () => {
     }, []);
 
     const redirectUser = useCallback((userData: UserData, role?: string) => {
+        // Chỉ redirect nếu đang ở trang login/register/home
         const shouldRedirect = ['/login', '/register', '/'].includes(pathname);
         if (!shouldRedirect) return;
 
@@ -53,7 +58,6 @@ export const useAuth = () => {
         }
     }, [pathname, router]);
 
-
     const { isLoading: loading } = useQuery({
         queryKey: ['auth', typeof window !== 'undefined' && localStorage.getItem('accessToken')],
         queryFn: async () => {
@@ -61,7 +65,11 @@ export const useAuth = () => {
             const userData = localStorage.getItem('user');
             const role = localStorage.getItem('role');
 
-            if (!token || !userData) throw new Error('No token or user');
+            // 👉 nếu chưa đăng nhập thì chỉ set false, không throw
+            if (!token || !userData) {
+                setIsAuthenticated(false);
+                return null;
+            }
 
             const valid = await validateToken(token);
             if (!valid) throw new Error('Token invalid');
@@ -76,7 +84,7 @@ export const useAuth = () => {
         onError: () => {
             clearAuthData();
         },
-        retry: false, // không retry khi token invalid
+        retry: false,
     });
 
     const login = (userData: any) => {
@@ -94,7 +102,7 @@ export const useAuth = () => {
 
     const logout = () => {
         clearAuthData();
-        router.push('/login');
+        router.push('/auth/login');
     };
 
     return {

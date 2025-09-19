@@ -430,7 +430,7 @@ export default function TeacherDashboard() {
               </CardContent>
             </Card>
             {/* Quick Stats */}
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Thống kê nhanh</CardTitle>
               </CardHeader>
@@ -452,7 +452,7 @@ export default function TeacherDashboard() {
                   <span className="font-medium">12</span>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>

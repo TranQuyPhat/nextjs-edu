@@ -46,7 +46,7 @@ export async function fetchQuizzesByTeacher() {
   const data = await apiCall<ApiResp<any[]>>(`/api/quizzes/teacher`);
   console.log(data.data);
 
-  return data.data.data ?? [];
+  return data.data ?? [];
 }
 export async function fetchQuizById(id: number) {
   return apiCall<ApiResp<any>>(`/api/quizzes/${id}`);

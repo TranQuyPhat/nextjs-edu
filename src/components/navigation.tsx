@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import ProfileModal from "./profile-modal";
+import { useAuth } from "@/app/auth/hook/useAuth";
 
 export default function Navigation() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
+  const { logout } = useAuth();
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
@@ -41,6 +42,8 @@ export default function Navigation() {
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("role");
     router.push("/auth/login");
   };
 
@@ -149,7 +152,7 @@ export default function Navigation() {
                     View profile
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={handleLogout}
+                    onClick={logout}
                     className="mt-1 cursor-pointer"
                   >
                     <LogOut className="mr-2 h-4 w-4 " />

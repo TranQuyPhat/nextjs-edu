@@ -91,7 +91,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { isAuthenticated, login, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const currentConfig = stepConfig[step];
   const form = useForm({
     resolver: yupResolver(currentConfig.schema),
@@ -123,16 +123,16 @@ export default function LoginPage() {
   useEffect(() => {
     reset();
   }, [step, reset]);
-  if (loading) {
-    return (
-      <div>
-        <Navigation />
-        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div>
+  //       <Navigation />
+  //       <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+  //         <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+  //       </div>
+  //     </div>
+  //   );
+  // }
   if (isAuthenticated) {
     return null;
   }
@@ -140,24 +140,33 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       const res = await authService.login(data);
-      console.log("res", res);
-
-      login(res.data);
-
+      console.log("res :", res);
+      localStorage.setItem("accessToken", res.accessToken);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          userId: res.userId,
+          username: res.username,
+          fullName: res.fullName,
+          email: res.email,
+          roles: res.roles,
+        })
+      );
       toast.success("Login successful!");
-
       if (res.roles && res.roles.length === 1) {
         const role = res.roles[0].toLowerCase();
         localStorage.setItem("role", role);
+        console.log(role);
+
         router.push(`/dashboard/${role}`);
       } else {
         router.push("/select-role");
       }
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.messages?.[0] ||
-        error?.response?.data?.error ||
-        "Incorrect email or password";
+        error?.response?.messages?.[0] ||
+        error?.response?.error ||
+        "Sai tài khoản hoặc mật khẩu";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);

@@ -45,7 +45,10 @@ interface QuizFormDataExtended extends QuizzFormData {
   classId: number;
   createdBy: number;
 }
-const token = localStorage.getItem("accessToken");
+let token: string | null = null;
+if (typeof window !== "undefined") {
+  token = localStorage.getItem("accessToken");
+}
 // API response type
 
 interface ApiResponse {
@@ -108,6 +111,7 @@ export default function CreateQuizzPage() {
     startDate: new Date().toISOString().split("T")[0],
     endDate: new Date().toISOString().split("T")[0],
     timeLimit: "40",
+    subject: "",
     description: "",
     files: [],
     classId: 0,

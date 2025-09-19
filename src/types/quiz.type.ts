@@ -79,7 +79,7 @@ export interface AiQuizSettings {
 export interface BackendQuizResponse {
     quizTitle: string;
     questions: Array<{
-        QuestionType: string;
+        questionType: string;
         questionText: string;
         options: Option[];
         correctIndex: number;

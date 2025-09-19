@@ -195,7 +195,7 @@ export function QuizFormm({
       {/* File DOCX */}
       <div className="space-y-1">
         <Label htmlFor="files">Tệp PDF</Label>
-        <QuizUploadGuide />
+        {/* <QuizUploadGuide /> */}
         <Input
           id="files"
           type="file"

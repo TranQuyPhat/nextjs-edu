@@ -45,9 +45,8 @@ export const authService = {
       `${API_BASE}/login`,
       data
     );
-    console.log("response.data", response.data);
 
-    return response.data;
+    return response.data.data;
   },
 
   logout: async (): Promise<{ message: string }> => {

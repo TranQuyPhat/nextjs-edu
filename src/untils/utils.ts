@@ -9,9 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function mapBackendToFormData(apiData: BackendQuizResponse): QuizzFormData {
-
+  console.log('apiData :', apiData);
   return {
-    title: apiData.quizTitle || "",
+    title: "",
     grade: "",
     subject: "",
     startDate: "",
@@ -20,7 +20,7 @@ export function mapBackendToFormData(apiData: BackendQuizResponse): QuizzFormDat
     description: "",
     questions: apiData.questions.map((q) => ({
       questionText: q.questionText,
-      questionType: q.questionType ,
+      questionType: q.questionType,
       options: q.options.map((opt, idx) => ({
         optionLabel: opt.optionLabel, // A, B, C, D
         optionText: opt.optionText, // Bỏ tiền tố "A. "
@@ -54,7 +54,7 @@ export function getCurrentUserId(): number | null {
 }
 export function getCurrentUser(): JwtPayload | null {
   const token = localStorage.getItem("accessToken");
-  if (!token) return null ;
+  if (!token) return null;
 
   try {
     const payload: JwtPayload = jwtDecode(token);
