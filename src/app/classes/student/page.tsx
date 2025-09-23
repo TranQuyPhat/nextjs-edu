@@ -30,7 +30,7 @@ import {
   getClassById,
   searchClasses,
   getLatestClasses,
-  searchClassesStudentPaginate, // Thêm import cho search function
+  searchClassesStudent, // Sử dụng hàm search backend
 } from "@/services/classService";
 import StudentNotificationToast from "@/components/classDetails/StudentNotificationToast";
 import { toast } from "react-toastify";
@@ -39,7 +39,6 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 export default function StudentClassesPage() {
   const [user, setUser] = useState<any>(null);
   const [classes, setClasses] = useState<any[]>([]);
-  const [joinCode, setJoinCode] = useState("");
 
   // States cho tìm kiếm chính
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -48,6 +47,7 @@ export default function StudentClassesPage() {
     useState<NodeJS.Timeout | null>(null);
 
   // States cho dialog tham gia lớp
+  const [joinCode, setJoinCode] = useState("");
   const [activeTab, setActiveTab] = useState<"code" | "search">("code");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -73,12 +73,10 @@ export default function StudentClassesPage() {
       .then((res) => {
         setClasses(Array.isArray(res.data) ? res.data : res.data || []);
         setTotalPages(res.totalPages || 1);
-        setIsSearching(false);
         console.log("res", res);
       })
       .catch((error) => {
         console.error("Lỗi khi lấy lớp học:", error);
-        setIsSearching(false);
         toast.error(
           error?.response?.data?.messages?.[0] ??
             "Không thể tải danh sách lớp học!"
@@ -112,8 +110,6 @@ export default function StudentClassesPage() {
       toast.error(
         err?.response?.data?.messages?.[0] ?? "Không thể tìm kiếm lớp!"
       );
-    } finally {
-      setIsSearching(false);
     }
   };
 
@@ -176,7 +172,11 @@ export default function StudentClassesPage() {
       if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
         // Refresh danh sách lớp
-        loadStudentClasses(user.userId, currentPage);
+        if (isSearching) {
+          clearSearch();
+        } else {
+          loadStudentClasses(user.userId, currentPage);
+        }
       } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
@@ -206,7 +206,11 @@ export default function StudentClassesPage() {
       if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
         // Refresh danh sách lớp
-        loadStudentClasses(user.userId, currentPage);
+        if (isSearching) {
+          clearSearch();
+        } else {
+          loadStudentClasses(user.userId, currentPage);
+        }
       } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
@@ -225,7 +229,7 @@ export default function StudentClassesPage() {
     }
   };
 
-  const handleSearch = async () => {
+  const handleSearchJoinDialog = async () => {
     setLoadingSearch(true);
     try {
       if (searchTerm.trim() === "") {
@@ -251,11 +255,9 @@ export default function StudentClassesPage() {
     setLoadingSearch(false);
   };
 
-  // Handle page change - phân biệt search và load thường
+  // Handle page change - chỉ hoạt động khi không tìm kiếm
   const handlePageChange = (page: number) => {
-    if (isSearching && searchKeyword.trim()) {
-      handleSearchStudentClasses(searchKeyword, page);
-    } else {
+    if (!isSearching) {
       setCurrentPage(page);
     }
   };
@@ -276,7 +278,7 @@ export default function StudentClassesPage() {
       <Navigation />
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          {/* Header + thanh tìm kiếm + nút tham gia */}
+          {/* Header + nút tham gia */}
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-green-700">
@@ -290,27 +292,6 @@ export default function StudentClassesPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* Thanh tìm kiếm */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  type="text"
-                  placeholder="Tìm kiếm lớp học của tôi..."
-                  value={searchKeyword}
-                  onChange={handleSearchInputChange}
-                  className="pl-10 pr-10 w-80 border-gray-300 focus:border-green-500 focus:ring-green-500"
-                />
-                {searchKeyword && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Xóa tìm kiếm"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
               <Dialog>
                 <DialogTrigger asChild>
                   <Button className="bg-green-700 hover:bg-green-800">
@@ -381,7 +362,7 @@ export default function StudentClassesPage() {
                           placeholder="Tìm theo tên lớp"
                         />
                         <Button
-                          onClick={handleSearch}
+                          onClick={handleSearchJoinDialog}
                           disabled={loadingSearch}
                           className="bg-green-700 hover:bg-green-800"
                         >
@@ -430,15 +411,31 @@ export default function StudentClassesPage() {
                 Đang tìm kiếm
               </Badge>
               <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearSearch}
-                className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                onClick={handleSearch}
+                className="bg-green-700 hover:bg-green-800"
+                disabled={!searchKeyword.trim()}
               >
-                Xem tất cả lớp của tôi
+                <Search className="h-4 w-4" />
               </Button>
             </div>
-          )}
+
+            {isSearching && (
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-500">
+                  Tìm thấy {classes.length} kết quả cho "{searchKeyword}"
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearSearch}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Xóa tìm kiếm
+                </Button>
+              </div>
+            )}
+          </div>
 
           {/* Danh sách lớp */}
           {classes.length > 0 ? (
@@ -496,11 +493,20 @@ export default function StudentClassesPage() {
                   ? "Thử từ khóa khác hoặc tham gia lớp học mới"
                   : "Bắt đầu bằng cách tham gia lớp học đầu tiên"}
               </div>
+              {isSearching && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={clearSearch}
+                >
+                  Xem tất cả lớp của tôi
+                </Button>
+              )}
             </div>
           )}
 
-          {/* Pagination - hiển thị cho cả search và load thường */}
-          {totalPages > 1 && (
+          {/* Pagination - chỉ hiển thị khi không tìm kiếm */}
+          {!isSearching && totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
               {Array.from({ length: totalPages }, (_, i) => i).map((num) => (
                 <Button
