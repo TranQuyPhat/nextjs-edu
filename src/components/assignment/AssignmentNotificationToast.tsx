@@ -47,7 +47,7 @@ class WebSocketManager {
       const classIds = classes.map((c: { id: any }) => c.id);
       console.log("Classes of student:", classIds);
 
-      const sockjsUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws`;
+      const sockjsUrl = `${process.env.NEXT_PUBLIC_API_URL}/ws`;
       const stompClient = new Client({
         connectHeaders: {},
         reconnectDelay: 5000,

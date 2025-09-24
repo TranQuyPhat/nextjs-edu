@@ -24,7 +24,7 @@ export default function StudentNotificationToast({
 
     console.log("Initializing WebSocket connection for studentId:", studentId);
 
-    const sockjsUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws?studentId=${studentId}`;
+    const sockjsUrl = `${process.env.NEXT_PUBLIC_API_URL}/ws?studentId=${studentId}`;
 
     const stompClient = new Client({
       connectHeaders: {},

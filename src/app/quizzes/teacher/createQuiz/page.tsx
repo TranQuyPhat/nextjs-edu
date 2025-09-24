@@ -69,7 +69,7 @@ const extractQuestionsFromFiles = async (
 
   try {
     const response = await fetch(
-      "http://localhost:8080/api/files/extract-questions",
+      `${process.env.NEXT_PUBLIC_API_URL}/api/files/extract-questions`,
       {
         method: "POST",
         headers: {

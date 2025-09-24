@@ -210,7 +210,7 @@ export default function QuizPage() {
       };
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/quiz-submissions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/quiz-submissions`,
         {
           method: "POST",
           headers: {

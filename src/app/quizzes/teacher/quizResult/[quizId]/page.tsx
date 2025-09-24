@@ -51,7 +51,7 @@ export default function QuizResultsPage() {
         const token = localStorage.getItem("accessToken"); // hoặc nơi bạn lưu token
 
         const res = await fetch(
-          `http://localhost:8080/api/quiz-submissions/by-quiz/${quizId}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/quiz-submissions/by-quiz/${quizId}`,
           {
             method: "GET",
             headers: {

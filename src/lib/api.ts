@@ -4,7 +4,7 @@ import { AiQuizSettings, BackendQuizResponse, QuizzFormData } from "@/types/quiz
 import { useQuizzStorage } from "./store/useQuizzStorage";
 import { mapBackendToFormData } from "@/untils/utils";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL;
 
 export const apiClient = axios.create({
     baseURL: API_BASE,

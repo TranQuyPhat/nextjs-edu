@@ -28,7 +28,7 @@ export default function TeacherNotificationToast({
     if (!teacherId) return;
     console.log("Initializing WebSocket connection for teacherId:", teacherId);
 
-    const sockjsUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws?teacherId=${teacherId}`;
+    const sockjsUrl = `${process.env.NEXT_PUBLIC_API_URL}/ws?teacherId=${teacherId}`;
     console.log("SockJS URL:", sockjsUrl);
 
     const stompClient = new Client({
