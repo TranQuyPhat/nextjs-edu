@@ -20,8 +20,9 @@ class WebSocketManager {
   private static instance: WebSocketManager | null = null;
   private client: Client | null = null;
   private isConnecting: boolean = false;
-  private subscribers: Set<(notification: NotificationAssignmentDTO) => void> = new Set();
-  
+  private subscribers: Set<(notification: NotificationAssignmentDTO) => void> =
+    new Set();
+
   static getInstance(): WebSocketManager {
     if (!WebSocketManager.instance) {
       WebSocketManager.instance = new WebSocketManager();
@@ -46,7 +47,7 @@ class WebSocketManager {
       const classIds = classes.map((c: { id: any }) => c.id);
       console.log("Classes of student:", classIds);
 
-      const sockjsUrl = `http://localhost:8080/ws`;
+      const sockjsUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws`;
       const stompClient = new Client({
         connectHeaders: {},
         reconnectDelay: 5000,
@@ -55,24 +56,29 @@ class WebSocketManager {
 
         onConnect: (frame) => {
           console.log("WebSocket Connected!", frame);
-          
+
           // Subscribe to all classes
           classIds.forEach((cid: any) => {
             const topicPath = `/topic/class/${cid}/assignments`;
             stompClient.subscribe(topicPath, (message) => {
               try {
-                const payload: NotificationAssignmentDTO = JSON.parse(message.body);
-                console.log(`Broadcasting to ${this.subscribers.size} subscribers:`, payload);
-                
+                const payload: NotificationAssignmentDTO = JSON.parse(
+                  message.body
+                );
+                console.log(
+                  `Broadcasting to ${this.subscribers.size} subscribers:`,
+                  payload
+                );
+
                 // Broadcast to all subscribers
-                this.subscribers.forEach(callback => callback(payload));
+                this.subscribers.forEach((callback) => callback(payload));
               } catch (err) {
                 console.error("Error parsing message:", err);
               }
             });
             console.log("Subscribed to:", topicPath);
           });
-          
+
           this.isConnecting = false;
         },
 
@@ -114,7 +120,7 @@ class WebSocketManager {
   subscribe(callback: (notification: NotificationAssignmentDTO) => void) {
     this.subscribers.add(callback);
     console.log("Subscriber added. Total:", this.subscribers.size);
-    
+
     return () => {
       this.subscribers.delete(callback);
       console.log("Subscriber removed. Total:", this.subscribers.size);
@@ -138,39 +144,41 @@ export default function AssignmentNotificationToast({
 }) {
   const router = useRouter();
   const wsManager = WebSocketManager.getInstance();
-  
+
   useEffect(() => {
     if (!studentId) return;
 
     console.log("Setting up notification for student:", studentId);
 
     // Subscribe to notifications
-    const unsubscribe = wsManager.subscribe((notification: NotificationAssignmentDTO) => {
-      const toastId = `assignment-${notification.classId}-${notification.title}`;
-      
-      // Check if toast already exists
-      if (toast.isActive(toastId)) {
-        console.log("Toast already active, skipping:", toastId);
-        return;
-      }
+    const unsubscribe = wsManager.subscribe(
+      (notification: NotificationAssignmentDTO) => {
+        const toastId = `assignment-${notification.classId}-${notification.title}`;
 
-      console.log("Creating toast:", toastId);
-      toast.info(
-        <div
-          className="cursor-pointer hover:underline"
-          onClick={() => router.push(`/classes/${notification.classId}`)}
-        >
-          {notification.message} <br />
-          {notification.title} <br />
-          Hạn: {new Date(notification.dueDate).toLocaleString()}
-        </div>,
-        { 
-          position: "top-right", 
-          autoClose: 6000,
-          toastId: toastId
+        // Check if toast already exists
+        if (toast.isActive(toastId)) {
+          console.log("Toast already active, skipping:", toastId);
+          return;
         }
-      );
-    });
+
+        console.log("Creating toast:", toastId);
+        toast.info(
+          <div
+            className="cursor-pointer hover:underline"
+            onClick={() => router.push(`/classes/${notification.classId}`)}
+          >
+            {notification.message} <br />
+            {notification.title} <br />
+            Hạn: {new Date(notification.dueDate).toLocaleString()}
+          </div>,
+          {
+            position: "top-right",
+            autoClose: 6000,
+            toastId: toastId,
+          }
+        );
+      }
+    );
 
     // Connect WebSocket
     wsManager.connect(studentId);
@@ -188,9 +196,9 @@ export default function AssignmentNotificationToast({
       WebSocketManager.cleanup();
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 

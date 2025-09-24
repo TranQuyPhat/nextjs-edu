@@ -3,7 +3,7 @@ import axios, { AxiosRequestConfig } from "axios";
 
 
 export const apiClient = axios.create({
-    baseURL: "http://localhost:8080/api",
+    baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`,
     withCredentials: true,
     timeout: 15000,
 });

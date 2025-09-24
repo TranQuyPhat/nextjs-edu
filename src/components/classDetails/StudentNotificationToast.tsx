@@ -24,7 +24,7 @@ export default function StudentNotificationToast({
 
     console.log("Initializing WebSocket connection for studentId:", studentId);
 
-    const sockjsUrl = `http://localhost:8080/ws?studentId=${studentId}`;
+    const sockjsUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/ws?studentId=${studentId}`;
 
     const stompClient = new Client({
       connectHeaders: {},
@@ -40,7 +40,7 @@ export default function StudentNotificationToast({
           `/user/${studentId}/queue/join-requests-response`,
           (message) => {
             const payload: ApprovalResponseDTO = JSON.parse(message.body);
-            
+
             // Hiển thị toast dựa trên trường 'approved' và 'message'
             if (payload.approved) {
               toast.success(`🎉 Yêu cầu của bạn đã được chấp nhận!`, {

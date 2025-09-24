@@ -41,8 +41,34 @@ export function useQuizzesQuery() {
         },
     });
 }
-
-
+export function useQuizSubmissionsByQuiz(quizId: string | number | null) {
+    return useQuery({
+        queryKey: ["quiz-submissions", quizId],
+        enabled: !!quizId,
+        queryFn: () => {
+            if (!quizId) throw new Error("quizId is required");
+            return apiClient.get(`api/quiz-submissions/by-quiz/${quizId}`);
+        },
+    });
+}
+export function useCreateQuizSubmission() {
+    return useMutation({
+        mutationFn: async (payload: any) =>
+            apiClient.post("api/quiz-submissions", payload),
+    });
+}
+export function useStudentQuizzesQuery() {
+    return useQuery({
+        queryKey: ["quizzes", "student"],
+        queryFn: () => apiClient.get("api/quizzes/student"),
+    });
+}
+export function useExtractQuestions() {
+    return useMutation({
+        mutationFn: async (formData: FormData) =>
+            apiClient.post("api/files/extract-questions", formData),
+    });
+}
 export function useQuiz(id: string | number | null | undefined) {
     return useQuery({
         queryKey: ["quiz", String(id)],

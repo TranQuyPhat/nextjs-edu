@@ -16,7 +16,7 @@ import QuestionCard from "./QuestionCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navigation from "@/components/navigation";
 import { QuizResultDialog } from "../components/quiz-result-dialog";
-import { useQuiz } from "../../hook/quiz-hooks";
+import { useCreateQuizSubmission, useQuiz } from "../../hook/quiz-hooks";
 import { QueryError } from "../../components/QueryError";
 import Swal from "sweetalert2";
 
@@ -35,7 +35,7 @@ interface QuizResultData {
 export default function QuizPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-
+  const { mutate: submitQuiz } = useCreateQuizSubmission();
   const { data: quiz, isLoading, error, refetch, isFetching } = useQuiz(id);
   console.log("quiz :", quiz);
 
@@ -209,14 +209,17 @@ export default function QuizPage() {
         answers: answersPayload,
       };
 
-      const res = await fetch("http://localhost:8080/api/quiz-submissions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(submissionPayload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/quiz-submissions`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(submissionPayload),
+        }
+      );
 
       if (!res.ok) {
         const errorText = await res.text();

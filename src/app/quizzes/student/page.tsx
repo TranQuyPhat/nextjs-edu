@@ -51,12 +51,15 @@ export default function StudentQuizzesPage() {
     const fetchQuizzes = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await fetch(`http://localhost:8080/api/quizzes/student`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/quizzes/student`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
         const payload = await res.json();
         setQuizzes(payload.data || []);
