@@ -404,7 +404,7 @@ export default function QuizResultsPage() {
   );
 }
 
-export function getMinutesAndSeconds(start: string, end: string): string {
+function getMinutesAndSeconds(start: string, end: string): string {
   const startTime = parseISO(start);
   const endTime = parseISO(end);
   const totalSeconds = differenceInSeconds(endTime, startTime);

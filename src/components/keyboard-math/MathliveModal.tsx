@@ -70,7 +70,7 @@ export function MathliveModal({
           </button>
         </div>
 
-        {/* @ts-ignore */}
+        {/* @ts-expect-error aaa */}
         <math-field
           ref={mfRef}
           virtual-keyboard-mode="onfocus"
@@ -83,7 +83,7 @@ export function MathliveModal({
             border: "1px solid #e5e7eb",
           }}
           placeholder="Nhập/sửa công thức…"
-        ></math-field>
+        />
 
         <div className="flex items-center justify-end gap-3">
           <button

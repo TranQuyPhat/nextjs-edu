@@ -14,7 +14,7 @@ export const steps = [
         <div className="bg-green-50 p-3 rounded-lg border-l-4 border-green-400">
           <p className="text-xs text-green-700">
             💡 <strong>Mẹo:</strong> Hãy mô tả chi tiết về nội dung và độ khó
-            mong muốn trong phần "Mô tả đề"
+            mong muốn trong phần &quot;Mô tả đề &quot;
           </p>
         </div>
       </div>
@@ -53,8 +53,8 @@ export const steps = [
         </p>
         <div className="bg-purple-50 p-3 rounded-lg border-l-4 border-purple-400">
           <p className="text-xs text-purple-700">
-            💡 <strong>Lựa chọn:</strong> "EXTRACT" nếu tài liệu đã có sẵn câu
-            hỏi, "GENERATE" để AI tự tạo mới
+            💡 <strong>Lựa chọn:</strong> &quot;EXTRACT&quot; nếu tài liệu đã có
+            sẵn câu hỏi, &quot;GENERATE&quot; để AI tự tạo mới
           </p>
         </div>
       </div>

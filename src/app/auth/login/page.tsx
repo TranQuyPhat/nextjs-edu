@@ -87,15 +87,21 @@ const stepConfig = {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState("login");
+  type StepKey = keyof typeof stepConfig;
+  const [step, setStep] = useState<StepKey>("login");
   const [email, setEmail] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { isAuthenticated, loading } = useAuth();
+  type LoginForm = { email: string; password: string };
+  type ForgotForm = { email: string };
+  type VerifyOtpForm = { otp: string };
+  type ResetPasswordForm = { newPassword: string; confirmPassword: string };
   const currentConfig = stepConfig[step];
-  const form = useForm({
-    resolver: yupResolver(currentConfig.schema),
-    mode: "onChange",
+  const form = useForm<
+    LoginForm | ForgotForm | VerifyOtpForm | ResetPasswordForm
+  >({
+    resolver: yupResolver(currentConfig.schema as any),
   });
 
   const {
@@ -180,7 +186,9 @@ export default function LoginPage() {
       setEmail(data.email);
       toast.success("Đã gửi mã OTP về email của bạn");
       setStep("verifyOtp");
-    } catch (error) {
+    } catch (error: any) {
+      console.log("error :", error);
+
       const errorMessage =
         error?.response?.data?.message ||
         error?.message ||
@@ -259,7 +267,8 @@ export default function LoginPage() {
   };
   const renderFormContent = () => {
     switch (step) {
-      case "login":
+      case "login": {
+        const loginErrors = errors as any;
         return (
           <>
             <div className="space-y-2">
@@ -270,9 +279,9 @@ export default function LoginPage() {
                 placeholder="Nhập email của bạn"
                 {...register("email")}
               />
-              {errors.email && (
+              {loginErrors.email && (
                 <p className="text-sm text-red-500">
-                  {errors.email.message as String}
+                  {loginErrors.email.message as string}
                 </p>
               )}
             </div>
@@ -284,9 +293,9 @@ export default function LoginPage() {
                 placeholder="Nhập mật khẩu"
                 {...register("password")}
               />
-              {errors.password && (
+              {loginErrors.password && (
                 <p className="text-sm text-red-500">
-                  {errors.password.message as String}
+                  {loginErrors.password.message as string}
                 </p>
               )}
             </div>
@@ -303,8 +312,9 @@ export default function LoginPage() {
             </div>
           </>
         );
-
-      case "forgot":
+      }
+      case "forgot": {
+        const forgotErrors = errors as any;
         return (
           <>
             <div className="space-y-2">
@@ -315,16 +325,17 @@ export default function LoginPage() {
                 placeholder="Nhập email để nhận OTP"
                 {...register("email")}
               />
-              {errors.email && (
+              {forgotErrors.email && (
                 <p className="text-sm text-red-500">
-                  {errors.email.message as String}
+                  {forgotErrors.email.message as string}
                 </p>
               )}
             </div>
           </>
         );
-
-      case "verifyOtp":
+      }
+      case "verifyOtp": {
+        const otpErrors = errors as any;
         return (
           <>
             <div className="space-y-2">
@@ -336,9 +347,9 @@ export default function LoginPage() {
                 maxLength={6}
                 {...register("otp")}
               />
-              {errors.otp && (
+              {otpErrors.otp && (
                 <p className="text-sm text-red-500">
-                  {errors.otp.message as String}
+                  {otpErrors.otp.message as string}
                 </p>
               )}
               <p className="text-sm text-gray-500">
@@ -347,8 +358,9 @@ export default function LoginPage() {
             </div>
           </>
         );
-
-      case "resetPassword":
+      }
+      case "resetPassword": {
+        const resetErrors = errors as any;
         return (
           <>
             <div className="space-y-2">
@@ -358,9 +370,9 @@ export default function LoginPage() {
                 placeholder="Nhập mật khẩu mới"
                 {...register("newPassword")}
               />
-              {errors.newPassword && (
+              {resetErrors.newPassword && (
                 <p className="text-sm text-red-500">
-                  {errors.newPassword.message as String}
+                  {resetErrors.newPassword.message as string}
                 </p>
               )}
             </div>
@@ -372,15 +384,15 @@ export default function LoginPage() {
                 placeholder="Nhập lại mật khẩu mới"
                 {...register("confirmPassword")}
               />
-              {errors.confirmPassword && (
+              {resetErrors.confirmPassword && (
                 <p className="text-sm text-red-500">
-                  {errors.confirmPassword.message as String}
+                  {resetErrors.confirmPassword.message as string}
                 </p>
               )}
             </div>
           </>
         );
-
+      }
       default:
         return null;
     }

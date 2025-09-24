@@ -4,6 +4,7 @@ import { LoginResponseDto } from "./auth";
 export interface Assignment {
   id: number;
   title: string;
+  status: "pending" | "submitted" | "graded" | "closed";
   description: string;
   classId: number;
   dueDate: string;
@@ -44,7 +45,7 @@ export interface Submission {
 
   assignment: {
     id: number;
-    title: string; 
+    title: string;
     published: boolean;
   };
 }

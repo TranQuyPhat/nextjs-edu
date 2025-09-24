@@ -162,7 +162,6 @@ export function QuizTour({
       steps={steps}
       // Spotlight & cảm giác hiện đại
       padding={12}
-      spotlightPadding={8}
       scrollSmooth
       disableInteraction={false}
       onClickMask={({ setIsOpen }) => setIsOpen(false)}

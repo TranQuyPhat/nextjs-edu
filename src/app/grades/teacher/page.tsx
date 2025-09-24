@@ -79,7 +79,7 @@ export default function TeacherGradesPage() {
     else setUser({ id: teacherId });
   }, [router, teacherId]);
 
-  const { data: ranking, isLoading, error } = useTeacherRanking(2);
+  const { data: ranking, isLoading, error } = useTeacherRanking();
 
   const apiStudents: UiStudent[] = useMemo(() => {
     if (!ranking) return [];
@@ -94,8 +94,8 @@ export default function TeacherGradesPage() {
     // Map sang cấu trúc UI; trend/completionRate/subjects là dữ liệu chưa có -> mặc định.
     return sorted.map((row, idx) => ({
       id: row.studentId ?? `${row.studentEmail}-${idx}`, // fallback nếu backend chưa có studentId
-      name: row.studentName ?? row.studentName ?? "Unknown",
-      email: row.studentEmail ?? row.studentEmail ?? "",
+      studentName: row.studentName ?? row.studentName ?? "Unknown",
+      studentEmail: row.studentEmail ?? row.studentEmail ?? "",
       className: row.className,
       classId: (row as any).classId, // backend có classId -> giữ
       avgGrade: Number(row.averageScore.toFixed(1)), // API của bạn trả 0..10 hay 0..?? Nếu 0..10 thì bỏ *10
@@ -421,12 +421,12 @@ export default function TeacherGradesPage() {
                             </div>
                             <Avatar className="h-16 w-16 mx-auto mb-3">
                               <AvatarFallback className="text-lg">
-                                {student?.name?.charAt(0) ||
+                                {student?.studentName?.charAt(0) ||
                                   student?.studentName?.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
                             <h3 className="font-medium">
-                              {student?.name || student?.studentName}
+                              {student?.studentName || student?.studentName}
                             </h3>
                             <p className="text-sm text-gray-500 mb-2">
                               {student.className}

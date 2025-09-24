@@ -12,22 +12,24 @@ export function mapBackendToFormData(apiData: BackendQuizResponse): QuizzFormDat
   console.log('apiData :', apiData);
   return {
     title: "",
-    grade: "",
     subject: "",
     startDate: "",
     endDate: "",
-    timeLimit: "",
+    timeLimit: 0,
     description: "",
-    questions: apiData.questions.map((q) => ({
+    questions: apiData.questions.map((q, idx) => ({
+      id: String(idx), // hoặc String(q.id) nếu API có id số
+      correctAnswerTexts: null,
+      correctAnswerRegex: null,
       questionText: q.questionText,
       questionType: q.questionType,
-      options: q.options.map((opt, idx) => ({
-        optionLabel: opt.optionLabel, // A, B, C, D
-        optionText: opt.optionText, // Bỏ tiền tố "A. "
+      options: q.options.map(opt => ({
+        optionLabel: opt.optionLabel,
+        optionText: opt.optionText,
       })),
       correctOptions: String.fromCharCode(65 + q.correctIndex),
-      explanation: q.explanation,
-      topic: q.topic,
+      explanation: q.explanation ?? "",
+      topic: q.topic ?? "",
       difficulty: q.difficulty,
     })),
   };
@@ -40,37 +42,42 @@ interface JwtPayload {
   roles: { name: string; id: number }[];
 }
 
-export function getCurrentUserId(): number | null {
+export function getCurrentUser(): JwtPayload | null {
+  if (typeof window === "undefined") return null; // ✅ bảo vệ SSR
+
   const token = localStorage.getItem("accessToken");
   if (!token) return null;
 
   try {
-    const payload: JwtPayload = jwtDecode(token);
+    return jwtDecode<JwtPayload>(token);
+  } catch (e) {
+    console.error("Invalid token", e);
+    return null;
+  }
+}
+
+export function getCurrentUserId(): number | null {
+  if (typeof window === "undefined") return null;
+
+  const token = localStorage.getItem("accessToken");
+  if (!token) return null;
+
+  try {
+    const payload = jwtDecode<JwtPayload>(token);
     return payload.id;
   } catch (e) {
     console.error("Invalid token", e);
     return null;
   }
 }
-export function getCurrentUser(): JwtPayload | null {
-  const token = localStorage.getItem("accessToken");
-  if (!token) return null;
 
-  try {
-    const payload: JwtPayload = jwtDecode(token);
-    return payload;
-  } catch (e) {
-    console.error("Invalid token", e);
-    return null;
-  }
-}
 /** ========= TÁCH VÀ THAY THẾ CÔNG THỨC ========= */
 export type Segment =
   | { type: "text"; content: string }
   | { type: "math"; content: string; display: boolean; index: number };
 
-const MATH_INLINE = /\$(.+?)\$/gs;
-const MATH_BLOCK = /\$\$(.+?)\$\$/gs;
+const MATH_INLINE = /\$([\s\S]+?)\$/g;
+const MATH_BLOCK = /\$\$([\s\S]+?)\$\$/g;
 
 export function splitLatexSegments(input: string): Segment[] {
   const segments: Segment[] = [];

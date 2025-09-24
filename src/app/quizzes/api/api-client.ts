@@ -23,9 +23,3 @@ apiClient.interceptors.response.use(
     (err) => Promise.reject(err)
 );
 
-export async function apiCall<T>(
-    path: string,
-    config: AxiosRequestConfig = {}
-): Promise<T> {
-    return apiClient.request<T>({ url: path, ...config });
-}

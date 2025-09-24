@@ -39,7 +39,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { createDocument, deleteDocument, downloadDocument, updateDocument } from "@/services/documentService";
+import {
+  createDocument,
+  deleteDocument,
+  downloadDocument,
+  updateDocument,
+} from "@/services/documentService";
 import { formatDateTime } from "@/untils/dateFormatter";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
@@ -86,14 +91,14 @@ export const documentSchema = yup.object().shape({
     .test("fileType", "Định dạng file không hợp lệ", (file) =>
       file
         ? [
-          "application/pdf",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "application/vnd.ms-excel",
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "image/jpeg",
-          "image/png",
-        ].includes(file.type)
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.ms-excel",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "image/jpeg",
+            "image/png",
+          ].includes(file.type)
         : true
     ),
 });
@@ -112,7 +117,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
     watch,
     formState: { errors },
   } = useForm<CreateDocumentFormData>({
-    resolver: yupResolver(documentSchema),
+    resolver: yupResolver(documentSchema) as any,
     defaultValues: {
       title: "",
       description: "",
@@ -158,7 +163,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Vâng, xóa ngay!",
-      cancelButtonText: "Hủy"
+      cancelButtonText: "Hủy",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -169,7 +174,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
             title: "Đã xóa!",
             text: "Tài liệu đã được xóa thành công.",
             icon: "success",
-            confirmButtonColor: "#3085d6"
+            confirmButtonColor: "#3085d6",
           });
         } catch (error) {
           console.error("Lỗi khi xóa tài liệu:", error);
@@ -177,7 +182,7 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
             title: "Lỗi!",
             text: "Không thể xóa tài liệu. Vui lòng thử lại.",
             icon: "error",
-            confirmButtonColor: "#d33"
+            confirmButtonColor: "#d33",
           });
         }
       }
@@ -232,7 +237,6 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
     }
   };
 
-
   const handleDownload = async (doc: Document) => {
     try {
       // 1. Tăng lượt tải trên backend
@@ -272,15 +276,13 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
 
   if (!user) {
     // Đảm bảo không render khi chưa có user
-    return (<div>
-      <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-        <DotLottieReact
-          src="/animations/loading.lottie"
-          loop
-          autoplay
-        />
+    return (
+      <div>
+        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+        </div>
       </div>
-    </div>);
+    );
   }
   const role = user?.roles?.[0] || "student";
 
@@ -298,15 +300,27 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Tải lên tài liệu cho {classes[0]?.className}</DialogTitle>
-                <DialogDescription>Chọn tệp tài liệu để chia sẻ với học sinh</DialogDescription>
+                <DialogTitle>
+                  Tải lên tài liệu cho {classes[0]?.className}
+                </DialogTitle>
+                <DialogDescription>
+                  Chọn tệp tài liệu để chia sẻ với học sinh
+                </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="title">Tên tài liệu</Label>
-                    <Input id="title" {...register("title")} placeholder="VD: Chương 1 - Giới hạn" />
-                    {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
+                    <Input
+                      id="title"
+                      {...register("title")}
+                      placeholder="VD: Chương 1 - Giới hạn"
+                    />
+                    {errors.title && (
+                      <p className="text-red-500 text-sm">
+                        {errors.title.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="description">Mô tả</Label>
@@ -316,15 +330,23 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                       placeholder="Mô tả chi tiết về tài liệu..."
                       rows={4}
                     />
-                    {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+                    {errors.description && (
+                      <p className="text-red-500 text-sm">
+                        {errors.description.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="classId">Chọn lớp</Label>
                     <Select
-                      onValueChange={(value) => setValue("classId", parseInt(value))}
+                      onValueChange={(value) =>
+                        setValue("classId", parseInt(value))
+                      }
                       value={watchedClassId ? watchedClassId.toString() : ""}
                     >
-                      <SelectTrigger className={errors.classId ? "border-red-500" : ""}>
+                      <SelectTrigger
+                        className={errors.classId ? "border-red-500" : ""}
+                      >
                         <SelectValue placeholder="Chọn lớp học" />
                       </SelectTrigger>
                       <SelectContent>
@@ -335,7 +357,11 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                         ))}
                       </SelectContent>
                     </Select>
-                    {errors.classId && <p className="text-red-500 text-sm">{errors.classId.message}</p>}
+                    {errors.classId && (
+                      <p className="text-red-500 text-sm">
+                        {errors.classId.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="file">Tệp đính kèm</Label>
@@ -344,10 +370,18 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                       onClick={() => document.getElementById("file")?.click()}
                     >
                       <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">Kéo thả tệp hoặc click để chọn</p>
-                      <p className="text-sm text-gray-600">Hỗ trợ PDF, Word, PowerPoint</p>
+                      <p className="text-sm text-gray-600">
+                        Kéo thả tệp hoặc click để chọn
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Hỗ trợ PDF, Word, PowerPoint
+                      </p>
                       <p className="text-xs text-gray-500">Tối đa 50MB</p>
-                      {watchedFile && <p className="text-xs text-gray-500 mt-2">{watchedFile.name}</p>}
+                      {watchedFile && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          {watchedFile.name}
+                        </p>
+                      )}
                     </div>
                     <input
                       id="file"
@@ -355,10 +389,16 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
                       className="hidden"
                       {...register("file")}
                       onChange={(e) => {
-                        setValue("file", e.target.files?.[0] || null, { shouldValidate: true })
+                        setValue("file", e.target.files?.[0] || null, {
+                          shouldValidate: true,
+                        });
                       }}
                     />
-                    {errors.file && <p className="text-red-500 text-sm">{errors.file.message}</p>}
+                    {errors.file && (
+                      <p className="text-red-500 text-sm">
+                        {errors.file.message}
+                      </p>
+                    )}
                   </div>
                   <Button type="submit" className="w-full">
                     Tải lên

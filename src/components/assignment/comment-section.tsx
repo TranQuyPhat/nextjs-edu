@@ -85,7 +85,9 @@ function ActionLink({
   children,
   disabled,
 }: {
-  onClick?: () => void;
+  onClick?: (
+    e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
+  ) => void;
   children: React.ReactNode;
   disabled?: boolean;
 }) {
@@ -209,6 +211,21 @@ function RootItem({
 }) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState<number>(comment?.likeCount ?? 0);
+  const handleLikeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLiked((s) => !s);
+    setLikeCount((c) => (liked ? Math.max(0, c - 1) : c + 1));
+  };
+
+  const handleReplyClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onOpenThread(comment);
+  };
+
+  const handleShowRepliesClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onOpenThread(comment);
+  };
 
   return (
     <div
@@ -239,13 +256,7 @@ function RootItem({
         </div>
 
         <div className="pl-2 mt-2 flex items-center gap-4">
-          <ActionLink
-            onClick={(e) => {
-              e.stopPropagation();
-              setLiked((s) => !s);
-              setLikeCount((c) => (liked ? Math.max(0, c - 1) : c + 1));
-            }}
-          >
+          <ActionLink onClick={handleLikeClick}>
             <span className="inline-flex items-center gap-1.5">
               <ThumbsUp
                 className={`h-3.5 w-3.5 ${
@@ -261,14 +272,7 @@ function RootItem({
             </span>
           </ActionLink>
 
-          <ActionLink
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenThread(comment);
-            }}
-          >
-            Trả lời
-          </ActionLink>
+          <ActionLink onClick={handleReplyClick}>Trả lời</ActionLink>
 
           {comment?.replyCount ? (
             <ActionLink

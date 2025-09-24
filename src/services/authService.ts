@@ -7,6 +7,7 @@ import {
   LoginResponseDto,
   SelectRoleRequest,
 } from "../types/auth";
+import { ApiResp } from "@/lib/type";
 
 const API_BASE = "/auth";
 
@@ -41,7 +42,7 @@ export const authService = {
     await apiClient.post("/auth/password/forgot/reset", data);
   },
   login: async (data: LoginRequestDto): Promise<LoginResponseDto> => {
-    const response = await apiClient.post<LoginResponseDto>(
+    const response = await apiClient.post<ApiResp<LoginResponseDto>>(
       `${API_BASE}/login`,
       data
     );

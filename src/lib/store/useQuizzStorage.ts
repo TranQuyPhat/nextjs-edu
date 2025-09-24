@@ -15,7 +15,7 @@ const defaultData: QuizzFormData = {
     classId: 0,
     startDate: "",
     endDate: "",
-    timeLimit: "",
+    timeLimit: 0,
     description: "",
     fileName: "",
     questions: [],

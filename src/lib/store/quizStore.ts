@@ -3,7 +3,13 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
 import { AiQuizSettings, Question, Quiz } from "@/types/quiz.type";
-
+type FileItem = {
+    id: string;
+    file: File;
+    name: string;
+    size: number;
+    type: string;
+};
 type State = {
     files: FileItem[];
     settings: AiQuizSettings;
@@ -28,18 +34,12 @@ type Actions = {
     updateQuestion: (qid: string, patch: Partial<Question>) => void;
     removeQuestion: (qid: string) => void;
 
-    addOption: (qid: string) => void;
-    updateOption: (
-        qid: string,
-        optionId: string,
-        patch: { text?: string; correct?: boolean }
-    ) => void;
-    removeOption: (qid: string, optionId: string) => void;
 
     getBackendSettings: () => AiQuizSettings;
 };
 
 const defaultSettings: AiQuizSettings = {
+    generationMode: "EXTRACT",
     language: "",
     questionType: "",
     difficulty: "",
@@ -98,55 +98,6 @@ export const useQuizStore = create<State & Actions>((set, get) => ({
             return { quiz: { ...s.quiz, questions: updated }, hasUnsavedChanges: true };
         }),
 
-    addOption: (qid) =>
-        set((s) => {
-            if (!s.quiz) return {};
-            const updated = s.quiz.questions.map((q) => {
-                if (q.id !== qid || q.type !== "multiple_choice") return q;
-                const newOption = { id: nanoid(), text: "Phương án mới", correct: false };
-                return { ...q, options: [...q.options, newOption] };
-            });
-            return { quiz: { ...s.quiz, questions: updated }, hasUnsavedChanges: true };
-        }),
-
-    updateOption: (qid, optionId, patch) =>
-        set((s) => {
-            if (!s.quiz) return {};
-            const updated = s.quiz.questions.map((q) => {
-                if (q.id !== qid || q.type !== "multiple_choice") return q;
-
-                let options = q.options;
-
-                // Quan trọng: phải check === 'boolean' để nhận cả true/false
-                if (typeof patch.correct === "boolean") {
-                    // single-correct: chỉ optionId được phép true
-                    options = q.options.map((o) => ({
-                        ...o,
-                        correct: o.id === optionId ? patch.correct! : false,
-                    }));
-                }
-
-                if (patch.text !== undefined) {
-                    options = options.map((o) =>
-                        o.id === optionId ? { ...o, text: patch.text! } : o
-                    );
-                }
-
-                return { ...q, options };
-            });
-
-            return { quiz: { ...s.quiz, questions: updated }, hasUnsavedChanges: true };
-        }),
-
-    removeOption: (qid, optionId) =>
-        set((s) => {
-            if (!s.quiz) return {};
-            const updated = s.quiz.questions.map((q) => {
-                if (q.id !== qid || q.questionType !== "multiple_choice") return q;
-                return { ...q, options: q.options.filter((o) => o.id !== optionId) };
-            });
-            return { quiz: { ...s.quiz, questions: updated }, hasUnsavedChanges: true };
-        }),
 
     getBackendSettings: (): AiQuizSettings => {
         const s = get().settings;
@@ -172,12 +123,13 @@ export const useQuizStore = create<State & Actions>((set, get) => ({
         };
 
         return {
+            generationMode: s.generationMode,
             numQuestions: s.numQuestions,
             quizTitle: s.quizTitle || "",
             language: language || "Tiếng Việt",
-            questionType: (questionTypeMap[s.questionType] ?? s.questionType) as any,
-            difficulty: (difficultyMap[s.difficulty] ?? s.difficulty) as any,
-            studyMode: (studyModeMap[s.studyMode] ?? s.studyMode) as any,
+            questionType: (questionTypeMap[s.questionType ?? ""] ?? s.questionType) as any,
+            difficulty: (difficultyMap[s.difficulty ?? ""] ?? s.difficulty) as any,
+            studyMode: (studyModeMap[s.studyMode ?? ""] ?? s.studyMode) as any,
             userPrompt: "",
         };
     },

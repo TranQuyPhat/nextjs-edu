@@ -11,7 +11,7 @@ export function useTeacherClasses(teacherId: number | null) {
         `api/auth/classes/teachers/${teacherId}`
       );
 
-      return res;
+      return res.data;
     },
     enabled: !!teacherId,
     staleTime: 5 * 60 * 1000,

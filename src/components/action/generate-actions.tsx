@@ -36,7 +36,7 @@ export function GenerateActions() {
 
     if (isRealFile(input.file)) return input.file as File;
 
-    if (input instanceof Blob && typeof input.name === "string") {
+    if (input instanceof File) {
       try {
         return new File([input], input.name, {
           type: input.type || "application/octet-stream",

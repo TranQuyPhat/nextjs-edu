@@ -134,7 +134,7 @@ export default function QuizPage() {
   ) => {
     setQuizAnswers((prev) => ({
       ...prev,
-      [questionId]: answer,
+      [Number(questionId)]: answer,
     }));
   };
 
@@ -142,13 +142,17 @@ export default function QuizPage() {
     if (!quiz || !quiz.questions?.length) return 0;
     if (!quizAnswers) return 0;
 
-    const answeredCount = Object.values(quizAnswers).filter(
-      (answer) =>
-        (Array.isArray(answer) && answer.length > 0) ||
-        (!Array.isArray(answer) && answer !== "")
-    ).length;
-
-    return (answeredCount / quiz.questions.length) * 100;
+    const answeredCount =
+      quiz?.questions?.filter((q: any) => {
+        const answer = quizAnswers[q.id as number];
+        return (
+          (Array.isArray(answer) && answer.length > 0) ||
+          (!Array.isArray(answer) && answer !== "")
+        );
+      }).length ?? 0;
+    return quiz?.questions?.length
+      ? (answeredCount / quiz.questions.length) * 100
+      : 0;
   };
 
   const handleSubmit = useCallback(async () => {
@@ -160,13 +164,14 @@ export default function QuizPage() {
     try {
       const answersPayload: Record<number, string[]> = {};
       for (const q of quiz.questions) {
-        const answer = quizAnswers[q.id];
+        const qid = Number(q.id);
+        const answer = quizAnswers[qid];
         if (Array.isArray(answer)) {
-          answersPayload[q.id] = answer;
+          answersPayload[qid] = answer;
         } else if (typeof answer === "string" && answer) {
-          answersPayload[q.id] = [answer];
+          answersPayload[qid] = [answer];
         } else {
-          answersPayload[q.id] = [];
+          answersPayload[qid] = [];
         }
       }
 

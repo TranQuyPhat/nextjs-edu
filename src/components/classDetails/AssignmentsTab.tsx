@@ -153,7 +153,7 @@ export const AssignmentsTab = ({
     watch,
     formState: { errors },
   } = useForm<CreateAssignmentFormData>({
-    resolver: yupResolver(assignmentSchema),
+    resolver: yupResolver(assignmentSchema) as any,
     defaultValues: {
       title: "",
       description: "",

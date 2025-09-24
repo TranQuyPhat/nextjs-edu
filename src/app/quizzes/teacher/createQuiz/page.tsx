@@ -41,7 +41,7 @@ import Navigation from "@/components/navigation";
 
 interface QuizFormDataExtended extends QuizzFormData {
   files: File[];
-  fileName: string;
+  fileName?: string;
   classId: number;
   createdBy: number;
 }
@@ -110,7 +110,7 @@ export default function CreateQuizzPage() {
     title: "",
     startDate: new Date().toISOString().split("T")[0],
     endDate: new Date().toISOString().split("T")[0],
-    timeLimit: "40",
+    timeLimit: 20,
     subject: "",
     description: "",
     files: [],

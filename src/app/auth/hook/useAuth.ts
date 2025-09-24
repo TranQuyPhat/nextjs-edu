@@ -58,14 +58,12 @@ export const useAuth = () => {
         }
     }, [pathname, router]);
 
-    const { isLoading: loading } = useQuery({
+    const { isLoading: loading } = useQuery<UserData | null>({
         queryKey: ['auth', typeof window !== 'undefined' && localStorage.getItem('accessToken')],
         queryFn: async () => {
             const token = localStorage.getItem('accessToken');
             const userData = localStorage.getItem('user');
             const role = localStorage.getItem('role');
-
-            // 👉 nếu chưa đăng nhập thì chỉ set false, không throw
             if (!token || !userData) {
                 setIsAuthenticated(false);
                 return null;
@@ -81,11 +79,14 @@ export const useAuth = () => {
             redirectUser(parsedUser, role || undefined);
             return parsedUser;
         },
-        onError: () => {
-            clearAuthData();
-        },
         retry: false,
+        meta: {
+            onError: () => {
+                clearAuthData();
+            },
+        },
     });
+
 
     const login = (userData: any) => {
         localStorage.setItem('accessToken', userData.accessToken);

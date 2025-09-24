@@ -30,10 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  fetchTeacherClasses,
-  useTeacherClasses,
-} from "../../hook/useTeacherClasses";
+import { useTeacherClasses } from "../../hook/useTeacherClasses";
 function toOffsetDateTime(localDateTime: string) {
   if (!localDateTime) return "";
   return localDateTime + ":00Z";

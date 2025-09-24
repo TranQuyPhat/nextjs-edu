@@ -15,7 +15,7 @@ export function useRecentScoreOfStudent() {
         queryKey: ["recent-scores"],
         queryFn: async () => {
             const res = await apiClient.get<RecentScore[]>(`/api/student/recent-scores`);
-            return res;
+            return res.data;
         },
         staleTime: 1000 * 60 * 5,
     });

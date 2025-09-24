@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { ApiResp } from "@/lib/type";
+import { Question } from "@/types/quiz.type";
 
 // ==== Updated Types to match your actual structure ====
 export interface QuizOption {
@@ -25,7 +26,7 @@ export interface QuizDetail {
     classId?: number;
     timeLimit: number;
     description?: string;
-    questions: QuizQuestion[];
+    questions: Question[];
     subject?: string;
     className?: string;
 }
@@ -49,7 +50,7 @@ export function useQuiz(id: string | number | null | undefined) {
         staleTime: 60_000,
         queryFn: async () => {
             if (!id) throw new Error("ID bài quiz không hợp lệ");
-            const res = await apiClient.get<ApiResp<QuizDetail>>(`api/quizzes/${id}`);
+            const res = await apiClient.get(`api/quizzes/${id}`) as ApiResp<QuizDetail>;
             console.log('res :', res.data);
 
             if (!res.success || !res.data) throw new Error(res.message || "Không có dữ liệu bài quiz");
@@ -80,7 +81,8 @@ export function useQuizById(id: number, role: "student" | "teacher" = "student")
     return useQuery<QuizDetail>({
         queryKey: ["quiz", id, role],
         queryFn: async () => {
-            const res = await apiClient.get<ApiResp<QuizDetail>>(`api/quizzes/${id}?role=${role}`);
+            const res = await apiClient.get(`api/quizzes/${id}?role=${role}`) as ApiResp<QuizDetail>;;
+
             return res.data;
         },
         enabled: !!id,
@@ -95,9 +97,9 @@ export function useQuizQuestionsPage(
     return useQuery({
         queryKey: ["quiz", quizId, "questions", page, size],
         queryFn: async () => {
-            const res = await apiClient.get<ApiResp<any>>(
+            const res = await apiClient.get(
                 `api/quizzes/${quizId}/questions?page=${page}&size=${size}`
-            );
+            ) as ApiResp<QuizDetail>;;
             if (!res.success) {
                 const error: any = new Error(res.message || "Lỗi khi tải câu hỏi quiz");
                 error.response = { data: res };
@@ -116,7 +118,7 @@ export function useQuizQuestionsPage(
 export function useApproveQuiz() {
     return useMutation({
         mutationFn: async (quizData: any) => {
-            const res = await apiClient.post<any>("api/quizzes", quizData);
+            const res = await apiClient.post("api/quizzes", quizData) as ApiResp<QuizDetail>;;
             console.log('res :', res);
 
             if (!res.success) {
@@ -149,7 +151,7 @@ export interface QuizBaseDTO {
 }
 
 export interface QuizContentUpdateDTO {
-    questions: QuizQuestion[];
+    questions: Question[];
     replaceAll?: boolean;
 }
 
@@ -242,7 +244,7 @@ export function useUpdateQuiz(id: number) {
             questionIdsToDelete
         }: {
             metaChanges?: QuizBaseDTO;
-            questionsToUpsert?: QuizQuestion[];
+            questionsToUpsert?: Question[];
             questionIdsToDelete?: number[];
         }) => {
             const results = [];

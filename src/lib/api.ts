@@ -16,10 +16,12 @@ export const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+            config.headers = config.headers || {};
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
     return config;
 });
@@ -33,10 +35,14 @@ apiClient.interceptors.response.use(
     }
 );
 
-export async function apiCall<T>(path: string, config: AxiosRequestConfig = {}): Promise<T> {
-    return apiClient.request<T>({ url: path, ...config });
+export async function apiCall<T>(
+    path: string,
+    config: AxiosRequestConfig = {}
+): Promise<T> {
+    const res = await apiClient.request<T>({ url: path, ...config });
+    // do interceptor đã trả về res.data, nên lúc này res chính là T
+    return res as T;
 }
-
 function extractAxiosError(err: AxiosError): string {
     console.error("Full error object:", err);
 
@@ -93,7 +99,7 @@ export async function callGenerateAPI(params: {
 
         console.log("API Response:", res);
 
-        const { questions, ...rest } = mapBackendToFormData(res);
+        const { questions, ...rest } = mapBackendToFormData(res.data);
         useQuizzStorage.getState().setData({
             ...useQuizzStorage.getState().data,
             questions,

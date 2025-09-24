@@ -38,19 +38,7 @@ export function ProcessingScreen() {
         <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-green-100">
           <div className="h-full w-1/3 animate-[progress_1.2s_ease-in-out_infinite] rounded-full bg-green-500" />
         </div>
-        <style jsx>{`
-          @keyframes progress {
-            0% {
-              transform: translateX(-100%);
-            }
-            50% {
-              transform: translateX(20%);
-            }
-            100% {
-              transform: translateX(120%);
-            }
-          }
-        `}</style>
+
         <p className="mt-3 text-center text-xs text-muted-foreground">
           Vui lòng đợi, chúng tôi đang tối ưu đầu ra theo cấu hình của bạn.
         </p>

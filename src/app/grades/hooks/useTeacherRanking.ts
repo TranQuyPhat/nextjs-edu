@@ -33,7 +33,7 @@ export function useTeacherRanking() {
         queryKey: ["teacher-ranking"],
         queryFn: async () => {
             const res = await apiClient.get<StudentRanking[]>(`/api/stats/teacher/ranking`);
-            return res;
+            return res.data;
         },
         staleTime: 1000 * 60 * 2,
     });
@@ -44,7 +44,7 @@ export function useStudentResult() {
         queryKey: ["student-grades"],
         queryFn: async () => {
             const res = await apiClient.get<StudentResult[]>(`/api/student/grades`);
-            return res;
+            return res.data;
         },
         staleTime: 1000 * 60 * 2,
     });

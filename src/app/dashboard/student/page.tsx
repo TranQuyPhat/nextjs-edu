@@ -31,7 +31,7 @@ export default function StudentDashboard() {
   const router = useRouter();
   const { data, isLoading, isError, error } = useRecentScoreOfStudent();
 
-  const [user, setUser] = useState<{ username: string } | null>(null);
+  const [user, setUser] = useState<{ fullName: string } | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Dashboard state (kết hợp API + mock)

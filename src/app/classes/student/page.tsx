@@ -27,7 +27,7 @@ import {
   getClasses,
   createJoinRequest,
   getClassById,
-  searchClasses,      
+  searchClasses,
   getLatestClasses,
 } from "@/services/classService";
 import StudentNotificationToast from "@/components/classDetails/StudentNotificationToast";
@@ -72,6 +72,7 @@ export default function StudentClassesPage() {
   }, [currentPage, pageSize]);
 
   // Load lớp gợi ý khi mở tab tìm kiếm lần đầu
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (activeTab === "search" && searchResults.length === 0 && !searchTerm) {
       getLatestClasses().then((data) => {
@@ -153,7 +154,6 @@ export default function StudentClassesPage() {
   const handleSearch = async () => {
     setLoadingSearch(true);
     try {
-
       if (searchTerm.trim() === "") {
         // Nếu không nhập gì thì load lại 10 lớp gần nhất
         const latest = await getLatestClasses();
@@ -161,7 +161,12 @@ export default function StudentClassesPage() {
       } else {
         const results = await searchClasses(searchTerm);
         setSearchResults(results);
-        console.log("lớp tìm kiếm: ", searchResults, "searchTerm: " ,searchTerm)
+        console.log(
+          "lớp tìm kiếm: ",
+          searchResults,
+          "searchTerm: ",
+          searchTerm
+        );
       }
     } catch (err: any) {
       console.error("Lỗi tìm kiếm lớp:", err);
@@ -177,11 +182,7 @@ export default function StudentClassesPage() {
       <div>
         <Navigation />
         <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact
-            src="/animations/loading.lottie"
-            loop
-            autoplay
-          />
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
     );
@@ -200,7 +201,7 @@ export default function StudentClassesPage() {
               </h1>
               <p className="text-gray-600">Các lớp học bạn đã tham gia</p>
             </div>
-            
+
             <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-green-700 hover:bg-green-800">

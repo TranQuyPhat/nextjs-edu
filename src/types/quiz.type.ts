@@ -14,13 +14,13 @@ export type Question = {
     questionText: string;
     questionType: string
     options: Option[];
-    correctOptions: string | null;
-    score: null;
+    correctOptions?: string | null;
+    score?: null;
     explanation?: string | null;
-    correctAnswerTexts: null;
-    correctAnswerRegex: null;
-    caseSensitive: boolean;
-    trimWhitespace: boolean;
+    correctAnswerTexts?: null;
+    correctAnswerRegex?: null;
+    caseSensitive?: boolean;
+    trimWhitespace?: boolean;
 };
 export type Option = {
     optionLabel: string;
@@ -34,7 +34,7 @@ export type QuizzFormData = {
     endDate: string;
     classId?: number;
     createdBy?: number;
-    timeLimit: string;
+    timeLimit: number;
     description: string;
     fileName?: string;
     questions: Question[];
@@ -66,6 +66,7 @@ export interface QuizCard {
     status: string;
 }
 export interface AiQuizSettings {
+    generationMode: "EXTRACT" | "AI";
     numQuestions?: number;
     quizTitle?: string;
     language?: string;
