@@ -48,6 +48,7 @@ export default function TeacherDashboard() {
     }
   }, [router]);
 
+<<<<<<< HEAD
   const {
     data: dashboardData,
     isLoading,
@@ -60,6 +61,17 @@ export default function TeacherDashboard() {
   } = useTeacherRanking();
   if (isLoading) {
     return <PageSkeleton />;
+=======
+  if (loading) {
+    return (
+      <div>
+        <Navigation />
+        <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+        </div>
+      </div>
+    );
+>>>>>>> 6629ee2 (update loading)
   }
 
   if (!user || !dashboardData) return null;

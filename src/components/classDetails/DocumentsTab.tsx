@@ -280,11 +280,21 @@ export const DocumentsTab = ({ documents, classData }: DocumentTabProps) => {
 
   if (!user) {
     // Đảm bảo không render khi chưa có user
+<<<<<<< HEAD
     return (
       <div>
         <div className="container mx-auto p-6 h-96 flex justify-center items-center">
           <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
+=======
+    return (<div>
+      <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+        <DotLottieReact
+          src="/animations/loading.lottie"
+          loop
+          autoplay
+        />
+>>>>>>> 6629ee2 (update loading)
       </div>
     );
   }

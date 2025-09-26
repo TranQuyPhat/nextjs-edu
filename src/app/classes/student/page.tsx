@@ -266,8 +266,17 @@ export default function StudentClassesPage() {
     return (
       <div>
         <Navigation />
+<<<<<<< HEAD
         <div className="container mx-auto p-6 h-96 flex justify-center items-center">
           <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+=======
+        <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+          <DotLottieReact
+            src="/animations/loading.lottie"
+            loop
+            autoplay
+          />
+>>>>>>> 6629ee2 (update loading)
         </div>
       </div>
     );
