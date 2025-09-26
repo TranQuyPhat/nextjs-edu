@@ -2,7 +2,7 @@ import SockJS from "sockjs-client";
 import { Client, IMessage } from "@stomp/stompjs";
 import { CommentEvent } from "../type";
 
-const WS_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:8080/ws";
+const WS_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
 
 let stompClient: Client | null = null;
 

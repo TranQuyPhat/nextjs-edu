@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, CheckCircle2, Save, Edit3, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -136,14 +135,12 @@ export default function QuizEditPage() {
   async function onPrimaryAction() {
     if (mode === "edit") {
       try {
-        // Update meta first
         await updateMetaMutation.mutateAsync({
           title: quiz.title,
           classId: quiz.classId,
           timeLimit: Number(quiz.timeLimit),
           description: quiz.description,
         });
-        // Then update questions if any edited
         if (editedQuestions.length > 0) {
           await replaceContentMutation.mutateAsync({
             questions: editedQuestions,

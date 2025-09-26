@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useQuizStore } from "@/lib/store/quizStore";
 
@@ -20,7 +21,7 @@ export function ProcessingScreen() {
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
           <div>
-            <p className="font-medium text-green-800">AI đang xử lý...</p>
+            <AnimatedLoadingText />
             <p className="text-xs text-muted-foreground">
               {settings.generationMode === "EXTRACT"
                 ? "Trích xuất câu hỏi từ tài liệu"
@@ -35,14 +36,28 @@ export function ProcessingScreen() {
             <span className="font-medium">{fileNames || "..."}</span>
           </p>
         </div>
-        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-green-100">
-          <div className="h-full w-1/3 animate-[progress_1.2s_ease-in-out_infinite] rounded-full bg-green-500" />
-        </div>
 
         <p className="mt-3 text-center text-xs text-muted-foreground">
           Vui lòng đợi, chúng tôi đang tối ưu đầu ra theo cấu hình của bạn.
         </p>
       </div>
     </div>
+  );
+}
+
+// Hiệu ứng animated dots cho loading
+function AnimatedLoadingText() {
+  const [dots, setDots] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev + 1) % 4);
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+  return (
+    <p className="font-medium text-green-800">
+      AI đang xử lý{""}
+      <span className="inline-block w-6">{".".repeat(dots)}</span>
+    </p>
   );
 }

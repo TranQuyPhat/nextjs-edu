@@ -21,59 +21,14 @@ import {
   Target,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { fetchTeacherDashboard } from "@/services/dashboardService";
+import { useTeacherDashboard } from "@/services/dashboardService";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useTeacherRanking } from "@/app/grades/hooks/useTeacherRanking";
-
 export default function TeacherDashboard() {
-  const {
-    data: rankingData = [],
-    isLoading: rankingLoading,
-    error: rankingError,
-  } = useTeacherRanking();
   const router = useRouter();
+
+  // Lấy user & token từ localStorage
   const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  // Mock data for teacher dashboard
-  const [dashboardData, setDashboardData] = useState<{
-    totalClasses: number;
-    totalStudents: number;
-    totalAssignments: number;
-    pendingGrading: number;
-    averageGrade: number;
-    recentActivities: any[];
-    upcomingDeadlinesTeacher: any[];
-    topPerformers: any[];
-    gradeDistribution?: {
-      xuatSac: number;
-      gioi: number;
-      kha: number;
-      canCaiThien: number;
-      totalStudents: number;
-    };
-  }>({
-    totalClasses: 0,
-    totalStudents: 0,
-    totalAssignments: 0,
-    pendingGrading: 0,
-    averageGrade: 8.6,
-    recentActivities: [],
-    upcomingDeadlinesTeacher: [],
-    gradeDistribution: {
-      xuatSac: 0,
-      gioi: 0,
-      kha: 0,
-      canCaiThien: 0,
-      totalStudents: 0,
-    },
-    topPerformers: [],
-  });
-  console.log("dashboardData :", dashboardData);
-
-  const total = dashboardData.gradeDistribution?.totalStudents ?? 0;
-  const percent = (value: number) =>
-    total > 0 ? `${((value * 100) / total).toFixed(0)}%` : "0%";
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -85,32 +40,24 @@ export default function TeacherDashboard() {
     }
 
     try {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-
-      // 🔹 gọi API lấy dữ liệu dashboard
-      fetchTeacherDashboard().then((data) => {
-        setDashboardData((prev) => ({
-          ...prev,
-          totalClasses: data.totalClasses,
-          totalStudents: data.totalStudents,
-          totalAssignments: data.totalAssignments,
-          pendingGrading: data.pendingGrading,
-          averageGrade: data.averageGrade,
-          recentActivities: data.recentActivities,
-          upcomingDeadlinesTeacher: data.upcomingDeadlinesTeacher,
-          gradeDistribution: data.gradeDistribution,
-          // topPerformers: data.topPerformers ?? prev.topPerformers,
-        }));
-        setLoading(false);
-      });
+      setUser(JSON.parse(userData));
     } catch {
       localStorage.removeItem("user");
       router.replace("/auth/login");
     }
   }, [router]);
 
-  if (loading) {
+  const {
+    data: dashboardData,
+    isLoading,
+    error,
+  } = useTeacherDashboard(Boolean(user));
+  const {
+    data: rankingData = [],
+    isLoading: rankingLoading,
+    error: rankingError,
+  } = useTeacherRanking();
+  if (isLoading) {
     return (
       <div>
         <Navigation />
@@ -121,9 +68,11 @@ export default function TeacherDashboard() {
     );
   }
 
-  if (!user || !dashboardData) {
-    return null;
-  }
+  if (!user || !dashboardData) return null;
+
+  const total = dashboardData.gradeDistribution?.totalStudents ?? 0;
+  const percent = (value: number) =>
+    total > 0 ? `${((value * 100) / total).toFixed(0)}%` : "0%";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -429,30 +378,6 @@ export default function TeacherDashboard() {
                 )}
               </CardContent>
             </Card>
-            {/* Quick Stats */}
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Thống kê nhanh</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-sm">Bài tập đã tạo tuần này</span>
-                  <span className="font-medium">5</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Bài đã chấm tuần này</span>
-                  <span className="font-medium">23</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Câu hỏi từ học sinh</span>
-                  <span className="font-medium text-orange-600">3</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Tài liệu đã tải lên</span>
-                  <span className="font-medium">12</span>
-                </div>
-              </CardContent>
-            </Card> */}
           </div>
         </div>
       </div>
