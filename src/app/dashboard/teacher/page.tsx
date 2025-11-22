@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useTeacherDashboard } from "@/services/dashboardService";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useTeacherRanking } from "@/app/grades/hooks/useTeacherRanking";
+import { PageSkeleton } from "@/components/ui/skeleton-modern";
 export default function TeacherDashboard() {
   const router = useRouter();
 
@@ -58,14 +59,7 @@ export default function TeacherDashboard() {
     error: rankingError,
   } = useTeacherRanking();
   if (isLoading) {
-    return (
-      <div>
-        <Navigation />
-        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
-        </div>
-      </div>
-    );
+    return <PageSkeleton />;
   }
 
   if (!user || !dashboardData) return null;
@@ -75,71 +69,110 @@ export default function TeacherDashboard() {
     total > 0 ? `${((value * 100) / total).toFixed(0)}%` : "0%";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Navigation />
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Chào mừng, {user.fullName}!
-          </h1>
-          <p className="text-gray-600">
-            Tổng quan về hoạt động giảng dạy của bạn
-          </p>
+        <div className="mb-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mb-2">
+                Chào mừng trở lại!
+              </h1>
+              <p className="text-xl text-gray-600 font-medium">
+                Xin chào, <span className="text-blue-600 font-semibold">{user.fullName}</span>
+              </p>
+              <p className="text-gray-500 mt-1">
+                Tổng quan về hoạt động giảng dạy của bạn
+              </p>
+            </div>
+            <div className="hidden md:block">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-1">
+                    {new Date().toLocaleDateString('vi-VN', { weekday: 'long' })}
+                  </div>
+                  <div className="text-lg text-gray-600">
+                    {new Date().toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Lớp học</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dashboardData.totalClasses}
-              </div>
-              <p className="text-xs text-muted-foreground">Đang giảng dạy</p>
-            </CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 hover:-translate-y-2 overflow-hidden">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
+                <CardTitle className="text-sm font-semibold text-gray-700">Lớp học</CardTitle>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <BookOpen className="h-6 w-6 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="text-3xl font-bold text-blue-600 mb-1">
+                  {dashboardData.totalClasses}
+                </div>
+                <p className="text-sm text-gray-500">Đang giảng dạy</p>
+              </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Học sinh</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dashboardData.totalStudents}
-              </div>
-              <p className="text-xs text-muted-foreground">Tổng số học sinh</p>
-            </CardContent>
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 hover:-translate-y-2 overflow-hidden">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
+                <CardTitle className="text-sm font-semibold text-gray-700">Học sinh</CardTitle>
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="text-3xl font-bold text-green-600 mb-1">
+                  {dashboardData.totalStudents}
+                </div>
+                <p className="text-sm text-gray-500">Tổng số học sinh</p>
+              </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Bài tập</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dashboardData.totalAssignments}
-              </div>
-              <p className="text-xs text-muted-foreground">Đã tạo</p>
-            </CardContent>
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 hover:-translate-y-2 overflow-hidden">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
+                <CardTitle className="text-sm font-semibold text-gray-700">Bài tập</CardTitle>
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="text-3xl font-bold text-purple-600 mb-1">
+                  {dashboardData.totalAssignments}
+                </div>
+                <p className="text-sm text-gray-500">Đã tạo</p>
+              </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Chờ chấm</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {dashboardData.pendingGrading}
-              </div>
-              <p className="text-xs text-muted-foreground">Bài nộp mới</p>
-            </CardContent>
+          <Card className="group hover:shadow-2xl transition-all duration-500 border-0 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 hover:-translate-y-2 overflow-hidden">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
+                <CardTitle className="text-sm font-semibold text-gray-700">Chờ chấm</CardTitle>
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Clock className="h-6 w-6 text-white" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-6 pt-0">
+                <div className="text-3xl font-bold text-orange-600 mb-1">
+                  {dashboardData.pendingGrading}
+                </div>
+                <p className="text-sm text-gray-500">Bài nộp mới</p>
+              </CardContent>
+            </div>
           </Card>
         </div>
 
@@ -147,43 +180,48 @@ export default function TeacherDashboard() {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Thao tác nhanh</CardTitle>
+            <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-500">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-white" />
+                  </div>
+                  Thao tác nhanh
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <Link href="#">
-                    <Button className="w-full h-20 flex flex-col gap-2">
-                      <Plus className="h-5 w-5" />
-                      <span className="text-xs">Tạo bài tập</span>
+                    <Button className="w-full h-24 flex flex-col gap-3 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 rounded-xl">
+                      <Plus className="h-6 w-6" />
+                      <span className="text-sm font-semibold">Tạo bài tập</span>
                     </Button>
                   </Link>
                   <Link href="/classes/teacher">
                     <Button
                       variant="outline"
-                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
+                      className="w-full h-24 flex flex-col gap-3 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 transition-all duration-300 border-2 border-green-200 hover:border-green-300 rounded-xl"
                     >
-                      <BookOpen className="h-5 w-5" />
-                      <span className="text-xs">Quản lý lớp</span>
+                      <BookOpen className="h-6 w-6 text-green-600" />
+                      <span className="text-sm font-semibold text-green-700">Quản lý lớp</span>
                     </Button>
                   </Link>
                   <Link href="/grades/teacher">
                     <Button
                       variant="outline"
-                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
+                      className="w-full h-24 flex flex-col gap-3 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 transition-all duration-300 border-2 border-purple-200 hover:border-purple-300 rounded-xl"
                     >
-                      <Award className="h-5 w-5" />
-                      <span className="text-xs">Xem điểm</span>
+                      <Award className="h-6 w-6 text-purple-600" />
+                      <span className="text-sm font-semibold text-purple-700">Xem điểm</span>
                     </Button>
                   </Link>
                   <Link href="/quizzes/teacher">
                     <Button
                       variant="outline"
-                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
+                      className="w-full h-24 flex flex-col gap-3 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 transition-all duration-300 border-2 border-orange-200 hover:border-orange-300 rounded-xl"
                     >
-                      <Target className="h-5 w-5" />
-                      <span className="text-xs">Tạo quiz</span>
+                      <Target className="h-6 w-6 text-orange-600" />
+                      <span className="text-sm font-semibold text-orange-700">Tạo quiz</span>
                     </Button>
                   </Link>
                 </div>
