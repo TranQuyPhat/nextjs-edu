@@ -66,11 +66,19 @@ export default function Navigation() {
   ];
 
   const studentNavItems = [
+<<<<<<< HEAD
     { href: "/dashboard/student", label: "Trang chủ", icon: Home, color: "blue" },
     { href: "/classes/student", label: "Lớp học", icon: Users, color: "green" },
     { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen, color: "purple" },
     { href: "/grades/student", label: "Kết quả", icon: GraduationCap, color: "red" },
     { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar, color: "orange" },
+=======
+    { href: "/dashboard/student", label: "Trang chủ", icon: Home },
+    { href: "/classes/student", label: "Lớp học", icon: Users },
+    { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen },
+    { href: "/grades/student", label: "Kết quả", icon: GraduationCap },
+    // { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar },
+>>>>>>> 7afe81f (update23/9)
   ];
 
   const currentRole = user?.roles?.includes("teacher") ? "teacher" : "student";

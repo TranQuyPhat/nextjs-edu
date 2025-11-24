@@ -39,6 +39,30 @@ export const searchClasses = async (query: string) => {
   return res.data;
 };
 
+
+export const searchClassesTeacher = async (teacherId: number, keyword: string) => {
+  try {
+    const res = await apiClient.get(`/auth/classes/teacher/${teacherId}/search?keyword=${encodeURIComponent(keyword)}`);
+    console.log("Dữ liệu tìm lớp học trả về từ API:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error('Error searching classes:', error);
+    throw error;
+  }
+};
+
+
+export const searchClassesStudent = async (studentId: number, keyword: string) => {
+  try {
+    const res = await apiClient.get(`/auth/classes/student/${studentId}/search?keyword=${encodeURIComponent(keyword)}`);
+    console.log("Dữ liệu tìm lớp học trả về từ API:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error('Error searching classes:', error);
+    throw error;
+  }
+};
+
 export const getSuggestedClasses = async () => {
   const res = await apiClient.get(`/auth/classes/suggested`);
   return res.data;

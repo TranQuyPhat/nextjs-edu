@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Eye } from "lucide-react";
+import { Plus, Eye, Search, X } from "lucide-react";
 import Link from "next/link";
 import {
   getStudentClasses,
@@ -29,6 +30,7 @@ import {
   getClassById,
   searchClasses,
   getLatestClasses,
+  searchClassesStudent, // Sử dụng hàm search backend
 } from "@/services/classService";
 import StudentNotificationToast from "@/components/classDetails/StudentNotificationToast";
 import { toast } from "react-toastify";
@@ -37,8 +39,15 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 export default function StudentClassesPage() {
   const [user, setUser] = useState<any>(null);
   const [classes, setClasses] = useState<any[]>([]);
-  const [joinCode, setJoinCode] = useState("");
 
+  // States cho tìm kiếm chính
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchDebounceTimeout, setSearchDebounceTimeout] =
+    useState<NodeJS.Timeout | null>(null);
+
+  // States cho dialog tham gia lớp
+  const [joinCode, setJoinCode] = useState("");
   const [activeTab, setActiveTab] = useState<"code" | "search">("code");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -55,21 +64,91 @@ export default function StudentClassesPage() {
       setUser(parsedUser);
       console.log("parsedUser :", parsedUser);
 
-      getStudentClasses(parsedUser.userId, currentPage, pageSize)
-        .then((res) => {
-          setClasses(Array.isArray(res.data) ? res.data : res.data || []);
-          setTotalPages(res.totalPages || 1);
-          console.log("res", res);
-        })
-        .catch((error) => {
-          console.error("Lỗi khi lấy lớp học:", error);
-          toast.error(
-            error?.response?.data?.messages?.[0] ??
-              "Không thể tải danh sách lớp học!"
-          );
-        });
+      loadStudentClasses(parsedUser.userId, currentPage);
     }
   }, [currentPage, pageSize]);
+
+  const loadStudentClasses = (userId: number, page: number) => {
+    getStudentClasses(userId, page, pageSize)
+      .then((res) => {
+        setClasses(Array.isArray(res.data) ? res.data : res.data || []);
+        setTotalPages(res.totalPages || 1);
+        console.log("res", res);
+      })
+      .catch((error) => {
+        console.error("Lỗi khi lấy lớp học:", error);
+        toast.error(
+          error?.response?.data?.messages?.[0] ??
+            "Không thể tải danh sách lớp học!"
+        );
+      });
+  };
+
+  // Function tìm kiếm lớp học của student với phân trang
+  const handleSearchStudentClasses = async (
+    keyword: string,
+    page: number = 0
+  ) => {
+    if (!keyword.trim()) {
+      loadStudentClasses(user.userId, page);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+<<<<<<< HEAD
+      const response = await searchClassesStudentPaginate(
+        user.userId,
+        keyword,
+        page,
+        pageSize
+      );
+      setClasses(response.data);
+      setCurrentPage(response.pageNumber);
+      setTotalPages(response.totalPages);
+=======
+      const res = await searchClassesStudent(user.userId, searchKeyword.trim());
+
+      // Hiển thị tất cả kết quả từ backend, không phân trang
+      setClasses(res.data || res);
+      setCurrentPage(0);
+      setTotalPages(0); // Không phân trang khi search
+
+      console.log("Kết quả tìm kiếm:", res);
+>>>>>>> 1360c2b (update before deploy v1)
+    } catch (err: any) {
+      console.error("Lỗi khi tìm kiếm lớp:", err);
+      toast.error(
+        err?.response?.data?.messages?.[0] ?? "Không thể tìm kiếm lớp!"
+      );
+    }
+  };
+
+  // Clear search và load lại lớp của student
+  const clearSearch = () => {
+    setSearchKeyword("");
+    setIsSearching(false);
+    setCurrentPage(0);
+    loadStudentClasses(user.userId, 0);
+  };
+
+  // Handle search input với debounce
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+
+    // Clear timeout cũ
+    if (searchDebounceTimeout) {
+      clearTimeout(searchDebounceTimeout);
+    }
+
+    // Set timeout mới
+    const timeoutId = setTimeout(() => {
+      handleSearchStudentClasses(value, 0); // Reset về trang đầu khi search
+    }, 500);
+
+    setSearchDebounceTimeout(timeoutId);
+  };
 
   // Load lớp gợi ý khi mở tab tìm kiếm lần đầu
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,12 +182,17 @@ export default function StudentClassesPage() {
       // Hiển thị thông báo tùy theo join_mode
       if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
+        // Refresh danh sách lớp
+        if (isSearching) {
+          clearSearch();
+        } else {
+          loadStudentClasses(user.userId, currentPage);
+        }
       } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
       } else {
-        // Fallback message nếu không có thông tin join_mode
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
@@ -132,12 +216,17 @@ export default function StudentClassesPage() {
       // Hiển thị thông báo tùy theo join_mode
       if (classInfo?.joinMode === "AUTO") {
         toast.success("Bạn đã tham gia lớp thành công!");
+        // Refresh danh sách lớp
+        if (isSearching) {
+          clearSearch();
+        } else {
+          loadStudentClasses(user.userId, currentPage);
+        }
       } else if (classInfo?.joinMode === "APPROVAL") {
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
       } else {
-        // Fallback message nếu không có thông tin join_mode
         toast.info(
           "Yêu cầu tham gia lớp đã được gửi, vui lòng đợi giáo viên xác nhận."
         );
@@ -151,7 +240,7 @@ export default function StudentClassesPage() {
     }
   };
 
-  const handleSearch = async () => {
+  const handleSearchJoinDialog = async () => {
     setLoadingSearch(true);
     try {
       if (searchTerm.trim() === "") {
@@ -177,12 +266,32 @@ export default function StudentClassesPage() {
     setLoadingSearch(false);
   };
 
+  // Handle page change - chỉ hoạt động khi không tìm kiếm
+  const handlePageChange = (page: number) => {
+    if (!isSearching) {
+      setCurrentPage(page);
+    }
+  };
+
   if (!user) {
     return (
       <div>
         <Navigation />
+<<<<<<< HEAD
         <div className="container mx-auto p-6 h-96 flex justify-center items-center">
           <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+=======
+        <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+<<<<<<< HEAD
+          <DotLottieReact
+            src="/animations/loading.lottie"
+            loop
+            autoplay
+          />
+>>>>>>> 6629ee2 (update loading)
+=======
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+>>>>>>> 1360c2b (update before deploy v1)
         </div>
       </div>
     );
@@ -199,175 +308,267 @@ export default function StudentClassesPage() {
               <h1 className="text-3xl font-bold text-green-700">
                 Lớp học của tôi
               </h1>
+<<<<<<< HEAD
+              <p className="text-gray-600">
+                {isSearching && searchKeyword.trim()
+                  ? `Kết quả tìm kiếm cho: "${searchKeyword}"`
+                  : "Các lớp học bạn đã tham gia"}
+              </p>
+=======
               <p className="text-gray-600">Các lớp học bạn đã tham gia</p>
+>>>>>>> 1360c2b (update before deploy v1)
             </div>
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button className="bg-green-700 hover:bg-green-800">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Tham gia lớp
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className="text-green-700">
-                    Tham gia lớp học
-                  </DialogTitle>
-                  <DialogDescription>Chọn cách tham gia</DialogDescription>
-                </DialogHeader>
-
-                {/* Tabs */}
-                <div className="flex gap-2 mb-4">
-                  <Button
-                    variant={activeTab === "code" ? "default" : "outline"}
-                    onClick={() => setActiveTab("code")}
-                    className={
-                      activeTab === "code"
-                        ? "bg-green-700 hover:bg-green-800"
-                        : "border-green-700 text-green-700 hover:bg-green-100"
-                    }
-                  >
-                    Nhập mã lớp
+            <div className="flex items-center gap-4">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-700 hover:bg-green-800">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tham gia lớp
                   </Button>
-                  <Button
-                    variant={activeTab === "search" ? "default" : "outline"}
-                    onClick={() => setActiveTab("search")}
-                    className={
-                      activeTab === "search"
-                        ? "bg-green-700 hover:bg-green-800"
-                        : "border-green-700 text-green-700 hover:bg-green-100"
-                    }
-                  >
-                    Tìm kiếm lớp
-                  </Button>
-                </div>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle className="text-green-700">
+                      Tham gia lớp học
+                    </DialogTitle>
+                    <DialogDescription>Chọn cách tham gia</DialogDescription>
+                  </DialogHeader>
 
-                {/* Tab nhập mã */}
-                {activeTab === "code" && (
-                  <div className="space-y-4">
-                    <Label htmlFor="joinCode">Mã lớp</Label>
-                    <Input
-                      id="joinCode"
-                      value={joinCode}
-                      onChange={(e) => setJoinCode(e.target.value)}
-                      placeholder="Nhập mã lớp (VD: 123456)"
-                    />
+                  {/* Tabs */}
+                  <div className="flex gap-2 mb-4">
                     <Button
-                      onClick={handleJoinClass}
-                      className="w-full bg-green-700 hover:bg-green-800"
+                      variant={activeTab === "code" ? "default" : "outline"}
+                      onClick={() => setActiveTab("code")}
+                      className={
+                        activeTab === "code"
+                          ? "bg-green-700 hover:bg-green-800"
+                          : "border-green-700 text-green-700 hover:bg-green-100"
+                      }
                     >
-                      Tham gia
+                      Nhập mã lớp
+                    </Button>
+                    <Button
+                      variant={activeTab === "search" ? "default" : "outline"}
+                      onClick={() => setActiveTab("search")}
+                      className={
+                        activeTab === "search"
+                          ? "bg-green-700 hover:bg-green-800"
+                          : "border-green-700 text-green-700 hover:bg-green-100"
+                      }
+                    >
+                      Tìm kiếm lớp
                     </Button>
                   </div>
-                )}
 
-                {/* Tab tìm kiếm */}
-                {activeTab === "search" && (
-                  <div className="space-y-4">
-                    <div className="flex gap-2">
+                  {/* Tab nhập mã */}
+                  {activeTab === "code" && (
+                    <div className="space-y-4">
+                      <Label htmlFor="joinCode">Mã lớp</Label>
                       <Input
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Tìm theo tên lớp hoặc giảng viên"
+                        id="joinCode"
+                        value={joinCode}
+                        onChange={(e) => setJoinCode(e.target.value)}
+                        placeholder="Nhập mã lớp (VD: 123456)"
                       />
                       <Button
-                        onClick={handleSearch}
-                        disabled={loadingSearch}
-                        className="bg-green-700 hover:bg-green-800"
+                        onClick={handleJoinClass}
+                        className="w-full bg-green-700 hover:bg-green-800"
                       >
-                        {loadingSearch ? "Đang tìm..." : "Tìm"}
+                        Tham gia
                       </Button>
                     </div>
-                    <div className="space-y-3 max-h-60 overflow-y-auto">
-                      {searchResults.length === 0 && <p>Không có lớp nào.</p>}
-                      {searchResults.map((item) => (
-                        <Card key={item.id} className="p-3">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <p className="font-bold text-green-700">
-                                {item.className}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                GV: {item.teacher?.fullName || "Chưa rõ"}
-                              </p>
+                  )}
+
+                  {/* Tab tìm kiếm */}
+                  {activeTab === "search" && (
+                    <div className="space-y-4">
+                      <div className="flex gap-2">
+                        <Input
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          placeholder="Tìm theo tên lớp"
+                        />
+                        <Button
+                          onClick={handleSearchJoinDialog}
+                          disabled={loadingSearch}
+                          className="bg-green-700 hover:bg-green-800"
+                        >
+                          {loadingSearch ? "Đang tìm..." : "Tìm"}
+                        </Button>
+                      </div>
+                      <div className="space-y-3 max-h-60 overflow-y-auto">
+                        {searchResults.length === 0 && <p>Không có lớp nào.</p>}
+                        {searchResults.map((item) => (
+                          <Card key={item.id} className="p-3">
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <p className="font-bold text-green-700">
+                                  {item.className}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  GV: {item.teacher?.fullName || "Chưa rõ"}
+                                </p>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleJoinFromSearch(item.id)}
+                                className="ml-4 shrink-0 bg-green-700 hover:bg-green-800"
+                              >
+                                Tham gia
+                              </Button>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => handleJoinFromSearch(item.id)}
-                              className="ml-4 shrink-0 bg-green-700 hover:bg-green-800"
-                            >
-                              Tham gia
-                            </Button>
-                          </div>
-                        </Card>
-                      ))}
+                          </Card>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </DialogContent>
-            </Dialog>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+
+<<<<<<< HEAD
+          {/* Hiển thị badge khi đang search */}
+          {isSearching && searchKeyword.trim() && (
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="bg-blue-50 text-blue-700 border-blue-200"
+              >
+                <Search className="h-3 w-3 mr-1" />
+                Đang tìm kiếm
+              </Badge>
+=======
+          {/* Thanh tìm kiếm */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 max-w-md flex gap-2">
+              <Input
+                placeholder="Tìm kiếm lớp học của tôi..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
+>>>>>>> 1360c2b (update before deploy v1)
+              <Button
+                onClick={handleSearch}
+                className="bg-green-700 hover:bg-green-800"
+                disabled={!searchKeyword.trim()}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {isSearching && (
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-500">
+                  Tìm thấy {classes.length} kết quả cho &quot;{searchKeyword}
+                  &quot;
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearSearch}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Xóa tìm kiếm
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Danh sách lớp */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {classes.map((classItem) => (
-              <Card
-                key={classItem.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardHeader>
-                  <CardTitle className="text-lg text-green-700">
-                    {classItem.className}
-                  </CardTitle>
-                  <CardDescription>
-                    Giáo viên: {classItem.teacher?.fullName || "Chưa rõ"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span>Năm học:</span>
-                      <span>{classItem.schoolYear}</span>
+          {classes.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {classes.map((classItem) => (
+                <Card
+                  key={classItem.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
+                  <CardHeader>
+                    <CardTitle className="text-lg text-green-700">
+                      {classItem.className}
+                    </CardTitle>
+                    <CardDescription>
+                      Giáo viên: {classItem.teacher?.fullName || "Chưa rõ"}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span>Năm học:</span>
+                        <span>{classItem.schoolYear}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Học kỳ:</span>
+                        <span>{classItem.semester}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Môn học:</span>
+                        <span>{classItem.subject?.name}</span>
+                      </div>
+                      <Link href={`/classes/${classItem.id}`}>
+                        <Button
+                          size="sm"
+                          className="w-full mt-2 bg-green-700 hover:bg-green-800"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Vào lớp học
+                        </Button>
+                      </Link>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Học kỳ:</span>
-                      <span>{classItem.semester}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Môn học:</span>
-                      <span>{classItem.subject?.name}</span>
-                    </div>
-                    <Link href={`/classes/${classItem.id}`}>
-                      <Button
-                        size="sm"
-                        className="w-full mt-2 bg-green-700 hover:bg-green-800"
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Vào lớp học
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-gray-500 mb-2">
+                {isSearching && searchKeyword.trim()
+<<<<<<< HEAD
+                  ? "Không tìm thấy lớp học nào"
+=======
+                  ? `Không tìm thấy lớp học nào với từ khóa "${searchKeyword}"`
+>>>>>>> 1360c2b (update before deploy v1)
+                  : "Chưa tham gia lớp học nào"}
+              </div>
+              <div className="text-sm text-gray-400">
+                {isSearching && searchKeyword.trim()
+                  ? "Thử từ khóa khác hoặc tham gia lớp học mới"
+                  : "Bắt đầu bằng cách tham gia lớp học đầu tiên"}
+              </div>
+              {isSearching && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={clearSearch}
+                >
+                  Xem tất cả lớp của tôi
+                </Button>
+              )}
+            </div>
+          )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
+          {/* Pagination - chỉ hiển thị khi không tìm kiếm */}
+          {!isSearching && totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
               {Array.from({ length: totalPages }, (_, i) => i).map((num) => (
                 <Button
                   key={num}
                   variant={num === currentPage ? "default" : "outline"}
-                  onClick={() => setCurrentPage(num)}
+                  onClick={() => handlePageChange(num)}
                   className={
                     num === currentPage
                       ? "bg-green-700 hover:bg-green-800"
                       : "border-green-700 text-green-700 hover:bg-green-100"
                   }
                 >
-                  {num}
+                  {num + 1}
                 </Button>
               ))}
             </div>

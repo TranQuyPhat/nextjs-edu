@@ -64,6 +64,7 @@ export default function UploadSubmission({
   // const [submissionList, setSubmissionList] = useState<Submission[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+<<<<<<< HEAD
   const {
     register,
     handleSubmit,
@@ -78,9 +79,16 @@ export default function UploadSubmission({
       file: null,
     },
   });
+=======
+    const [user, setUser] = useState<any>(null);
+    // const [submissionList, setSubmissionList] = useState<Submission[]>([]);
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+>>>>>>> 1774028 (update)
 
   const watchedFile = watch("file");
 
+<<<<<<< HEAD
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
@@ -88,6 +96,57 @@ export default function UploadSubmission({
         const parsedUser = JSON.parse(userData);
         if (parsedUser) {
           setUser(parsedUser);
+=======
+    const watchedFile = watch("file")
+
+    useEffect(() => {
+        const userData = localStorage.getItem("user");
+        if (userData) {
+            try {
+                const parsedUser = JSON.parse(userData);
+                if (parsedUser) {
+                    setUser(parsedUser);
+                }
+            } catch (e) {
+                console.error("Lỗi parse user:", e);
+            }
+        }
+    }, []);
+
+    const onSubmit = async (data: FieldValues) => {
+        setIsLoading(true)
+        const submissionData = data as SubmissionFormData;
+        try {
+            const formData = new FormData()
+            formData.append("assignmentId", assignment.id.toString())
+            formData.append("studentId", user.userId.toString())
+            if (submissionData.file) {
+                formData.append("file", submissionData.file)
+            }
+            formData.append("description", submissionData.description || "")
+
+            const newSubmission = await submitAssignment(formData)
+            // Gọi callback cho cha biết
+            if (onSuccess) {
+                onSuccess(newSubmission)
+            }
+            // setSubmissionList(prev => [newSubmission, ...prev]); // Cập nhật danh sách bài nộp
+            reset() // Reset form về giá trị mặc định
+            setIsDialogOpen(false) // Đóng dialog sau khi tạo thành công
+            // Swal.fire({
+            //     position: "top-end",
+            //     icon: "success",
+            //     title: "Nộp bài tập thành công!",
+            //     showConfirmButton: false,
+            //     timer: 1500
+            // });
+            toast.success("Nộp bài tập thành công!")
+        } catch (error) {
+            console.error("Có lỗi xảy ra khi tạo bài nộp:", error)
+            toast.error("Có lỗi xảy ra khi tạo bài nộp.") // Thông báo lỗi
+        } finally {
+            setIsLoading(false)
+>>>>>>> 1774028 (update)
         }
       } catch (e) {
         console.error("Lỗi parse user:", e);
@@ -106,6 +165,7 @@ export default function UploadSubmission({
       }
       formData.append("description", submissionData.description || "");
 
+<<<<<<< HEAD
       const newSubmission = await submitAssignment(formData);
       // Gọi callback cho cha biết
       if (onSuccess) {
@@ -205,3 +265,62 @@ export default function UploadSubmission({
     </Dialog>
   );
 }
+=======
+    return (
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+                <Button size="sm" disabled={isOverdue}>
+                    <Upload className="h-4 w-4 mr-1" />
+                    {isOverdue ? "Hết hạn nộp" : "Nộp bài"}
+                </Button>
+            </DialogTrigger>
+            {!isOverdue && (
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Nộp bài tập</DialogTitle>
+                        <DialogDescription>{assignment.title}</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="file">Tải tệp đính kèm lên</Label>
+                                <div
+                                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
+                                    onClick={() => document.getElementById("file")?.click()}
+                                >
+                                    <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
+                                    <p className="text-sm text-gray-600">Kéo thả tệp hoặc click để chọn</p>
+                                    <p className="text-sm text-gray-600">Hỗ trợ PDF, Word, PowerPoint, PNG, JPG</p>
+                                    <p className="text-xs text-gray-500">Tối đa 10MB</p>
+                                    {watchedFile && <p className="text-xs text-gray-500 mt-2">{watchedFile.name}</p>}
+                                </div>
+                                <input
+                                    id="file"
+                                    type="file"
+                                    className="hidden"
+                                    {...register("file")}
+                                    onChange={(e) => {
+                                        setValue("file", e.target.files?.[0] || null, { shouldValidate: true })
+                                    }}
+                                />
+                                {errors.file && <p className="text-red-500 text-sm">{errors.file.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="description">Ghi chú (mô tả)</Label>
+                                <Textarea
+                                    id="description"
+                                    {...register("description")}
+                                    placeholder="Thêm ghi chú mô tả cho bài làm..."
+                                    rows={4}
+                                />
+                                {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+                            </div>
+                            <Button type='submit' className="w-full" disabled={isLoading}>{isLoading ? "Đang nộp bài..." : "Nộp bài"}</Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            )}
+        </Dialog>
+    )
+}
+>>>>>>> 1774028 (update)

@@ -281,7 +281,11 @@ export default function LoginPage() {
               />
               {loginErrors.email && (
                 <p className="text-sm text-red-500">
+<<<<<<< HEAD
                   {loginErrors.email.message as string}
+=======
+                  {errors.email.message as string}
+>>>>>>> 1360c2b (update before deploy v1)
                 </p>
               )}
             </div>
@@ -295,7 +299,11 @@ export default function LoginPage() {
               />
               {loginErrors.password && (
                 <p className="text-sm text-red-500">
+<<<<<<< HEAD
                   {loginErrors.password.message as string}
+=======
+                  {errors.password.message as string}
+>>>>>>> 1360c2b (update before deploy v1)
                 </p>
               )}
             </div>
@@ -327,7 +335,11 @@ export default function LoginPage() {
               />
               {forgotErrors.email && (
                 <p className="text-sm text-red-500">
+<<<<<<< HEAD
                   {forgotErrors.email.message as string}
+=======
+                  {errors.email.message as string}
+>>>>>>> 1360c2b (update before deploy v1)
                 </p>
               )}
             </div>
@@ -349,7 +361,11 @@ export default function LoginPage() {
               />
               {otpErrors.otp && (
                 <p className="text-sm text-red-500">
+<<<<<<< HEAD
                   {otpErrors.otp.message as string}
+=======
+                  {errors.otp.message as string}
+>>>>>>> 1360c2b (update before deploy v1)
                 </p>
               )}
               <p className="text-sm text-gray-500">
@@ -372,7 +388,11 @@ export default function LoginPage() {
               />
               {resetErrors.newPassword && (
                 <p className="text-sm text-red-500">
+<<<<<<< HEAD
                   {resetErrors.newPassword.message as string}
+=======
+                  {errors.newPassword.message as string}
+>>>>>>> 1360c2b (update before deploy v1)
                 </p>
               )}
             </div>
@@ -386,7 +406,11 @@ export default function LoginPage() {
               />
               {resetErrors.confirmPassword && (
                 <p className="text-sm text-red-500">
+<<<<<<< HEAD
                   {resetErrors.confirmPassword.message as string}
+=======
+                  {errors.confirmPassword.message as string}
+>>>>>>> 1360c2b (update before deploy v1)
                 </p>
               )}
             </div>

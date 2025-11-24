@@ -24,7 +24,8 @@ import { useRouter } from "next/navigation";
 import { useTeacherDashboard } from "@/services/dashboardService";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useTeacherRanking } from "@/app/grades/hooks/useTeacherRanking";
-import { PageSkeleton } from "@/components/ui/skeleton-modern";
+import { TeacherDashboardSkeleton } from "./teacherdashboradskeleton";
+
 export default function TeacherDashboard() {
   const router = useRouter();
 
@@ -48,6 +49,7 @@ export default function TeacherDashboard() {
     }
   }, [router]);
 
+<<<<<<< HEAD
   const {
     data: dashboardData,
     isLoading,
@@ -60,6 +62,18 @@ export default function TeacherDashboard() {
   } = useTeacherRanking();
   if (isLoading) {
     return <PageSkeleton />;
+=======
+  if (loading) {
+    return (
+      <div>
+        <Navigation />
+        {/* <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+        </div> */}
+        <TeacherDashboardSkeleton />
+      </div>
+    );
+>>>>>>> 6629ee2 (update loading)
   }
 
   if (!user || !dashboardData) return null;
