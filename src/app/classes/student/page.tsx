@@ -96,6 +96,7 @@ export default function StudentClassesPage() {
 
     try {
       setIsSearching(true);
+<<<<<<< HEAD
       const response = await searchClassesStudentPaginate(
         user.userId,
         keyword,
@@ -105,6 +106,16 @@ export default function StudentClassesPage() {
       setClasses(response.data);
       setCurrentPage(response.pageNumber);
       setTotalPages(response.totalPages);
+=======
+      const res = await searchClassesStudent(user.userId, searchKeyword.trim());
+
+      // Hiển thị tất cả kết quả từ backend, không phân trang
+      setClasses(res.data || res);
+      setCurrentPage(0);
+      setTotalPages(0); // Không phân trang khi search
+
+      console.log("Kết quả tìm kiếm:", res);
+>>>>>>> 1360c2b (update before deploy v1)
     } catch (err: any) {
       console.error("Lỗi khi tìm kiếm lớp:", err);
       toast.error(
@@ -271,12 +282,16 @@ export default function StudentClassesPage() {
           <DotLottieReact src="/animations/loading.lottie" loop autoplay />
 =======
         <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+<<<<<<< HEAD
           <DotLottieReact
             src="/animations/loading.lottie"
             loop
             autoplay
           />
 >>>>>>> 6629ee2 (update loading)
+=======
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+>>>>>>> 1360c2b (update before deploy v1)
         </div>
       </div>
     );
@@ -293,11 +308,15 @@ export default function StudentClassesPage() {
               <h1 className="text-3xl font-bold text-green-700">
                 Lớp học của tôi
               </h1>
+<<<<<<< HEAD
               <p className="text-gray-600">
                 {isSearching && searchKeyword.trim()
                   ? `Kết quả tìm kiếm cho: "${searchKeyword}"`
                   : "Các lớp học bạn đã tham gia"}
               </p>
+=======
+              <p className="text-gray-600">Các lớp học bạn đã tham gia</p>
+>>>>>>> 1360c2b (update before deploy v1)
             </div>
 
             <div className="flex items-center gap-4">
@@ -409,6 +428,7 @@ export default function StudentClassesPage() {
             </div>
           </div>
 
+<<<<<<< HEAD
           {/* Hiển thị badge khi đang search */}
           {isSearching && searchKeyword.trim() && (
             <div className="flex items-center gap-2">
@@ -419,6 +439,21 @@ export default function StudentClassesPage() {
                 <Search className="h-3 w-3 mr-1" />
                 Đang tìm kiếm
               </Badge>
+=======
+          {/* Thanh tìm kiếm */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 max-w-md flex gap-2">
+              <Input
+                placeholder="Tìm kiếm lớp học của tôi..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
+>>>>>>> 1360c2b (update before deploy v1)
               <Button
                 onClick={handleSearch}
                 className="bg-green-700 hover:bg-green-800"
@@ -431,7 +466,8 @@ export default function StudentClassesPage() {
             {isSearching && (
               <div className="flex items-center gap-4">
                 <div className="text-sm text-gray-500">
-                  Tìm thấy {classes.length} kết quả cho "{searchKeyword}"
+                  Tìm thấy {classes.length} kết quả cho &quot;{searchKeyword}
+                  &quot;
                 </div>
                 <Button
                   variant="outline"
@@ -494,7 +530,11 @@ export default function StudentClassesPage() {
             <div className="text-center py-12">
               <div className="text-gray-500 mb-2">
                 {isSearching && searchKeyword.trim()
+<<<<<<< HEAD
                   ? "Không tìm thấy lớp học nào"
+=======
+                  ? `Không tìm thấy lớp học nào với từ khóa "${searchKeyword}"`
+>>>>>>> 1360c2b (update before deploy v1)
                   : "Chưa tham gia lớp học nào"}
               </div>
               <div className="text-sm text-gray-400">

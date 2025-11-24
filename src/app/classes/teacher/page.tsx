@@ -30,7 +30,17 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Users, Plus, Copy, Eye, Settings, Trash2, Edit3, Search, X } from "lucide-react";
+import {
+  Users,
+  Plus,
+  Copy,
+  Eye,
+  Settings,
+  Trash2,
+  Edit3,
+  Search,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import {
   getTeacherClasses,
@@ -55,7 +65,6 @@ import {
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-
 
 // Schema validate form lớp học
 const classSchema = yup.object().shape({
@@ -143,7 +152,8 @@ export default function TeacherClassesPage() {
       .catch((err) => {
         console.error("Lỗi khi lấy môn học:", err);
         toast.error(
-          err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách môn học!"
+          err?.response?.data?.messages?.[0] ??
+            "Không thể tải danh sách môn học!"
         );
       });
   };
@@ -158,12 +168,12 @@ export default function TeacherClassesPage() {
     try {
       setIsSearching(true);
       const res = await searchClassesTeacher(user.userId, searchKeyword.trim());
-      
+
       // Hiển thị tất cả kết quả từ backend, không phân trang
       setClasses(res.data || res);
       setPageNumber(0);
       setTotalPages(0); // Không phân trang khi search
-      
+
       console.log("Kết quả tìm kiếm:", res);
     } catch (err: any) {
       console.error("Lỗi khi tìm kiếm lớp:", err);
@@ -260,7 +270,6 @@ export default function TeacherClassesPage() {
       classForm.reset();
       setIsModalOpen(false);
       setEditingClass(null);
-
     } catch (err: any) {
       console.error(
         editingClass ? "Lỗi cập nhật lớp học:" : "Lỗi tạo lớp học:",
@@ -281,24 +290,24 @@ export default function TeacherClassesPage() {
       icon: "error",
       showCancelButton: true,
       confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy bỏ", 
+      cancelButtonText: "Hủy bỏ",
       reverseButtons: true,
-      confirmButtonColor: '#dc2626',
-      cancelButtonColor: '#6b7280',
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
       focusCancel: true, // Tránh nhấn nhầm
     });
 
     if (result.isConfirmed) {
       try {
         await deleteClass(id);
-        
+
         // Load lại danh sách lớp
         if (isSearching) {
           clearSearch(); // Clear search và load lại trang bình thường
         } else {
           await loadClasses(user.userId, pageNumber);
         }
-        
+
         toast.success("Xóa lớp thành công!");
       } catch {
         Swal.fire("Thất bại!", "Xóa lớp thất bại.", "error");
@@ -316,11 +325,7 @@ export default function TeacherClassesPage() {
       <div>
         <Navigation />
         <div className="container mx-auto p-6 h-52 flex justify-center items-center">
-          <DotLottieReact
-            src="/animations/loading.lottie"
-            loop
-            autoplay
-          />
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
     );
@@ -376,7 +381,7 @@ export default function TeacherClassesPage() {
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === "Enter") {
                     handleSearch();
                   }
                 }}
@@ -393,7 +398,8 @@ export default function TeacherClassesPage() {
             {isSearching && (
               <div className="flex items-center gap-4">
                 <div className="text-sm text-gray-500">
-                  Tìm thấy {uniqueClasses.length} kết quả cho "{searchKeyword}"
+                  Tìm thấy {uniqueClasses.length} kết quả cho &quot;
+                  {searchKeyword}&quot;
                 </div>
                 <Button
                   variant="outline"
@@ -583,8 +589,8 @@ export default function TeacherClassesPage() {
                   {classForm.formState.isSubmitting
                     ? "Đang xử lý..."
                     : editingClass
-                      ? "Cập nhật lớp"
-                      : "Tạo lớp"}
+                    ? "Cập nhật lớp"
+                    : "Tạo lớp"}
                 </Button>
 
                 {/* Thêm button hủy */}
@@ -619,10 +625,11 @@ export default function TeacherClassesPage() {
                     </div>
                     <Badge
                       variant="outline"
-                      className={`text-xs font-medium shrink-0 ml-3 ${classItem.joinMode === "AUTO"
-                        ? "border-green-200 bg-green-50 text-green-700"
-                        : "border-amber-200 bg-amber-50 text-amber-700"
-                        }`}
+                      className={`text-xs font-medium shrink-0 ml-3 ${
+                        classItem.joinMode === "AUTO"
+                          ? "border-green-200 bg-green-50 text-green-700"
+                          : "border-amber-200 bg-amber-50 text-amber-700"
+                      }`}
                     >
                       {classItem.joinMode === "AUTO" ? "Tự động" : "Phê duyệt"}
                     </Badge>
@@ -715,8 +722,8 @@ export default function TeacherClassesPage() {
           {uniqueClasses.length === 0 && (
             <div className="text-center py-12">
               <div className="text-gray-500 text-lg">
-                {isSearching 
-                  ? `Không tìm thấy lớp học nào với từ khóa "${searchKeyword}"` 
+                {isSearching
+                  ? `Không tìm thấy lớp học nào với từ khóa "${searchKeyword}"`
                   : "Chưa có lớp học nào"}
               </div>
               {isSearching && (
