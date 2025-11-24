@@ -140,5 +140,5 @@ export async function fetchQuizzesByClass(params: {
     `/api/teacher/quizzes/class/${classId}`,
     { params: { status, page, size } }
   );
-  return res.data;
+  return res.data.data;
 }
