@@ -83,7 +83,6 @@ const assignmentSchema = yup.object().shape({
     ),
 });
 
-<<<<<<< HEAD
 export default function CreateAssignment({
   classData,
   onAssignmentCreated,
@@ -107,22 +106,11 @@ export default function CreateAssignment({
       file: null,
     },
   });
-=======
-export default function CreateAssignment({ classData, onAssignmentCreated }: CreateAssignmentProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } =
-    useForm<CreateAssignmentFormData>({
-      resolver: yupResolver(assignmentSchema),
-      defaultValues: { title: "", description: "", dueDate: new Date(), maxScore: 10, classId: undefined, file: null },
-    })
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
 
   const watchedFile = watch("file");
   const watchedClassId = watch("classId");
 
   const onSubmit = async (data: FieldValues) => {
-    setIsLoading(true)
     try {
       const formData = new FormData();
       formData.append("title", data.title);
@@ -132,7 +120,6 @@ export default function CreateAssignment({ classData, onAssignmentCreated }: Cre
       formData.append("classId", data.classId.toString());
       if (data.file) formData.append("file", data.file);
 
-<<<<<<< HEAD
       const newAssignment = await createAssignment(formData);
 
       if (onAssignmentCreated) onAssignmentCreated(newAssignment);
@@ -143,20 +130,6 @@ export default function CreateAssignment({ classData, onAssignmentCreated }: Cre
       toast.success("Tạo bài tập thành công!");
     } catch {
       toast.error("Có lỗi xảy ra khi tạo bài tập.");
-=======
-      const newAssignment = await createAssignment(formData)
-
-      if (onAssignmentCreated) onAssignmentCreated(newAssignment)
-
-      //   onAssignmentCreated(newAssignment)
-      reset()
-      setIsDialogOpen(false)
-      toast.success("Tạo bài tập thành công!");
-    } catch {
-      toast.error("Có lỗi xảy ra khi tạo bài tập.")
-    } finally {
-      setIsLoading(false)
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
     }
   };
   const selectedClass = classData.find((c) => c.id === watchedClassId);
@@ -178,7 +151,6 @@ export default function CreateAssignment({ classData, onAssignmentCreated }: Cre
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title">Tiêu đề</Label>
-<<<<<<< HEAD
             <Input
               id="title"
               {...register("title")}
@@ -207,19 +179,6 @@ export default function CreateAssignment({ classData, onAssignmentCreated }: Cre
             {errors.dueDate && (
               <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
             )}
-=======
-            <Input id="title" {...register("title")} disabled={isLoading} placeholder="VD: Bài tập Chương 1" />
-            {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description">Mô tả</Label>
-            <Textarea id="description" {...register("description")} disabled={isLoading} rows={4} placeholder="Mô tả..." />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dueDate">Hạn nộp</Label>
-            <Input id="dueDate" type="datetime-local" {...register("dueDate", { valueAsDate: true })} disabled={isLoading} />
-            {errors.dueDate && <p className="text-red-500 text-sm">{errors.dueDate.message}</p>}
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
           </div>
           {/* Điểm tối đa */}
           <div className="space-y-2">
@@ -227,24 +186,14 @@ export default function CreateAssignment({ classData, onAssignmentCreated }: Cre
             <Input
               id="maxScore"
               type="number"
-<<<<<<< HEAD
               {...register("maxScore", { valueAsNumber: true })}
             />
             {errors.maxScore && (
               <p className="text-red-500 text-sm">{errors.maxScore.message}</p>
             )}
-=======
-              value={10} // luôn = 10
-              disabled // không cho sửa
-              className="bg-gray-100"
-            />
-            {/* hidden input để đảm bảo gửi dữ liệu lên backend */}
-            <input type="hidden" {...register("maxScore")} value={10} />
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
           </div>
           {/* Lớp học (auto fill) */}
           <div className="space-y-2">
-<<<<<<< HEAD
             <Label htmlFor="classId">Chọn lớp</Label>
             <Select
               value={watchedClassId?.toString() || ""}
@@ -264,73 +213,26 @@ export default function CreateAssignment({ classData, onAssignmentCreated }: Cre
             {errors.classId && (
               <p className="text-red-500 text-sm">{errors.classId.message}</p>
             )}
-=======
-            <Label htmlFor="classId">Lớp học</Label>
-            <Input
-              id="classId"
-              value={classData[0]?.className || ""}
-              disabled
-              className="bg-gray-100"
-            />
-            <input
-              type="hidden"
-              {...register("classId")}
-              value={classData[0]?.id || ""}
-            />
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
           </div>
           {/* File đính kèm */}
           <div className="space-y-2">
             <Label htmlFor="file">Tệp đính kèm</Label>
             <div
-<<<<<<< HEAD
               className="border-2 border-dashed p-6 text-center cursor-pointer"
               onClick={() => document.getElementById("file")?.click()}
             >
               <Upload className="h-8 w-8 mx-auto mb-2" />
               {watchedFile && <p>{watchedFile.name}</p>}
-=======
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
-              onClick={() => document.getElementById("file")?.click()}
-            >
-              <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-
-              <p className="text-sm text-gray-600">
-                Kéo thả tệp hoặc click để chọn
-              </p>
-              {watchedFile && (
-                <p className="text-xs text-gray-500 mt-2">
-                  {watchedFile.name}
-                </p>
-              )}
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
             </div>
             <input
               id="file"
               type="file"
               className="hidden"
-<<<<<<< HEAD
               onChange={(e) => setValue("file", e.target.files?.[0] || null)}
             />
           </div>
           <Button type="submit" className="w-full">
             Tạo bài tập
-=======
-              onChange={(e) => {
-                setValue("file", e.target.files?.[0] || null); // Lấy file đầu tiên hoặc null
-              }}
-              disabled={isLoading}
-            />
-            {errors.file && (
-              <p className="text-red-500 text-sm">
-                {errors.file.message}
-              </p>
-            )}
-          </div>
-          {/* Submit */}
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Đang tạo bài tập..." : "Tạo bài tập"}
->>>>>>> 97cb9c1 (hoàn thành ux class, score, button (#20))
           </Button>
         </form>
       </DialogContent>
