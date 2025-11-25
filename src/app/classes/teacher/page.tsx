@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import TeacherNotificationBell from "@/components/classDetails/TeacherNotificationToast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,14 +30,16 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import {
-  Users,
-  Plus,
   Copy,
-  Eye,
-  Settings,
-  Trash2,
   Edit3,
+  Eye,
+  Layers,
+  Plus,
   Search,
+  Settings,
+  Sparkles,
+  Trash2,
+  Users,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -339,80 +340,180 @@ export default function TeacherClassesPage() {
         index === self.findIndex((c) => c && c.id === classItem.id)
     ) || [];
 
+  const autoClasses = uniqueClasses.filter((cls) => cls.joinMode === "AUTO").length;
+  const approvalClasses = uniqueClasses.filter((cls) => cls.joinMode === "APPROVAL").length;
+
+  const heroMetrics = [
+    {
+      label: "Lớp đang quản lý",
+      value: uniqueClasses.length,
+      detail: `${uniqueClasses.length >= pageSize ? "Đang đầy tải" : "Ổn định"}`,
+    },
+    {
+      label: "Tự động tham gia",
+      value: autoClasses,
+      detail: "Không cần phê duyệt",
+    },
+    {
+      label: "Cần phê duyệt",
+      value: approvalClasses,
+      detail: "Kiểm soát học sinh",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-emerald-600/40 via-slate-900 to-slate-950 blur-3xl" />
+        <div className="absolute -right-24 top-24 h-64 w-64 rounded-full bg-teal-500/30 blur-[140px]" />
+        <div className="absolute -left-16 bottom-0 h-72 w-72 rounded-full bg-indigo-500/30 blur-[150px]" />
+        <div className="absolute inset-0 opacity-30">
+          {[...Array(30)].map((_, index) => (
+            <span
+              key={index}
+              className="absolute h-1 w-1 rounded-full bg-cyan-200/40"
+              style={{
+                left: `${(index * 37) % 100}%`,
+                top: `${(index * 21) % 100}%`,
+                animation: `pulse 6s ease-in-out ${index * 0.3}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
       <Navigation />
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-6">
-          {/* Header + nút tạo lớp, quản lý môn học, thông báo */}
-          <div className="flex justify-between items-center">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+        <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-green-700">
-                Quản lý lớp học
-              </h1>
-              <p className="text-gray-600">
-                Tạo và quản lý các lớp học của bạn
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-200">
+                <Sparkles className="h-3.5 w-3.5" />
+                Classroom OS
+              </span>
+              <h1 className="mt-4 text-4xl font-black md:text-5xl">Trung tâm quản lý lớp học</h1>
+              <p className="mt-3 max-w-2xl text-slate-300">
+                Tạo, điều phối và giám sát mọi lớp học trong một giao diện thống nhất. Hoạt động được đồng bộ realtime giữa giáo viên và học sinh.
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <DropdownNotificationBell teacherId={user.userId} />
-
               <SubjectManager
                 userId={user.userId}
                 subjects={uniqueSubjects}
                 reloadSubjects={async () => loadSubjects()}
               />
-
               <Button
-                className="bg-green-700 hover:bg-green-800"
+                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-5 text-base font-semibold shadow-emerald-500/40 hover:from-emerald-600 hover:to-teal-600"
                 onClick={openCreateModal}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="mr-2 h-4 w-4" />
                 Tạo lớp mới
               </Button>
             </div>
           </div>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {heroMetrics.map((metric) => (
+              <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <p className="text-sm text-slate-300">{metric.label}</p>
+                <p className="mt-2 text-3xl font-semibold text-white">{metric.value}</p>
+                <p className="text-xs text-emerald-200">{metric.detail}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-          {/* Thanh tìm kiếm */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 max-w-md flex gap-2">
-              <Input
-                placeholder="Tìm kiếm lớp học..."
-                value={searchKeyword}
-                onChange={(e) => setSearchKeyword(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
-              />
-              <Button
-                onClick={handleSearch}
-                className="bg-green-700 hover:bg-green-800"
-                disabled={!searchKeyword.trim()}
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {isSearching && (
-              <div className="flex items-center gap-4">
-                <div className="text-sm text-gray-500">
-                  Tìm thấy {uniqueClasses.length} kết quả cho &quot;
-                  {searchKeyword}&quot;
+        <section className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+          <Card className="rounded-[28px] border-white/10 bg-slate-900/70 text-white shadow-xl backdrop-blur-2xl">
+            <CardHeader className="border-b border-white/5 pb-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="text-2xl font-semibold">Tìm kiếm & bộ lọc</CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Lọc nhanh theo tên lớp để truy cập tức thì.
+                  </CardDescription>
                 </div>
+                <div className="rounded-full border border-white/10 px-4 py-1 text-xs text-slate-300">
+                  {uniqueClasses.length} lớp hiện hoạt
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Input
+                  placeholder="Nhập tên lớp, môn học hoặc mã lớp..."
+                  value={searchKeyword}
+                  onChange={(e) => setSearchKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  className="flex-1 bg-white/5 text-white placeholder:text-slate-500"
+                />
                 <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearSearch}
-                  className="flex items-center gap-2"
+                  onClick={handleSearch}
+                  className="rounded-xl bg-emerald-500 px-6 py-5 text-white hover:bg-emerald-600"
+                  disabled={!searchKeyword.trim()}
                 >
-                  <X className="h-4 w-4" />
-                  Xóa tìm kiếm
+                  <Search className="mr-2 h-4 w-4" />
+                  Tìm lớp
                 </Button>
               </div>
-            )}
-          </div>
+              {isSearching ? (
+                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+                  <div>
+                    Tìm thấy{" "}
+                    <span className="font-semibold text-white">{uniqueClasses.length}</span> kết quả cho{" "}
+                    <span className="font-semibold text-emerald-200">"{searchKeyword}"</span>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={clearSearch}>
+                    <X className="mr-2 h-4 w-4" /> Xóa tìm kiếm
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-sm text-slate-400">
+                  Gợi ý: đặt tên lớp theo cấu trúc{" "}
+                  <span className="font-semibold text-white">[Môn]-[Khối]-[Năm]</span> để dễ tìm kiếm hơn.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[28px] border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-3xl">
+            <CardHeader className="border-b border-white/5 pb-5">
+              <div className="flex items-center gap-3">
+                <Layers className="h-5 w-5 text-emerald-200" />
+                <div>
+                  <CardTitle className="text-2xl font-semibold">Mô-đun bổ trợ</CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Đồng bộ môn học và thông báo ngay tại đây.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6 text-sm text-slate-200">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
+                <p className="text-base font-semibold text-white">Thông báo lớp học</p>
+                <p className="text-slate-400">Theo dõi yêu cầu tham gia và cập nhật mới.</p>
+                <div className="mt-3 inline-flex rounded-full border border-white/20 px-3 py-1 text-xs uppercase tracking-[0.3em] text-emerald-200">
+                  Realtime
+                </div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
+                <p className="text-base font-semibold text-white">Quản lý môn học</p>
+                <p className="text-slate-400">Thêm mới, chỉnh sửa và phân loại môn để tái sử dụng.</p>
+                <div className="mt-3">
+                  <SubjectManager
+                    userId={user.userId}
+                    subjects={uniqueSubjects}
+                    reloadSubjects={async () => loadSubjects()}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
           {/* Dialog tạo/sửa lớp học */}
           <Dialog
@@ -606,141 +707,113 @@ export default function TeacherClassesPage() {
             </DialogContent>
           </Dialog>
 
-          {/* Danh sách lớp */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="mt-12 space-y-8">
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {uniqueClasses.map((classItem, index) => (
               <Card
                 key={`class-${classItem.id}-${index}`}
-                className="hover:shadow-lg transition-shadow"
+                className="rounded-[28px] border border-white/10 bg-white/5 text-white transition hover:-translate-y-1 hover:bg-white/10"
               >
                 <CardHeader className="pb-3">
-                  <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <CardTitle className="text-lg text-green-700 mb-2">
-                        {classItem.className}
-                      </CardTitle>
-                      <CardDescription className="text-sm text-gray-600 line-clamp-2">
-                        {classItem.description}
+                      <CardTitle className="text-xl font-semibold">{classItem.className}</CardTitle>
+                      <CardDescription className="text-sm text-slate-300 line-clamp-2">
+                        {classItem.description || "Chưa có mô tả cho lớp học này."}
                       </CardDescription>
                     </div>
                     <Badge
                       variant="outline"
-                      className={`text-xs font-medium shrink-0 ml-3 ${
+                      className={`rounded-full border px-3 py-1 text-xs ${
                         classItem.joinMode === "AUTO"
-                          ? "border-green-200 bg-green-50 text-green-700"
-                          : "border-amber-200 bg-amber-50 text-amber-700"
+                          ? "border-emerald-300 text-emerald-200"
+                          : "border-amber-300 text-amber-200"
                       }`}
                     >
                       {classItem.joinMode === "AUTO" ? "Tự động" : "Phê duyệt"}
                     </Badge>
                   </div>
-
-                  {/* Thông tin niên khóa */}
-                  <div className="text-sm text-gray-500 border-t pt-3">
-                    Niên khóa: {classItem.schoolYear} - {classItem.semester}
+                  <div className="mt-4 flex items-center gap-3 text-sm text-slate-400">
+                    <Users className="h-4 w-4 text-emerald-200" />
+                    Niên khóa {classItem.schoolYear} • {classItem.semester}
                   </div>
                 </CardHeader>
-
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    {/* Mã lớp */}
-                    <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium text-gray-500">
-                          MÃ LỚP:
-                        </span>
-                        <span className="text-sm font-bold text-gray-800 font-mono">
-                          #{classItem.id}
-                        </span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 px-3 hover:bg-white/80 hover:shadow-sm transition-all"
-                        onClick={() => copyClassCode(classItem.id.toString())}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        <span className="text-xs">Sao chép</span>
+                <CardContent className="space-y-4 pt-0">
+                  <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm text-slate-300">
+                      <span className="text-xs uppercase tracking-[0.3em] text-slate-500">Mã lớp</span>
+                      <span className="font-mono text-lg text-white">#{classItem.id}</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-full text-xs text-white hover:bg-white/10"
+                      onClick={() => copyClassCode(classItem.id.toString())}
+                    >
+                      <Copy className="mr-1 h-3.5 w-3.5" />
+                      Sao chép
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Link href={`/classes/${classItem.id}`} className="flex-1">
+                      <Button className="w-full rounded-xl bg-emerald-500 text-white hover:bg-emerald-600">
+                        <Eye className="mr-2 h-4 w-4" />
+                        Xem lớp
                       </Button>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/classes/${classItem.id}`}
-                        className="flex-1"
-                      >
+                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
                         <Button
-                          size="sm"
-                          className="w-full bg-green-700 hover:bg-green-800 text-white"
+                          size="icon"
+                          variant="ghost"
+                          className="rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10"
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Xem lớp
+                          <Settings className="h-4 w-4" />
                         </Button>
-                      </Link>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="w-9 h-9 p-0 rounded-lg bg-white hover:bg-green-50 border border-gray-200 hover:border-green-300 text-gray-600 hover:text-green-700 shadow-sm hover:shadow-md transition-all duration-200"
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-44 rounded-xl shadow-lg border border-gray-200 bg-white overflow-hidden"
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-48 rounded-2xl border border-slate-800 bg-slate-900/95 text-white backdrop-blur-xl"
+                      >
+                        <DropdownMenuItem
+                          className="flex items-center gap-2 text-sm text-white hover:bg-white/5"
+                          onClick={() => openEditModal(classItem)}
                         >
-                          <DropdownMenuItem
-                            className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors duration-200 cursor-pointer"
-                            onClick={() => openEditModal(classItem)}
-                          >
-                            <Edit3 className="h-4 w-4 mr-3 text-green-600" />
-                            Chỉnh sửa lớp
-                          </DropdownMenuItem>
-
-                          <div className="my-1 border-t border-gray-200"></div>
-
-                          <DropdownMenuItem
-                            className="flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200 cursor-pointer"
-                            onClick={() => handleDeleteClass(classItem.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-3" />
-                            Xóa lớp học
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
+                          <Edit3 className="h-4 w-4 text-emerald-200" />
+                          Chỉnh sửa lớp
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="flex items-center gap-2 text-sm text-rose-300 hover:bg-white/5"
+                          onClick={() => handleDeleteClass(classItem.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Xóa lớp học
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Hiển thị thông báo khi không có kết quả */}
           {uniqueClasses.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-500 text-lg">
+            <div className="rounded-[32px] border border-dashed border-white/20 bg-white/5 px-6 py-16 text-center">
+              <p className="text-lg text-slate-300">
                 {isSearching
                   ? `Không tìm thấy lớp học nào với từ khóa "${searchKeyword}"`
-                  : "Chưa có lớp học nào"}
-              </div>
+                  : "Chưa có lớp học nào. Hãy tạo lớp đầu tiên để bắt đầu hành trình giảng dạy số."}
+              </p>
               {isSearching && (
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={clearSearch}
-                >
+                <Button variant="outline" className="mt-6 border-white/30 text-white hover:bg-white/10" onClick={clearSearch}>
                   Xóa bộ lọc
                 </Button>
               )}
             </div>
           )}
 
-          {/* Phân trang - chỉ hiển thị khi không tìm kiếm */}
           {!isSearching && totalPages > 1 && (
-            <div className="flex justify-center gap-2 mt-6">
+            <div className="flex justify-center gap-2">
               {Array.from({ length: totalPages }, (_, i) => i).map((num) => (
                 <Button
                   key={num}
@@ -748,8 +821,8 @@ export default function TeacherClassesPage() {
                   onClick={() => handlePageChange(num)}
                   className={
                     num === pageNumber
-                      ? "bg-green-700 hover:bg-green-800 text-white"
-                      : "border-green-700 text-green-700 hover:bg-green-50"
+                      ? "rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
+                      : "rounded-full border-white/30 text-white hover:bg-white/10"
                   }
                 >
                   {num + 1}
@@ -757,8 +830,8 @@ export default function TeacherClassesPage() {
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
