@@ -59,18 +59,58 @@ export default function Navigation() {
   };
 
   const teacherNavItems = [
-    { href: "/dashboard/teacher", label: "Trang chủ", icon: Home, color: "blue" },
-    { href: "/classes/teacher", label: "Quản lý lớp", icon: Users, color: "green" },
-    { href: "/quizzes/teacher", label: "Trắc nghiệm", icon: BookOpen, color: "purple" },
-    { href: "/grades/teacher", label: "Xếp hạng", icon: Trophy, color: "yellow" },
+    {
+      href: "/dashboard/teacher",
+      label: "Trang chủ",
+      icon: Home,
+      color: "blue",
+    },
+    {
+      href: "/classes/teacher",
+      label: "Quản lý lớp",
+      icon: Users,
+      color: "green",
+    },
+    {
+      href: "/quizzes/teacher",
+      label: "Trắc nghiệm",
+      icon: BookOpen,
+      color: "purple",
+    },
+    {
+      href: "/grades/teacher",
+      label: "Xếp hạng",
+      icon: Trophy,
+      color: "yellow",
+    },
   ];
 
   const studentNavItems = [
-    { href: "/dashboard/student", label: "Trang chủ", icon: Home, color: "blue" },
+    {
+      href: "/dashboard/student",
+      label: "Trang chủ",
+      icon: Home,
+      color: "blue",
+    },
     { href: "/classes/student", label: "Lớp học", icon: Users, color: "green" },
-    { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen, color: "purple" },
-    { href: "/grades/student", label: "Kết quả", icon: GraduationCap, color: "red" },
-    { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar, color: "orange" },
+    {
+      href: "/quizzes/student",
+      label: "Trắc nghiệm",
+      icon: BookOpen,
+      color: "purple",
+    },
+    {
+      href: "/grades/student",
+      label: "Kết quả",
+      icon: GraduationCap,
+      color: "red",
+    },
+    {
+      href: "/schedule/student",
+      label: "Thời khóa biểu",
+      icon: Calendar,
+      color: "orange",
+    },
   ];
 
   const currentRole = user?.roles?.includes("teacher") ? "teacher" : "student";
@@ -162,7 +202,11 @@ export default function Navigation() {
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 rounded-xl"
               >
-                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {isDarkMode ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
               </Button>
 
               {/* User Profile */}
@@ -191,7 +235,13 @@ export default function Navigation() {
                         {user.email}
                       </p>
                       <div className="inline-flex items-center gap-1 mt-1">
-                        <div className={`w-2 h-2 rounded-full ${currentRole === "teacher" ? "bg-green-500" : "bg-blue-500"}`} />
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            currentRole === "teacher"
+                              ? "bg-green-500"
+                              : "bg-blue-500"
+                          }`}
+                        />
                         <p className="text-xs font-medium text-gray-600">
                           {currentRole === "teacher" ? "Giáo viên" : "Học sinh"}
                         </p>
@@ -206,9 +256,7 @@ export default function Navigation() {
                       <CircleUser className="mr-3 h-4 w-4" />
                       Xem hồ sơ
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="cursor-pointer rounded-lg hover:bg-gray-100 transition-colors duration-200"
-                    >
+                    <DropdownMenuItem className="cursor-pointer rounded-lg hover:bg-gray-100 transition-colors duration-200">
                       <Settings className="mr-3 h-4 w-4" />
                       Cài đặt
                     </DropdownMenuItem>
@@ -229,7 +277,11 @@ export default function Navigation() {
                 className="md:hidden ml-2 hover:bg-gray-100/80 rounded-xl"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
-                {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {isMobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </Button>
             </div>
           </div>

@@ -1,0 +1,89 @@
+
+> nextjs-education@0.1.0 build
+> next build
+
+ ⚠ Warning: Found multiple lockfiles. Selecting E:\web\package-lock.json.
+   Consider removing the lockfiles at:
+   * E:\web\final-project\nextjs-education\pnpm-lock.yaml
+
+   ▲ Next.js 15.4.2
+   - Environments: .env
+
+   Creating an optimized production build ...
+Failed to compile.
+
+./src/components/classDetails/assi/UploadSubmission.tsx
+Error:   [31mx[0m Expected a semicolon
+     ,-[[36;1;4mE:\web\final-project\nextjs-education\src\components\classDetails\assi\UploadSubmission.tsx[0m:133:1]
+ [2m130[0m |         } finally {
+ [2m131[0m |             setIsLoading(false)
+ [2m132[0m |         }
+ [2m133[0m |       } catch (e) {
+     : [35;1m        ^^^^^[0m
+ [2m134[0m |         console.error("Lỗi parse user:", e);
+ [2m135[0m |       }
+ [2m135[0m |     }
+     `----
+  [31mx[0m Expression expected
+     ,-[[36;1;4mE:\web\final-project\nextjs-education\src\components\classDetails\assi\UploadSubmission.tsx[0m:136:1]
+ [2m133[0m |       } catch (e) {
+ [2m134[0m |         console.error("Lỗi parse user:", e);
+ [2m135[0m |       }
+ [2m136[0m |     }
+     : [35;1m    ^[0m
+ [2m137[0m |   }, []);
+ [2m138[0m | 
+ [2m138[0m |   const onSubmit = async (data: FieldValues) => {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/classDetails/assi/UploadSubmission.tsx
+./src/app/classes/[id]/assignment/page.tsx
+
+./src/components/navigation.tsx
+Error:   [31mx[0m Merge conflict marker encountered.
+    ,-[[36;1;4mE:\web\final-project\nextjs-education\src\components\navigation.tsx[0m:69:1]
+ [2m66[0m |   ];
+ [2m67[0m | 
+ [2m68[0m |   const studentNavItems = [
+ [2m69[0m | <<<<<<< HEAD
+    : [35;1m^^^^^^^[0m
+ [2m70[0m |     { href: "/dashboard/student", label: "Trang chủ", icon: Home, color: "blue" },
+ [2m71[0m |     { href: "/classes/student", label: "Lớp học", icon: Users, color: "green" },
+ [2m71[0m |     { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen, color: "purple" },
+    `----
+  [31mx[0m Merge conflict marker encountered.
+    ,-[[36;1;4mE:\web\final-project\nextjs-education\src\components\navigation.tsx[0m:75:1]
+ [2m72[0m |     { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen, color: "purple" },
+ [2m73[0m |     { href: "/grades/student", label: "Kết quả", icon: GraduationCap, color: "red" },
+ [2m74[0m |     { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar, color: "orange" },
+ [2m75[0m | =======
+    : [35;1m^^^^^^^[0m
+ [2m76[0m |     { href: "/dashboard/student", label: "Trang chủ", icon: Home },
+ [2m77[0m |     { href: "/classes/student", label: "Lớp học", icon: Users },
+ [2m77[0m |     { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen },
+    `----
+  [31mx[0m Merge conflict marker encountered.
+    ,-[[36;1;4mE:\web\final-project\nextjs-education\src\components\navigation.tsx[0m:81:1]
+ [2m78[0m |     { href: "/quizzes/student", label: "Trắc nghiệm", icon: BookOpen },
+ [2m79[0m |     { href: "/grades/student", label: "Kết quả", icon: GraduationCap },
+ [2m80[0m |     // { href: "/schedule/student", label: "Thời khóa biểu", icon: Calendar },
+ [2m81[0m | >>>>>>> 7afe81f (update23/9)
+    : [35;1m^^^^^^^[0m
+ [2m82[0m |   ];
+ [2m83[0m | 
+ [2m83[0m |   const currentRole = user?.roles?.includes("teacher") ? "teacher" : "student";
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/navigation.tsx
+./src/app/classes/[id]/page.tsx
+
+
+> Build failed because of webpack errors

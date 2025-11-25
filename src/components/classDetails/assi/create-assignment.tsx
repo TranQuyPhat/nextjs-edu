@@ -180,6 +180,7 @@ export default function CreateAssignment({
               <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
             )}
           </div>
+          {/* Điểm tối đa */}
           <div className="space-y-2">
             <Label htmlFor="maxScore">Điểm tối đa</Label>
             <Input
@@ -191,6 +192,7 @@ export default function CreateAssignment({
               <p className="text-red-500 text-sm">{errors.maxScore.message}</p>
             )}
           </div>
+          {/* Lớp học (auto fill) */}
           <div className="space-y-2">
             <Label htmlFor="classId">Chọn lớp</Label>
             <Select
@@ -212,6 +214,7 @@ export default function CreateAssignment({
               <p className="text-red-500 text-sm">{errors.classId.message}</p>
             )}
           </div>
+          {/* File đính kèm */}
           <div className="space-y-2">
             <Label htmlFor="file">Tệp đính kèm</Label>
             <div

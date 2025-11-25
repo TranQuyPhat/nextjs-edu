@@ -71,7 +71,7 @@ import SubmissionsTable from "./assi/SubmissionsTable";
 import { formatDateTime } from "@/untils/dateFormatter";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import UpdateUploadSubmission from "./assi/UpdateUploadSubmission";
 import UpdateAssignment from "./assi/UpdateAssignment";
 import type { Comment } from "@/types/assignment";
@@ -125,6 +125,8 @@ export const AssignmentsTab = ({
   const [visibleComments, setVisibleComments] = useState<
     Record<number, boolean>
   >({});
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
   // Callback khi nộp thành công
   const handleSubmissionSuccess = (newSubmission: Submission) => {
@@ -310,12 +312,12 @@ export const AssignmentsTab = ({
         updated[assignmentId] = updated[assignmentId].map((sub) =>
           sub.id === submissionId
             ? {
-                ...sub,
-                score,
-                teacherComment,
-                status: "GRADED",
-                gradedAt: new Date().toISOString(),
-              }
+              ...sub,
+              score,
+              teacherComment,
+              status: "GRADED",
+              gradedAt: new Date().toISOString(),
+            }
             : sub
         );
       }
@@ -324,6 +326,7 @@ export const AssignmentsTab = ({
   };
 
   const onSubmit = async (data: FieldValues) => {
+    setIsLoading(true)
     const formData = data as CreateAssignmentFormData;
     try {
       const formData = new FormData();
@@ -345,6 +348,8 @@ export const AssignmentsTab = ({
     } catch (error) {
       console.error("Error creating assignment:", error);
       toast.error("Có lỗi xảy ra khi tạo bài tập."); // Thông báo lỗi
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -538,6 +543,7 @@ export const AssignmentsTab = ({
                     <Input
                       id="title"
                       {...register("title")}
+                      disabled={isLoading}
                       placeholder="VD: Bài tập Chương 1"
                     />
                     {errors.title && (
@@ -552,6 +558,7 @@ export const AssignmentsTab = ({
                     <Textarea
                       id="description"
                       {...register("description")}
+                      disabled={isLoading}
                       placeholder="Mô tả chi tiết về bài tập..."
                       rows={4}
                     />
@@ -570,6 +577,7 @@ export const AssignmentsTab = ({
                       {...register("dueDate", {
                         valueAsDate: true, // Quan trọng: chuyển đổi giá trị input date thành Date object
                       })}
+                      disabled={isLoading}
                     />
                     {errors.dueDate && (
                       <p className="text-red-500 text-sm">
@@ -583,45 +591,29 @@ export const AssignmentsTab = ({
                     <Input
                       id="maxScore"
                       type="number"
-                      {...register("maxScore", {
-                        valueAsNumber: true, // Quan trọng: chuyển đổi giá trị input number thành number
-                      })}
-                      placeholder="VD: 100"
+                      value={10} // luôn = 10
+                      disabled // không cho sửa
+                      className="bg-gray-100"
                     />
-                    {errors.maxScore && (
-                      <p className="text-red-500 text-sm">
-                        {errors.maxScore.message}
-                      </p>
-                    )}
+                    {/* hidden input để đảm bảo gửi dữ liệu lên backend */}
+                    <input type="hidden" {...register("maxScore")} value={10} />
                   </div>
-                  {/* Chọn lớp */}
+                  {/* Lớp học (auto fill) */}
                   <div className="space-y-2">
-                    <Label htmlFor="classId">Chọn lớp</Label>
-                    <Select
-                      onValueChange={(value) =>
-                        setValue("classId", parseInt(value))
-                      }
-                      value={watchedClassId ? watchedClassId.toString() : ""}
-                    >
-                      <SelectTrigger
-                        className={errors.classId ? "border-red-500" : ""}
-                      >
-                        <SelectValue placeholder="Chọn lớp học" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classes.map((cls) => (
-                          <SelectItem key={cls.id} value={cls.id.toString()}>
-                            {cls.className}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.classId && (
-                      <p className="text-red-500 text-sm">
-                        {errors.classId.message}
-                      </p>
-                    )}
+                    <Label htmlFor="classId">Lớp học</Label>
+                    <Input
+                      id="classId"
+                      value={classes[0]?.className || ""}
+                      disabled
+                      className="bg-gray-100"
+                    />
+                    <input
+                      type="hidden"
+                      {...register("classId")}
+                      value={classes[0]?.id || ""}
+                    />
                   </div>
+
                   {/* File đính kèm */}
                   <div className="space-y-2">
                     <Label htmlFor="file">Tệp đính kèm</Label>
@@ -647,6 +639,7 @@ export const AssignmentsTab = ({
                       onChange={(e) => {
                         setValue("file", e.target.files?.[0] || null); // Lấy file đầu tiên hoặc null
                       }}
+                      disabled={isLoading}
                     />
                     {errors.file && (
                       <p className="text-red-500 text-sm">
@@ -655,8 +648,8 @@ export const AssignmentsTab = ({
                     )}
                   </div>
                   {/* Submit */}
-                  <Button type="submit" className="w-full">
-                    Tạo bài tập
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Đang tạo bài tập..." : "Tạo bài tập"}
                   </Button>
                 </div>
               </form>
@@ -762,7 +755,7 @@ export const AssignmentsTab = ({
                                   </p>
                                 </div>
                               ) : submissionsByAssignment[assignment.id]
-                                  ?.length === 0 ||
+                                ?.length === 0 ||
                                 !submissionsByAssignment[assignment.id] ? (
                                 <div className="text-center py-8 text-gray-500">
                                   <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -793,7 +786,7 @@ export const AssignmentsTab = ({
                                           </div>
                                           <div className="text-right">
                                             {submission.status?.toLowerCase() ===
-                                            "graded" ? (
+                                              "graded" ? (
                                               <div>
                                                 <Badge className="bg-green-500 mb-1">
                                                   Đã chấm
@@ -827,7 +820,8 @@ export const AssignmentsTab = ({
                                                 onClick={() =>
                                                   handleViewFile(
                                                     submission.filePath,
-                                                    submission.fileType
+                                                    submission.fileType,
+                                                    submission.fileName
                                                   )
                                                 }
                                               >
@@ -884,7 +878,7 @@ export const AssignmentsTab = ({
                                             </Button>
 
                                             {submission.status ===
-                                            "SUBMITTED" ? (
+                                              "SUBMITTED" ? (
                                               // Chấm bài
                                               <AssignmentScore
                                                 assignment={assignment}
@@ -953,66 +947,57 @@ export const AssignmentsTab = ({
                           variant={
                             assignment.published
                               ? "default"
-                              : submissionsByAssignment[assignment.id]
-                                  ?.length === countstudents &&
-                                submissionsByAssignment[assignment.id]?.every(
-                                  (s) => s.status === "GRADED"
-                                )
-                              ? "default"
-                              : "outline"
+                              : submissionsByAssignment[assignment.id]?.length === countstudents &&
+                                submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
+                                ? "default"
+                                : "outline"
                           }
                           className={
                             assignment.published
                               ? "bg-green-500 text-white"
-                              : submissionsByAssignment[assignment.id]
-                                  ?.length === countstudents &&
-                                submissionsByAssignment[assignment.id]?.every(
-                                  (s) => s.status === "GRADED"
-                                )
-                              ? "bg-blue-500 text-white"
-                              : "opacity-50 cursor-not-allowed"
+                              : submissionsByAssignment[assignment.id]?.length === countstudents &&
+                                submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
+                                ? "bg-blue-500 text-white"
+                                : submissionsByAssignment[assignment.id]?.some((s) => s.status === "GRADED")
+                                  ? "bg-amber-500 text-white"
+                                  : "opacity-50 cursor-not-allowed"
                           }
                           disabled={
+                            loadingId === assignment.id ||
                             assignment.published ||
-                            (submissionsByAssignment[assignment.id]?.length ??
-                              0) < countstudents ||
-                            !submissionsByAssignment[assignment.id]?.every(
-                              (s) => s.status === "GRADED"
-                            )
+                            (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents ||
+                            !submissionsByAssignment[assignment.id]?.every((s) => s.status === "GRADED")
                           }
                           onClick={async () => {
                             try {
+                              setLoadingId(assignment.id);
                               await publishAssignment(assignment.id);
                               setAssignmentList((prev) =>
                                 prev.map((item) =>
-                                  item.id === assignment.id
-                                    ? { ...item, published: true }
-                                    : item
+                                  item.id === assignment.id ? { ...item, published: true } : item
                                 )
                               );
-                              toast.success(
-                                "Đã công bố điểm cho " + assignment.title
-                              );
+                              toast.success("Đã công bố điểm cho " + assignment.title);
                             } catch (error) {
                               console.error("Lỗi khi công bố điểm:", error);
                               toast.error("Công bố điểm thất bại!");
+                            } finally {
+                              setLoadingId(null); // tắt loading
                             }
                           }}
                         >
-                          {assignment.published
-                            ? "Đã công bố điểm"
-                            : (submissionsByAssignment[assignment.id]?.length ??
-                                0) < countstudents
-                            ? `Chưa đủ bài nộp (${
-                                submissionsByAssignment[assignment.id]
-                                  ?.length || 0
-                              }/${countstudents})`
-                            : !submissionsByAssignment[assignment.id]?.every(
-                                (s) => s.status === "GRADED"
-                              )
-                            ? "Chưa chấm xong"
-                            : "Công bố điểm"}
+                          {loadingId === assignment.id
+                            ? "Đang công bố điểm..."
+                            : assignment.published
+                              ? "Đã công bố điểm"
+                              : (submissionsByAssignment[assignment.id]?.length ?? 0) < countstudents
+                                ? `Chưa đủ bài nộp (${submissionsByAssignment[assignment.id]?.length || 0}/${countstudents})`
+                                : submissionsByAssignment[assignment.id]?.filter((s) => s.status === "GRADED").length <
+                                  submissionsByAssignment[assignment.id]?.length
+                                  ? `Đang chấm ${submissionsByAssignment[assignment.id]?.filter((s) => s.status === "GRADED").length}/${submissionsByAssignment[assignment.id]?.length}`
+                                  : "Công bố điểm"}
                         </Button>
+
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -1104,7 +1089,7 @@ export const AssignmentsTab = ({
                                           </div>
                                           <div className="text-right">
                                             {userSubmission.status?.toLowerCase() ===
-                                            "graded" ? (
+                                              "graded" ? (
                                               assignment.published ? (
                                                 <div>
                                                   <Badge className="bg-green-500 mb-1">
@@ -1152,7 +1137,8 @@ export const AssignmentsTab = ({
                                                 onClick={() =>
                                                   handleViewFile(
                                                     userSubmission.filePath,
-                                                    userSubmission.fileType
+                                                    userSubmission.fileType,
+                                                    userSubmission.fileName
                                                   )
                                                 }
                                               >

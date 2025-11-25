@@ -20,6 +20,23 @@ export interface JoinRequestDTO {
   status: "PENDING" | "APPROVED" | "REJECTED";
   reason?: string; // nếu có reject reason
 }
+export const searchClassesStudentPaginate = async (
+  studentId: number,
+  keyword: string,
+  page: number = 0,
+  size: number = 6
+) => {
+  try {
+    const res = await apiClient.get(
+      `/auth/classes/student/${studentId}/search?keyword=${encodeURIComponent(keyword)}&page=${page}&size=${size}`
+    );
+    console.log("Dữ liệu tìm lớp học student trả về từ API:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("Error searching student classes:", error);
+    throw error;
+  }
+};
 // Lấy danh sách lớp
 export const getClasses = async (): Promise<ClassItem[]> => {
   const response = await apiClient.get<ClassItem[]>('/auth/classes');
@@ -37,6 +54,30 @@ export const searchClasses = async (query: string) => {
   const res = await apiClient.get(`/auth/classes/search?keyword=${query}`);
   console.log("Dữ liệu tìm lớp học trả về từ API:", res.data);
   return res.data;
+};
+
+
+export const searchClassesTeacher = async (teacherId: number, keyword: string) => {
+  try {
+    const res = await apiClient.get(`/auth/classes/teacher/${teacherId}/search?keyword=${encodeURIComponent(keyword)}`);
+    console.log("Dữ liệu tìm lớp học trả về từ API:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error('Error searching classes:', error);
+    throw error;
+  }
+};
+
+
+export const searchClassesStudent = async (studentId: number, keyword: string) => {
+  try {
+    const res = await apiClient.get(`/auth/classes/student/${studentId}/search?keyword=${encodeURIComponent(keyword)}`);
+    console.log("Dữ liệu tìm lớp học trả về từ API:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error('Error searching classes:', error);
+    throw error;
+  }
 };
 
 export const getSuggestedClasses = async () => {

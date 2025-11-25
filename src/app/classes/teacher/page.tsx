@@ -30,7 +30,17 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { Users, Plus, Copy, Eye, Settings, Trash2, Edit3 } from "lucide-react";
+import {
+  Users,
+  Plus,
+  Copy,
+  Eye,
+  Settings,
+  Trash2,
+  Edit3,
+  Search,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import {
   getTeacherClasses,
@@ -38,6 +48,7 @@ import {
   getAllSubjects,
   deleteClass,
   updateClass,
+  searchClassesTeacher, // Import hàm search mới
 } from "@/services/classService";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -54,7 +65,6 @@ import {
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-
 
 // Schema validate form lớp học
 const classSchema = yup.object().shape({
@@ -75,6 +85,8 @@ const classSchema = yup.object().shape({
 
 export default function TeacherClassesPage() {
   const [searchSubject, setSearchSubject] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState(""); // Input field value
+  const [isSearching, setIsSearching] = useState(false); // Trạng thái đang tìm kiếm
   const [user, setUser] = useState<any>(null);
   const [classes, setClasses] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -100,6 +112,7 @@ export default function TeacherClassesPage() {
       subject.subjectName.toLowerCase().includes(searchSubject.toLowerCase())
     );
   }, [uniqueSubjects, searchSubject]);
+
   // Form cho tạo/sửa lớp học
   const classForm = useForm({
     resolver: yupResolver(classSchema),
@@ -139,9 +152,49 @@ export default function TeacherClassesPage() {
       .catch((err) => {
         console.error("Lỗi khi lấy môn học:", err);
         toast.error(
-          err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách lớp!"
+          err?.response?.data?.messages?.[0] ??
+            "Không thể tải danh sách môn học!"
         );
       });
+  };
+
+  // Hàm tìm kiếm bằng backend
+  const handleSearch = async () => {
+    if (!searchKeyword.trim()) {
+      toast.error("Vui lòng nhập từ khóa tìm kiếm!");
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const res = await searchClassesTeacher(user.userId, searchKeyword.trim());
+
+      // Hiển thị tất cả kết quả từ backend, không phân trang
+      setClasses(res.data || res);
+      setPageNumber(0);
+      setTotalPages(0); // Không phân trang khi search
+
+      console.log("Kết quả tìm kiếm:", res);
+    } catch (err: any) {
+      console.error("Lỗi khi tìm kiếm lớp:", err);
+      toast.error(
+        err?.response?.data?.messages?.[0] ?? "Không thể tìm kiếm lớp!"
+      );
+    }
+  };
+
+  // Hàm clear search
+  const clearSearch = () => {
+    setSearchKeyword("");
+    setIsSearching(false);
+    loadClasses(user.userId, 0); // Load lại trang đầu
+  };
+
+  // Hàm chuyển trang (chỉ hoạt động khi không tìm kiếm)
+  const handlePageChange = (page: number) => {
+    if (!isSearching) {
+      loadClasses(user.userId, page);
+    }
   };
 
   // Hàm mở form tạo mới
@@ -206,16 +259,18 @@ export default function TeacherClassesPage() {
         toast.success("Tạo lớp học thành công!");
       }
 
-      // load lại danh sách lớp
-      await loadClasses(user.userId, pageNumber);
+      // Load lại danh sách lớp
+      if (isSearching) {
+        clearSearch(); // Clear search và load lại trang bình thường
+      } else {
+        await loadClasses(user.userId, pageNumber);
+      }
 
       // reset form và đóng modal
       classForm.reset();
       setIsModalOpen(false);
       setEditingClass(null);
-
     } catch (err: any) {
-
       console.error(
         editingClass ? "Lỗi cập nhật lớp học:" : "Lỗi tạo lớp học:",
         err
@@ -225,24 +280,34 @@ export default function TeacherClassesPage() {
         (editingClass ? "Cập nhật lớp học thất bại!" : "Tạo lớp học thất bại!");
 
       toast.error(backendMessage);
-
     }
   };
 
   const handleDeleteClass = async (id: number) => {
     const result = await Swal.fire({
-      title: "Bạn có chắc chắn?",
-      text: "Lớp sẽ bị xóa vĩnh viễn!",
-      icon: "warning",
+      title: "Xác nhận xóa",
+      text: "Hành động này sẽ xóa vĩnh viễn lớp học và không thể hoàn tác!",
+      icon: "error",
       showCancelButton: true,
       confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      cancelButtonText: "Hủy bỏ",
+      reverseButtons: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      focusCancel: true, // Tránh nhấn nhầm
     });
 
     if (result.isConfirmed) {
       try {
         await deleteClass(id);
-        await loadClasses(user.userId, pageNumber);
+
+        // Load lại danh sách lớp
+        if (isSearching) {
+          clearSearch(); // Clear search và load lại trang bình thường
+        } else {
+          await loadClasses(user.userId, pageNumber);
+        }
+
         toast.success("Xóa lớp thành công!");
       } catch {
         Swal.fire("Thất bại!", "Xóa lớp thất bại.", "error");
@@ -259,12 +324,8 @@ export default function TeacherClassesPage() {
     return (
       <div>
         <Navigation />
-        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact
-            src="/animations/loading.lottie"
-            loop
-            autoplay
-          />
+        <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
     );
@@ -302,7 +363,6 @@ export default function TeacherClassesPage() {
                 reloadSubjects={async () => loadSubjects()}
               />
 
-
               <Button
                 className="bg-green-700 hover:bg-green-800"
                 onClick={openCreateModal}
@@ -311,6 +371,47 @@ export default function TeacherClassesPage() {
                 Tạo lớp mới
               </Button>
             </div>
+          </div>
+
+          {/* Thanh tìm kiếm */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 max-w-md flex gap-2">
+              <Input
+                placeholder="Tìm kiếm lớp học..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleSearch}
+                className="bg-green-700 hover:bg-green-800"
+                disabled={!searchKeyword.trim()}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {isSearching && (
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-gray-500">
+                  Tìm thấy {uniqueClasses.length} kết quả cho &quot;
+                  {searchKeyword}&quot;
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearSearch}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Xóa tìm kiếm
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Dialog tạo/sửa lớp học */}
@@ -488,8 +589,8 @@ export default function TeacherClassesPage() {
                   {classForm.formState.isSubmitting
                     ? "Đang xử lý..."
                     : editingClass
-                      ? "Cập nhật lớp"
-                      : "Tạo lớp"}
+                    ? "Cập nhật lớp"
+                    : "Tạo lớp"}
                 </Button>
 
                 {/* Thêm button hủy */}
@@ -524,10 +625,11 @@ export default function TeacherClassesPage() {
                     </div>
                     <Badge
                       variant="outline"
-                      className={`text-xs font-medium shrink-0 ml-3 ${classItem.joinMode === "AUTO"
-                        ? "border-green-200 bg-green-50 text-green-700"
-                        : "border-amber-200 bg-amber-50 text-amber-700"
-                        }`}
+                      className={`text-xs font-medium shrink-0 ml-3 ${
+                        classItem.joinMode === "AUTO"
+                          ? "border-green-200 bg-green-50 text-green-700"
+                          : "border-amber-200 bg-amber-50 text-amber-700"
+                      }`}
                     >
                       {classItem.joinMode === "AUTO" ? "Tự động" : "Phê duyệt"}
                     </Badge>
@@ -616,14 +718,34 @@ export default function TeacherClassesPage() {
             ))}
           </div>
 
-          {/* Phân trang */}
-          {totalPages > 1 && (
+          {/* Hiển thị thông báo khi không có kết quả */}
+          {uniqueClasses.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-500 text-lg">
+                {isSearching
+                  ? `Không tìm thấy lớp học nào với từ khóa "${searchKeyword}"`
+                  : "Chưa có lớp học nào"}
+              </div>
+              {isSearching && (
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={clearSearch}
+                >
+                  Xóa bộ lọc
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Phân trang - chỉ hiển thị khi không tìm kiếm */}
+          {!isSearching && totalPages > 1 && (
             <div className="flex justify-center gap-2 mt-6">
               {Array.from({ length: totalPages }, (_, i) => i).map((num) => (
                 <Button
                   key={num}
                   variant={num === pageNumber ? "default" : "outline"}
-                  onClick={() => loadClasses(user.userId, num)}
+                  onClick={() => handlePageChange(num)}
                   className={
                     num === pageNumber
                       ? "bg-green-700 hover:bg-green-800 text-white"

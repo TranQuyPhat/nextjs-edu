@@ -25,7 +25,9 @@ import { useRouter } from "next/navigation";
 import { useTeacherDashboard } from "@/services/dashboardService";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useTeacherRanking } from "@/app/grades/hooks/useTeacherRanking";
+import { TeacherDashboardSkeleton } from "./teacherdashboradskeleton";
 import { PageSkeleton } from "@/components/ui/skeleton-modern";
+
 export default function TeacherDashboard() {
   const router = useRouter();
 
@@ -81,7 +83,10 @@ export default function TeacherDashboard() {
                 Chào mừng trở lại!
               </h1>
               <p className="text-xl text-gray-600 font-medium">
-                Xin chào, <span className="text-blue-600 font-semibold">{user.fullName}</span>
+                Xin chào,{" "}
+                <span className="text-blue-600 font-semibold">
+                  {user.fullName}
+                </span>
               </p>
               <p className="text-gray-500 mt-1">
                 Tổng quan về hoạt động giảng dạy của bạn
@@ -91,10 +96,16 @@ export default function TeacherDashboard() {
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600 mb-1">
-                    {new Date().toLocaleDateString('vi-VN', { weekday: 'long' })}
+                    {new Date().toLocaleDateString("vi-VN", {
+                      weekday: "long",
+                    })}
                   </div>
                   <div className="text-lg text-gray-600">
-                    {new Date().toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    {new Date().toLocaleDateString("vi-VN", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
                   </div>
                 </div>
               </div>
@@ -108,7 +119,9 @@ export default function TeacherDashboard() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
-                <CardTitle className="text-sm font-semibold text-gray-700">Lớp học</CardTitle>
+                <CardTitle className="text-sm font-semibold text-gray-700">
+                  Lớp học
+                </CardTitle>
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <BookOpen className="h-6 w-6 text-white" />
                 </div>
@@ -126,7 +139,9 @@ export default function TeacherDashboard() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
-                <CardTitle className="text-sm font-semibold text-gray-700">Học sinh</CardTitle>
+                <CardTitle className="text-sm font-semibold text-gray-700">
+                  Học sinh
+                </CardTitle>
                 <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <Users className="h-6 w-6 text-white" />
                 </div>
@@ -144,7 +159,9 @@ export default function TeacherDashboard() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-purple-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
-                <CardTitle className="text-sm font-semibold text-gray-700">Bài tập</CardTitle>
+                <CardTitle className="text-sm font-semibold text-gray-700">
+                  Bài tập
+                </CardTitle>
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <FileText className="h-6 w-6 text-white" />
                 </div>
@@ -162,7 +179,9 @@ export default function TeacherDashboard() {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-600 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
-                <CardTitle className="text-sm font-semibold text-gray-700">Chờ chấm</CardTitle>
+                <CardTitle className="text-sm font-semibold text-gray-700">
+                  Chờ chấm
+                </CardTitle>
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <Clock className="h-6 w-6 text-white" />
                 </div>
@@ -204,7 +223,9 @@ export default function TeacherDashboard() {
                       className="w-full h-24 flex flex-col gap-3 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 transition-all duration-300 border-2 border-green-200 hover:border-green-300 rounded-xl"
                     >
                       <BookOpen className="h-6 w-6 text-green-600" />
-                      <span className="text-sm font-semibold text-green-700">Quản lý lớp</span>
+                      <span className="text-sm font-semibold text-green-700">
+                        Quản lý lớp
+                      </span>
                     </Button>
                   </Link>
                   <Link href="/grades/teacher">
@@ -213,7 +234,9 @@ export default function TeacherDashboard() {
                       className="w-full h-24 flex flex-col gap-3 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 transition-all duration-300 border-2 border-purple-200 hover:border-purple-300 rounded-xl"
                     >
                       <Award className="h-6 w-6 text-purple-600" />
-                      <span className="text-sm font-semibold text-purple-700">Xem điểm</span>
+                      <span className="text-sm font-semibold text-purple-700">
+                        Xem điểm
+                      </span>
                     </Button>
                   </Link>
                   <Link href="/quizzes/teacher">
@@ -222,7 +245,9 @@ export default function TeacherDashboard() {
                       className="w-full h-24 flex flex-col gap-3 bg-white/80 backdrop-blur-sm hover:bg-white hover:scale-105 transition-all duration-300 border-2 border-orange-200 hover:border-orange-300 rounded-xl"
                     >
                       <Target className="h-6 w-6 text-orange-600" />
-                      <span className="text-sm font-semibold text-orange-700">Tạo quiz</span>
+                      <span className="text-sm font-semibold text-orange-700">
+                        Tạo quiz
+                      </span>
                     </Button>
                   </Link>
                 </div>
