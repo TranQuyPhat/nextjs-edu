@@ -19,6 +19,7 @@ import {
   Eye,
   Calendar,
   Target,
+  Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTeacherDashboard } from "@/services/dashboardService";

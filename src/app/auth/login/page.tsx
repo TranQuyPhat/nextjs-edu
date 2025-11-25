@@ -23,6 +23,7 @@ import { authService } from "@/services/authService";
 import { useAuth } from "../hook/useAuth";
 import Navigation from "@/components/navigation";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Mail, Lock, ArrowLeft, Shield, KeyRound, Loader2 } from "lucide-react";
 
 // Định nghĩa schema cho từng step
 const loginSchema = yup.object().shape({
@@ -272,39 +273,53 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Nhập email của bạn"
-                {...register("email")}
-              />
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Nhập email của bạn"
+                  className="pl-10 h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
+                  {...register("email")}
+                />
+              </div>
               {loginErrors.email && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+                  <span className="text-red-500">•</span>
                   {loginErrors.email.message as string}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
-              <InputPassword
-                id="password"
-                placeholder="Nhập mật khẩu"
-                {...register("password")}
-              />
+              <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Mật khẩu
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
+                <InputPassword
+                  id="password"
+                  placeholder="Nhập mật khẩu"
+                  className="pl-10 pr-10 h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
+                  {...register("password")}
+                />
+              </div>
               {loginErrors.password && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+                  <span className="text-red-500">•</span>
                   {loginErrors.password.message as string}
                 </p>
               )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-1">
               <button
                 type="button"
                 onClick={() => setStep("forgot")}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors underline-offset-4 hover:underline"
                 disabled={isLoading}
               >
                 Quên mật khẩu?
@@ -318,15 +333,22 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Nhập email để nhận OTP"
-                {...register("email")}
-              />
+              <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Nhập email để nhận OTP"
+                  className="pl-10 h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
+                  {...register("email")}
+                />
+              </div>
               {forgotErrors.email && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+                  <span className="text-red-500">•</span>
                   {forgotErrors.email.message as string}
                 </p>
               )}
@@ -339,21 +361,28 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="otp">Mã OTP</Label>
-              <Input
-                id="otp"
-                type="text"
-                placeholder="Nhập 6 chữ số OTP"
-                maxLength={6}
-                {...register("otp")}
-              />
+              <Label htmlFor="otp" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Mã OTP
+              </Label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="Nhập 6 chữ số OTP"
+                  maxLength={6}
+                  className="pl-10 h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 text-center text-lg tracking-widest font-mono"
+                  {...register("otp")}
+                />
+              </div>
               {otpErrors.otp && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+                  <span className="text-red-500">•</span>
                   {otpErrors.otp.message as string}
                 </p>
               )}
-              <p className="text-sm text-gray-500">
-                Mã OTP đã được gửi về email: <strong>{email}</strong>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                Mã OTP đã được gửi về email: <strong className="text-blue-600 dark:text-blue-400">{email}</strong>
               </p>
             </div>
           </>
@@ -364,28 +393,42 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="newPassword">Mật khẩu mới</Label>
-              <InputPassword
-                id="newPassword"
-                placeholder="Nhập mật khẩu mới"
-                {...register("newPassword")}
-              />
+              <Label htmlFor="newPassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Mật khẩu mới
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
+                <InputPassword
+                  id="newPassword"
+                  placeholder="Nhập mật khẩu mới"
+                  className="pl-10 pr-10 h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
+                  {...register("newPassword")}
+                />
+              </div>
               {resetErrors.newPassword && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+                  <span className="text-red-500">•</span>
                   {resetErrors.newPassword.message as string}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
-              <InputPassword
-                id="confirmPassword"
-                placeholder="Nhập lại mật khẩu mới"
-                {...register("confirmPassword")}
-              />
+              <Label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Xác nhận mật khẩu
+              </Label>
+              <div className="relative">
+                <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10 pointer-events-none" />
+                <InputPassword
+                  id="confirmPassword"
+                  placeholder="Nhập lại mật khẩu mới"
+                  className="pl-10 pr-10 h-11 border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500/20"
+                  {...register("confirmPassword")}
+                />
+              </div>
               {resetErrors.confirmPassword && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-500 mt-1.5 flex items-center gap-1">
+                  <span className="text-red-500">•</span>
                   {resetErrors.confirmPassword.message as string}
                 </p>
               )}
@@ -404,12 +447,21 @@ export default function LoginPage() {
       <>
         <Button
           type="submit"
-          className={`w-full py-5 ${
-            step === "login" ? "bg-green-600 hover:bg-green-700" : ""
-          }`}
+          className={`w-full h-12 text-base font-semibold shadow-lg transition-all duration-200 ${
+            step === "login" 
+              ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" 
+              : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white"
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
           disabled={isLoading}
         >
-          {isLoading ? "Đang xử lý..." : getSubmitButtonText()}
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Đang xử lý...
+            </span>
+          ) : (
+            getSubmitButtonText()
+          )}
         </Button>
 
         {/* Back button cho các step không phải login */}
@@ -417,9 +469,10 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleBackButton}
-            className="w-full text-sm text-gray-600 hover:underline mt-2"
+            className="w-full flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors mt-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700/50"
             disabled={isLoading}
           >
+            <ArrowLeft className="h-4 w-4" />
             {getBackButtonText()}
           </button>
         )}
@@ -475,19 +528,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <Card className="w-full max-w-md relative z-10 shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl">
+        <CardHeader className="space-y-3 pb-6">
+          <div className="flex items-center justify-center mb-2">
+            <div className="p-3 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+              {step === "login" && <Lock className="h-6 w-6 text-white" />}
+              {step === "forgot" && <Mail className="h-6 w-6 text-white" />}
+              {step === "verifyOtp" && <Shield className="h-6 w-6 text-white" />}
+              {step === "resetPassword" && <KeyRound className="h-6 w-6 text-white" />}
+            </div>
+          </div>
+          <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             {currentConfig.title}
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-base text-gray-600 dark:text-gray-400">
             {currentConfig.description}
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {renderFormContent()}
             {renderActionButtons()}
           </form>
@@ -495,20 +563,20 @@ export default function LoginPage() {
           {/* Chỉ hiển thị phần đăng ký và Google login ở step login */}
           {step === "login" && (
             <>
-              <div className="mt-4 text-center text-sm">
-                Chưa có tài khoản?{" "}
+              <div className="mt-6 text-center text-sm">
+                <span className="text-gray-600 dark:text-gray-400">Chưa có tài khoản? </span>
                 <Link
                   href="/auth/register"
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors underline-offset-4 hover:underline"
                 >
                   Đăng ký ngay
                 </Link>
               </div>
 
-              <div className="flex items-center gap-2 my-4">
-                <div className="flex-grow h-px bg-gray-300" />
-                <span className="text-sm text-gray-500">hoặc</span>
-                <div className="flex-grow h-px bg-gray-300" />
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-600" />
+                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">hoặc</span>
+                <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-600" />
               </div>
 
               <GoogleLoginButton />

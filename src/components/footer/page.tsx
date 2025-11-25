@@ -21,19 +21,19 @@ export default function Footer() {
     }
 
     return (
-        <footer className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden" suppressHydrationWarning>
+        <footer className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden">
             {/* Background Effects */}
-            <div className="absolute inset-0" suppressHydrationWarning>
-                <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" suppressHydrationWarning />
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" suppressHydrationWarning />
+            <div className="absolute inset-0">
+                <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
             </div>
 
-            <div className="relative container mx-auto px-4 py-16" suppressHydrationWarning>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12" suppressHydrationWarning>
+            <div className="relative container mx-auto px-4 py-16">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
                     {/* Company Info */}
-                    <div className="space-y-6" suppressHydrationWarning>
-                        <div className="flex items-center space-x-3" suppressHydrationWarning>
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center" suppressHydrationWarning>
+                    <div className="space-y-6">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                                 <span className="text-white font-bold text-lg">E</span>
                             </div>
                             <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -43,7 +43,7 @@ export default function Footer() {
                         <p className="text-gray-300 leading-relaxed max-w-sm">
                             Nền tảng học tập thông minh, kết nối giáo viên và học sinh trong môi trường giáo dục hiện đại và hiệu quả.
                         </p>
-                        <div className="flex space-x-4" suppressHydrationWarning>
+                        <div className="flex space-x-4">
                             <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white hover:bg-white/10 rounded-xl">
                                 <Facebook className="h-5 w-5" />
                             </Button>
@@ -60,9 +60,9 @@ export default function Footer() {
                     </div>
 
                     {/* Quick Links */}
-                    <div className="space-y-6" suppressHydrationWarning>
+                    <div className="space-y-6">
                         <h3 className="text-xl font-bold text-white">Liên kết nhanh</h3>
-                        <div className="space-y-3" suppressHydrationWarning>
+                        <div className="space-y-3">
                             <Link href="/" className="block text-gray-300 hover:text-white transition-colors duration-300 hover:translate-x-2 transform">
                                 Trang chủ
                             </Link>
@@ -79,9 +79,9 @@ export default function Footer() {
                     </div>
 
                     {/* Features */}
-                    <div className="space-y-6" suppressHydrationWarning>
+                    <div className="space-y-6">
                         <h3 className="text-xl font-bold text-white">Tính năng</h3>
-                        <div className="space-y-3" suppressHydrationWarning>
+                        <div className="space-y-3">
                             <Link href="/classes" className="block text-gray-300 hover:text-white transition-colors duration-300 hover:translate-x-2 transform">
                                 Quản lý lớp học
                             </Link>
@@ -98,18 +98,18 @@ export default function Footer() {
                     </div>
 
                     {/* Contact Info */}
-                    <div className="space-y-6" suppressHydrationWarning>
+                    <div className="space-y-6">
                         <h3 className="text-xl font-bold text-white">Liên hệ</h3>
-                        <div className="space-y-4" suppressHydrationWarning>
-                            <div className="flex items-center space-x-3 text-gray-300" suppressHydrationWarning>
+                        <div className="space-y-4">
+                            <div className="flex items-center space-x-3 text-gray-300">
                                 <Mail className="h-5 w-5 text-blue-400" />
                                 <span>support@edusystem.com</span>
                             </div>
-                            <div className="flex items-center space-x-3 text-gray-300" suppressHydrationWarning>
+                            <div className="flex items-center space-x-3 text-gray-300">
                                 <Phone className="h-5 w-5 text-blue-400" />
                                 <span>+84 123 456 789</span>
                             </div>
-                            <div className="flex items-center space-x-3 text-gray-300" suppressHydrationWarning>
+                            <div className="flex items-center space-x-3 text-gray-300">
                                 <MapPin className="h-5 w-5 text-blue-400" />
                                 <span>Hà Nội, Việt Nam</span>
                             </div>
@@ -118,14 +118,14 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Section */}
-                <div className="border-t border-gray-700 pt-8" suppressHydrationWarning>
-                    <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0" suppressHydrationWarning>
-                        <div className="flex items-center space-x-2 text-gray-400" suppressHydrationWarning>
+                <div className="border-t border-gray-700 pt-8">
+                    <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                        <div className="flex items-center space-x-2 text-gray-400">
                             <span>© {new Date().getFullYear()} EduSystem. Made with</span>
                             <Heart className="h-4 w-4 text-red-500 animate-pulse" />
                             <span>in Vietnam</span>
                         </div>
-                        <div className="flex items-center space-x-6 text-sm text-gray-400" suppressHydrationWarning>
+                        <div className="flex items-center space-x-6 text-sm text-gray-400">
                             <Link href="/privacy" className="hover:text-white transition-colors duration-300">
                                 Chính sách bảo mật
                             </Link>
