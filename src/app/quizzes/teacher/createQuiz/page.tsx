@@ -106,6 +106,8 @@ export default function CreateQuizzPage() {
   const { data: classes = [], isLoading: classesLoading } =
     useTeacherClasses(userId);
   console.log("classes :", classes);
+  console.log("classes length:", classes?.length);
+  console.log("classesLoading:", classesLoading);
 
   const defaultValues: QuizFormDataExtended = {
     title: "",
