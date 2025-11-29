@@ -58,7 +58,10 @@ export function QuizFormm({
 
   useEffect(() => {
     console.log("❗ Form Errors:", errors);
-  }, [errors]);
+    console.log("❗ classOptions received:", classOptions);
+    console.log("❗ classOptions length:", classOptions?.length);
+    console.log("❗ classOptions is array:", Array.isArray(classOptions));
+  }, [errors, classOptions]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
@@ -105,13 +108,21 @@ export function QuizFormm({
                 <SelectTrigger className="bg-white/5 text-white border-white/10">
                   <SelectValue placeholder="Chọn lớp học" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-900 border-white/10 text-white">
-                  {(Array.isArray(classOptions) ? classOptions : []).map(
-                    (cls) => (
-                      <SelectItem key={cls.id} value={cls.id.toString()}>
+                <SelectContent className="bg-slate-900 border-white/10 text-white z-50 max-h-[300px]">
+                  {Array.isArray(classOptions) && classOptions.length > 0 ? (
+                    classOptions.map((cls) => (
+                      <SelectItem 
+                        key={cls.id} 
+                        value={cls.id.toString()}
+                        className="cursor-pointer hover:bg-white/10 focus:bg-white/10"
+                      >
                         {cls.className}
                       </SelectItem>
-                    )
+                    ))
+                  ) : (
+                    <div className="px-3 py-6 text-center text-slate-400 text-sm">
+                      Không có lớp học nào
+                    </div>
                   )}
                 </SelectContent>
               </Select>
