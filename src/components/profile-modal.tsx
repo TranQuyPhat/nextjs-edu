@@ -517,7 +517,7 @@ export default function ProfileModal({
                   <Button
                     onClick={handleClose}
                     variant="outline"
-                    className="flex-1 rounded-xl border-white/10 text-white hover:bg-white/10"
+    
                     disabled={loadingSave || loadingPassword || loadingUpload}
                   >
                     Đóng

@@ -10,9 +10,9 @@ import {
   MessageCircle,
   Send,
   ChevronDown,
-  ThumbsUp,
+  Heart,
   X,
-  Hash,
+  MessageSquare,
 } from "lucide-react";
 import {
   useCreateComment,
@@ -181,7 +181,7 @@ function ReplyItem({ reply }: { reply: CommentItemData }) {
             }}
           >
             <span className="inline-flex items-center gap-1.5">
-              <ThumbsUp
+              <Heart
                 className={`h-3.5 w-3.5 ${
                   liked ? "text-blue-600 fill-blue-600" : ""
                 }`}
@@ -258,7 +258,7 @@ function RootItem({
         <div className="pl-2 mt-2 flex items-center gap-4">
           <ActionLink onClick={handleLikeClick}>
             <span className="inline-flex items-center gap-1.5">
-              <ThumbsUp
+              <Heart
                 className={`h-3.5 w-3.5 ${
                   liked ? "text-blue-600 fill-blue-600" : ""
                 }`}
@@ -348,7 +348,7 @@ function ThreadPanel({
     <div className="h-full flex flex-col bg-white dark:bg-slate-900">
       <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3">
         <div className="flex items-center gap-3">
-          <Hash className="h-4 w-4 text-slate-500" />
+          <MessageSquare className="h-4 w-4 text-slate-500" />
           <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             Thread
           </span>
@@ -628,7 +628,7 @@ export function CommentSection({
           ) : (
             <div className="h-full grid place-items-center text-center p-8 bg-slate-50/50 dark:bg-slate-800/30">
               <div>
-                <Hash className="h-16 w-16 text-slate-200 dark:text-slate-700 mx-auto mb-4" />
+                <MessageSquare className="h-16 w-16 text-slate-200 dark:text-slate-700 mx-auto mb-4" />
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
                   Chọn một bình luận
                 </p>

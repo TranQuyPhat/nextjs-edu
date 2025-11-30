@@ -465,7 +465,7 @@ export default function TeacherClassesPage() {
                   <div>
                     Tìm thấy{" "}
                     <span className="font-semibold text-white">{uniqueClasses.length}</span> kết quả cho{" "}
-                    <span className="font-semibold text-emerald-200">"{searchKeyword}"</span>
+                    <span className="font-semibold text-emerald-200">&quot;{searchKeyword}&quot;</span>
                   </div>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={clearSearch}>
                     <X className="mr-2 h-4 w-4" /> Xóa tìm kiếm

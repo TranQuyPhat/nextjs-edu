@@ -96,7 +96,7 @@ export default function TeacherDashboard() {
     },
     {
       label: "Điểm trung bình",
-      value: `${dashboardData.averageScore ?? 0}/10`,
+      value: `${dashboardData.averageGrade ?? 0}/10`,
       delta: "Ổn định 7 ngày qua",
     },
   ];

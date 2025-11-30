@@ -32,9 +32,7 @@ import {
   Users,
   TrendingUp,
   TrendingDown,
-  Minus,
-  Crown,
-  Medal,
+  Trophy,
   Award,
   BookOpen,
   Target,
@@ -208,9 +206,9 @@ export default function TeacherGradesPage() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="h-5 w-5 text-yellow-500" />;
+        return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 2:
-        return <Medal className="h-5 w-5 text-gray-400" />;
+        return <Award className="h-5 w-5 text-gray-400" />;
       case 3:
         return <Award className="h-5 w-5 text-amber-600" />;
       default:
@@ -225,7 +223,7 @@ export default function TeacherGradesPage() {
       case "down":
         return <TrendingDown className="h-4 w-4 text-red-500" />;
       default:
-        return <Minus className="h-4 w-4 text-gray-400" />;
+        return <Trophy className="h-4 w-4 text-gray-400" />;
     }
   };
 
@@ -728,7 +726,7 @@ export default function TeacherGradesPage() {
 
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-3">
-                        <Minus className="h-8 w-8 text-gray-500" />
+                        <Trophy className="h-8 w-8 text-gray-500" />
                         <div>
                           <h4 className="font-medium text-gray-800">Ổn định</h4>
                           <p className="text-sm text-gray-600">
