@@ -38,6 +38,8 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
+  BarChart3,
+  Sparkles,
 } from "lucide-react";
 import { getCurrentUserId } from "@/untils/utils";
 import { useTeacherRanking } from "../hooks/useTeacherRanking";
@@ -206,32 +208,32 @@ export default function TeacherGradesPage() {
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
+        return <Trophy className="h-5 w-5 text-yellow-400" />;
       case 2:
-        return <Award className="h-5 w-5 text-gray-400" />;
+        return <Award className="h-5 w-5 text-slate-400" />;
       case 3:
-        return <Award className="h-5 w-5 text-amber-600" />;
+        return <Award className="h-5 w-5 text-amber-500" />;
       default:
-        return <span className="text-gray-500 font-bold">#{rank}</span>;
+        return <span className="text-slate-400 font-bold">#{rank}</span>;
     }
   };
 
   const getTrendIcon = (trend: UiStudent["trend"]) => {
     switch (trend) {
       case "up":
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
+        return <TrendingUp className="h-4 w-4 text-emerald-400" />;
       case "down":
-        return <TrendingDown className="h-4 w-4 text-red-500" />;
+        return <TrendingDown className="h-4 w-4 text-red-400" />;
       default:
-        return <Trophy className="h-4 w-4 text-gray-400" />;
+        return <Trophy className="h-4 w-4 text-slate-400" />;
     }
   };
 
   const getGradeBadge = (grade: number) => {
-    if (grade >= 9) return <Badge className="bg-green-500">Xuất sắc</Badge>;
-    if (grade >= 8) return <Badge className="bg-blue-500">Giỏi</Badge>;
-    if (grade >= 6.5) return <Badge className="bg-yellow-500">Khá</Badge>;
-    return <Badge variant="destructive">Cần cố gắng</Badge>;
+    if (grade >= 9) return <Badge className="rounded-full border border-emerald-300/50 bg-emerald-500/20 text-emerald-200 px-3 py-1">Xuất sắc</Badge>;
+    if (grade >= 8) return <Badge className="rounded-full border border-teal-300/50 bg-teal-500/20 text-teal-200 px-3 py-1">Giỏi</Badge>;
+    if (grade >= 6.5) return <Badge className="rounded-full border border-yellow-300/50 bg-yellow-500/20 text-yellow-200 px-3 py-1">Khá</Badge>;
+    return <Badge className="rounded-full border border-red-300/50 bg-red-500/20 text-red-200 px-3 py-1">Cần cố gắng</Badge>;
   };
 
   const getGradeColor = (grade: number) => {
@@ -242,32 +244,59 @@ export default function TeacherGradesPage() {
   };
 
   if (!teacherId) return null; // đã redirect ở useEffect
-  if (isLoading) return <div className="p-6">Đang tải xếp hạng...</div>;
+  if (isLoading) return (
+    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+      <div className="text-slate-300">Đang tải xếp hạng...</div>
+    </div>
+  );
   if (error)
-    return <div className="p-6 text-red-600">Lỗi tải dữ liệu xếp hạng</div>;
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <div className="text-red-400">Lỗi tải dữ liệu xếp hạng</div>
+      </div>
+    );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-emerald-600/40 via-slate-900 to-slate-950 blur-3xl" />
+        <div className="absolute -right-24 top-24 h-64 w-64 rounded-full bg-teal-500/30 blur-[140px]" />
+        <div className="absolute -left-16 bottom-0 h-72 w-72 rounded-full bg-indigo-500/30 blur-[150px]" />
+        <div className="absolute inset-0 opacity-30">
+          {[...Array(30)].map((_, index) => (
+            <span
+              key={index}
+              className="absolute h-1 w-1 rounded-full bg-cyan-200/40"
+              style={{
+                left: `${(index * 37) % 100}%`,
+                top: `${(index * 21) % 100}%`,
+                animation: `pulse 6s ease-in-out ${index * 0.3}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
       <Navigation />
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+        <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Bảng xếp hạng học sinh
-              </h1>
-              <p className="text-gray-600">
-                Theo dõi và đánh giá sự tiến bộ của học sinh
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-200">
+                <BarChart3 className="h-3.5 w-3.5" />
+                Ranking System
+              </span>
+              <h1 className="mt-4 text-4xl font-black md:text-5xl">Bảng xếp hạng học sinh</h1>
+              <p className="mt-3 max-w-2xl text-slate-300">
+                Theo dõi và đánh giá sự tiến bộ của học sinh. Phân tích thành tích và xu hướng học tập một cách toàn diện.
               </p>
             </div>
-
-            {/* Filters */}
-            <div className="flex gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 bg-white/5 text-white border-white/10">
                   <SelectValue placeholder="Chọn lớp" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-white/10 text-white">
                   {classesFromApi.map((cls) => (
                     <SelectItem key={cls.id} value={cls.id}>
                       {cls.name}
@@ -276,15 +305,14 @@ export default function TeacherGradesPage() {
                 </SelectContent>
               </Select>
 
-              {/* Subject filter – API chưa có, giữ UI để sau nối */}
               <Select
                 value={selectedSubject}
                 onValueChange={setSelectedSubject}
               >
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 bg-white/5 text-white border-white/10">
                   <SelectValue placeholder="Chọn môn học" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-slate-900 border-white/10 text-white">
                   <SelectItem value="all">Tất cả môn</SelectItem>
                   <SelectItem value="math">Toán học</SelectItem>
                   <SelectItem value="literature">Ngữ văn</SelectItem>
@@ -293,94 +321,114 @@ export default function TeacherGradesPage() {
               </Select>
             </div>
           </div>
+        </section>
 
+        <section className="mt-10">
           <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Tổng quan</TabsTrigger>
-              <TabsTrigger value="ranking">Xếp hạng</TabsTrigger>
-              <TabsTrigger value="analysis">Phân tích</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10 rounded-2xl p-1 h-auto">
+              <TabsTrigger 
+                value="overview"
+                className="flex items-center gap-2 data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 rounded-xl h-12 transition-all"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Tổng quan
+              </TabsTrigger>
+              <TabsTrigger 
+                value="ranking"
+                className="flex items-center gap-2 data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 rounded-xl h-12 transition-all"
+              >
+                <Trophy className="h-4 w-4" />
+                Xếp hạng
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analysis"
+                className="flex items-center gap-2 data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 rounded-xl h-12 transition-all"
+              >
+                <Target className="h-4 w-4" />
+                Phân tích
+              </TabsTrigger>
             </TabsList>
 
             {/* ======= OVERVIEW ======= */}
             <TabsContent value="overview" className="space-y-6">
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl transition hover:-translate-y-1 hover:bg-white/10">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-slate-300">
                       Tổng học sinh
                     </CardTitle>
-                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <Users className="h-4 w-4 text-emerald-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold text-white">
                       {filteredStudents.length}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-400">
                       Đang theo dõi
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl transition hover:-translate-y-1 hover:bg-white/10">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-slate-300">
                       Điểm TB chung
                     </CardTitle>
-                    <Target className="h-4 w-4 text-muted-foreground" />
+                    <Target className="h-4 w-4 text-emerald-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{overallAverage}</div>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="text-2xl font-bold text-white">{overallAverage}</div>
+                    <p className="text-xs text-slate-400">
                       Trên thang điểm 10
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl transition hover:-translate-y-1 hover:bg-white/10">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-slate-300">
                       Học sinh giỏi
                     </CardTitle>
-                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <CheckCircle className="h-4 w-4 text-emerald-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-emerald-400">
                       {distribution.excellent + distribution.good}
                     </div>
-                    <p className="text-xs text-muted-foreground">≥ 8.0 điểm</p>
+                    <p className="text-xs text-slate-400">≥ 8.0 điểm</p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl transition hover:-translate-y-1 hover:bg-white/10">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-slate-300">
                       Tiến bộ
                     </CardTitle>
-                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <TrendingUp className="h-4 w-4 text-emerald-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-green-600">
+                    <div className="text-2xl font-bold text-emerald-400">
                       {trendStats.improving}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-400">
                       Học sinh cải thiện
                     </p>
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl transition hover:-translate-y-1 hover:bg-white/10">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
+                    <CardTitle className="text-sm font-medium text-slate-300">
                       Cần chú ý
                     </CardTitle>
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                    <AlertCircle className="h-4 w-4 text-red-400" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-red-600">
+                    <div className="text-2xl font-bold text-red-400">
                       {distribution.needsImprovement}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-400">
                       &lt;6.5 điểm
                     </p>
                   </CardContent>
@@ -388,10 +436,10 @@ export default function TeacherGradesPage() {
               </div>
 
               {/* Top 3 Students */}
-              <Card>
+              <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                 <CardHeader>
-                  <CardTitle>Top 3 học sinh xuất sắc</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-white">Top 3 học sinh xuất sắc</CardTitle>
+                  <CardDescription className="text-slate-400">
                     Những học sinh có thành tích cao nhất
                   </CardDescription>
                 </CardHeader>
@@ -402,7 +450,7 @@ export default function TeacherGradesPage() {
                       .slice(0, 3);
                     if (excellentStudents.length === 0) {
                       return (
-                        <div className="text-center text-muted-foreground py-4">
+                        <div className="text-center text-slate-400 py-4">
                           Không có học sinh xuất sắc nào (điểm {">"} 8)
                         </div>
                       );
@@ -412,28 +460,32 @@ export default function TeacherGradesPage() {
                         {excellentStudents.map((student, index) => (
                           <div
                             key={student.id}
-                            className="text-center p-4 bg-gray-50 rounded-lg"
+                            className="text-center p-6 bg-white/5 rounded-[20px] border border-white/10 backdrop-blur-xl transition hover:bg-white/10 hover:-translate-y-1"
                           >
                             <div className="flex justify-center mb-3">
                               {getRankIcon(index + 1)}
                             </div>
-                            <Avatar className="h-16 w-16 mx-auto mb-3">
-                              <AvatarFallback className="text-lg">
+                            <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-emerald-500/50">
+                              <AvatarFallback className="text-lg bg-emerald-500/20 text-emerald-200">
                                 {student?.studentName?.charAt(0) ||
                                   student?.studentName?.charAt(0)}
                               </AvatarFallback>
                             </Avatar>
-                            <h3 className="font-medium">
+                            <h3 className="font-medium text-white">
                               {student?.studentName || student?.studentName}
                             </h3>
-                            <p className="text-sm text-gray-500 mb-2">
+                            <p className="text-sm text-slate-400 mb-2">
                               {student.className}
                             </p>
                             <div className="flex items-center justify-center space-x-2">
                               <span
-                                className={`text-xl font-bold ${getGradeColor(
-                                  student.avgGrade
-                                )}`}
+                                className={`text-xl font-bold ${
+                                  student.avgGrade >= 9
+                                    ? "text-emerald-400"
+                                    : student.avgGrade >= 8
+                                    ? "text-teal-400"
+                                    : "text-yellow-400"
+                                }`}
                               >
                                 {student.avgGrade}
                               </span>
@@ -449,10 +501,10 @@ export default function TeacherGradesPage() {
 
               {/* Class Statistics */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                   <CardHeader>
-                    <CardTitle>Phân bố điểm số</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">Phân bố điểm số</CardTitle>
+                    <CardDescription className="text-slate-400">
                       Số lượng học sinh theo từng mức điểm
                     </CardDescription>
                   </CardHeader>
@@ -461,13 +513,13 @@ export default function TeacherGradesPage() {
                       {/* Xuất sắc */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="text-sm">Xuất sắc (9.0-10)</span>
+                          <CheckCircle className="h-4 w-4 text-emerald-400" />
+                          <span className="text-sm text-slate-300">Xuất sắc (9.0-10)</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                          <div className="w-32 bg-white/10 rounded-full h-2">
                             <div
-                              className="bg-green-500 h-2 rounded-full"
+                              className="bg-emerald-500 h-2 rounded-full"
                               style={{
                                 width: `${
                                   filteredStudents.length
@@ -479,7 +531,7 @@ export default function TeacherGradesPage() {
                               }}
                             />
                           </div>
-                          <span className="text-sm font-medium w-8">
+                          <span className="text-sm font-medium w-8 text-white">
                             {distribution.excellent}
                           </span>
                         </div>
@@ -488,13 +540,13 @@ export default function TeacherGradesPage() {
                       {/* Giỏi */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <Target className="h-4 w-4 text-blue-500" />
-                          <span className="text-sm">Giỏi (8.0-8.9)</span>
+                          <Target className="h-4 w-4 text-teal-400" />
+                          <span className="text-sm text-slate-300">Giỏi (8.0-8.9)</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                          <div className="w-32 bg-white/10 rounded-full h-2">
                             <div
-                              className="bg-blue-500 h-2 rounded-full"
+                              className="bg-teal-500 h-2 rounded-full"
                               style={{
                                 width: `${
                                   filteredStudents.length
@@ -506,7 +558,7 @@ export default function TeacherGradesPage() {
                               }}
                             />
                           </div>
-                          <span className="text-sm font-medium w-8">
+                          <span className="text-sm font-medium w-8 text-white">
                             {distribution.good}
                           </span>
                         </div>
@@ -515,11 +567,11 @@ export default function TeacherGradesPage() {
                       {/* Khá */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <BookOpen className="h-4 w-4 text-yellow-500" />
-                          <span className="text-sm">Khá (6.5-7.9)</span>
+                          <BookOpen className="h-4 w-4 text-yellow-400" />
+                          <span className="text-sm text-slate-300">Khá (6.5-7.9)</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                          <div className="w-32 bg-white/10 rounded-full h-2">
                             <div
                               className="bg-yellow-500 h-2 rounded-full"
                               style={{
@@ -533,7 +585,7 @@ export default function TeacherGradesPage() {
                               }}
                             />
                           </div>
-                          <span className="text-sm font-medium w-8">
+                          <span className="text-sm font-medium w-8 text-white">
                             {distribution.average}
                           </span>
                         </div>
@@ -542,11 +594,11 @@ export default function TeacherGradesPage() {
                       {/* Cần cố gắng */}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <AlertCircle className="h-4 w-4 text-red-500" />
-                          <span className="text-sm">Cần cố gắng (&lt;6.5)</span>
+                          <AlertCircle className="h-4 w-4 text-red-400" />
+                          <span className="text-sm text-slate-300">Cần cố gắng (&lt;6.5)</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <div className="w-32 bg-gray-200 rounded-full h-2">
+                          <div className="w-32 bg-white/10 rounded-full h-2">
                             <div
                               className="bg-red-500 h-2 rounded-full"
                               style={{
@@ -560,7 +612,7 @@ export default function TeacherGradesPage() {
                               }}
                             />
                           </div>
-                          <span className="text-sm font-medium w-8">
+                          <span className="text-sm font-medium w-8 text-white">
                             {distribution.needsImprovement}
                           </span>
                         </div>
@@ -570,10 +622,10 @@ export default function TeacherGradesPage() {
                 </Card>
 
                 {/* Thống kê theo lớp (từ API) */}
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                   <CardHeader>
-                    <CardTitle>Thống kê theo lớp</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">Thống kê theo lớp</CardTitle>
+                    <CardDescription className="text-slate-400">
                       Điểm trung bình từng lớp học
                     </CardDescription>
                   </CardHeader>
@@ -584,23 +636,29 @@ export default function TeacherGradesPage() {
                         .map((cls) => (
                           <div
                             key={cls.id}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                            className="flex items-center justify-between p-4 bg-white/5 rounded-[16px] border border-white/10 backdrop-blur-xl transition hover:bg-white/10"
                           >
                             <div>
-                              <h4 className="font-medium">{cls.name}</h4>
-                              <p className="text-sm text-gray-500">
+                              <h4 className="font-medium text-white">{cls.name}</h4>
+                              <p className="text-sm text-slate-400">
                                 {cls.studentCount} học sinh
                               </p>
                             </div>
                             <div className="text-right">
                               <div
-                                className={`text-lg font-bold ${getGradeColor(
-                                  cls.avgGrade
-                                )}`}
+                                className={`text-lg font-bold ${
+                                  cls.avgGrade >= 9
+                                    ? "text-emerald-400"
+                                    : cls.avgGrade >= 8
+                                    ? "text-teal-400"
+                                    : cls.avgGrade >= 6.5
+                                    ? "text-yellow-400"
+                                    : "text-red-400"
+                                }`}
                               >
                                 {cls.avgGrade}
                               </div>
-                              <p className="text-xs text-gray-500">Điểm TB</p>
+                              <p className="text-xs text-slate-400">Điểm TB</p>
                             </div>
                           </div>
                         ))}
@@ -612,86 +670,94 @@ export default function TeacherGradesPage() {
 
             {/* ======= RANKING ======= */}
             <TabsContent value="ranking" className="space-y-6">
-              <Card>
+              <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                 <CardHeader>
-                  <CardTitle>Bảng xếp hạng chi tiết</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-white">Bảng xếp hạng chi tiết</CardTitle>
+                  <CardDescription className="text-slate-400">
                     Danh sách tất cả học sinh được sắp xếp theo điểm trung bình
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-16">Hạng</TableHead>
-                        <TableHead>Học sinh</TableHead>
-                        <TableHead>Lớp</TableHead>
-                        <TableHead className="text-center">Điểm TB</TableHead>
-                        <TableHead className="text-center">Xu hướng</TableHead>
-                        <TableHead className="text-center">
-                          Hoàn thành
-                        </TableHead>
-                        <TableHead className="text-center">Đánh giá</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredStudents.map((student, index) => (
-                        <TableRow key={student.id}>
-                          <TableCell className="text-center">
-                            {getRankIcon(index + 1)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback>
-                                  {student.studentName?.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <div className="font-medium">
-                                  {student.studentName}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  {student.studentEmail}
-                                </div>
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{student.className}</TableCell>
-                          <TableCell className="text-center">
-                            <span
-                              className={`text-lg font-bold ${getGradeColor(
-                                student.avgGrade
-                              )}`}
-                            >
-                              {student.avgGrade}
-                            </span>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {getTrendIcon(student.trend)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center space-x-2">
-                              <div className="w-16 bg-gray-200 rounded-full h-2">
-                                <div
-                                  className="bg-blue-500 h-2 rounded-full"
-                                  style={{
-                                    width: `${student.completionRate}%`,
-                                  }}
-                                />
-                              </div>
-                              <span className="text-sm">
-                                {student.completionRate}%
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {getGradeBadge(student.avgGrade)}
-                          </TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-white/10 hover:bg-white/5">
+                          <TableHead className="w-16 text-slate-300">Hạng</TableHead>
+                          <TableHead className="text-slate-300">Học sinh</TableHead>
+                          <TableHead className="text-slate-300">Lớp</TableHead>
+                          <TableHead className="text-center text-slate-300">Điểm TB</TableHead>
+                          <TableHead className="text-center text-slate-300">Xu hướng</TableHead>
+                          <TableHead className="text-center text-slate-300">
+                            Hoàn thành
+                          </TableHead>
+                          <TableHead className="text-center text-slate-300">Đánh giá</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredStudents.map((student, index) => (
+                          <TableRow key={student.id} className="border-white/10 hover:bg-white/5">
+                            <TableCell className="text-center">
+                              {getRankIcon(index + 1)}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center space-x-3">
+                                <Avatar className="h-8 w-8 border border-white/20">
+                                  <AvatarFallback className="bg-emerald-500/20 text-emerald-200">
+                                    {student.studentName?.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium text-white">
+                                    {student.studentName}
+                                  </div>
+                                  <div className="text-sm text-slate-400">
+                                    {student.studentEmail}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-slate-300">{student.className}</TableCell>
+                            <TableCell className="text-center">
+                              <span
+                                className={`text-lg font-bold ${
+                                  student.avgGrade >= 9
+                                    ? "text-emerald-400"
+                                    : student.avgGrade >= 8
+                                    ? "text-teal-400"
+                                    : student.avgGrade >= 6.5
+                                    ? "text-yellow-400"
+                                    : "text-red-400"
+                                }`}
+                              >
+                                {student.avgGrade}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {getTrendIcon(student.trend)}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center space-x-2">
+                                <div className="w-16 bg-white/10 rounded-full h-2">
+                                  <div
+                                    className="bg-emerald-500 h-2 rounded-full"
+                                    style={{
+                                      width: `${student.completionRate}%`,
+                                    }}
+                                  />
+                                </div>
+                                <span className="text-sm text-slate-300">
+                                  {student.completionRate}%
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">
+                              {getGradeBadge(student.avgGrade)}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -699,57 +765,57 @@ export default function TeacherGradesPage() {
             {/* ======= ANALYSIS ======= */}
             <TabsContent value="analysis" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                   <CardHeader>
-                    <CardTitle>Xu hướng học tập</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">Xu hướng học tập</CardTitle>
+                    <CardDescription className="text-slate-400">
                       Phân tích sự tiến bộ của học sinh
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-emerald-500/10 rounded-[16px] border border-emerald-500/20 backdrop-blur-xl">
                       <div className="flex items-center space-x-3">
-                        <TrendingUp className="h-8 w-8 text-green-500" />
+                        <TrendingUp className="h-8 w-8 text-emerald-400" />
                         <div>
-                          <h4 className="font-medium text-green-800">
+                          <h4 className="font-medium text-white">
                             Tiến bộ
                           </h4>
-                          <p className="text-sm text-green-600">
+                          <p className="text-sm text-emerald-300">
                             Điểm số cải thiện
                           </p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-emerald-400">
                         {trendStats.improving}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-white/5 rounded-[16px] border border-white/10 backdrop-blur-xl">
                       <div className="flex items-center space-x-3">
-                        <Trophy className="h-8 w-8 text-gray-500" />
+                        <Trophy className="h-8 w-8 text-slate-400" />
                         <div>
-                          <h4 className="font-medium text-gray-800">Ổn định</h4>
-                          <p className="text-sm text-gray-600">
+                          <h4 className="font-medium text-white">Ổn định</h4>
+                          <p className="text-sm text-slate-400">
                             Duy trì mức độ hiện tại
                           </p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-gray-600">
+                      <div className="text-2xl font-bold text-slate-300">
                         {trendStats.stable}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-red-500/10 rounded-[16px] border border-red-500/20 backdrop-blur-xl">
                       <div className="flex items-center space-x-3">
-                        <TrendingDown className="h-8 w-8 text-red-500" />
+                        <TrendingDown className="h-8 w-8 text-red-400" />
                         <div>
-                          <h4 className="font-medium text-red-800">
+                          <h4 className="font-medium text-white">
                             Cần chú ý
                           </h4>
-                          <p className="text-sm text-red-600">Điểm số giảm</p>
+                          <p className="text-sm text-red-300">Điểm số giảm</p>
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-red-600">
+                      <div className="text-2xl font-bold text-red-400">
                         {trendStats.declining}
                       </div>
                     </div>
@@ -757,10 +823,10 @@ export default function TeacherGradesPage() {
                 </Card>
 
                 {/* Thành tích theo môn – chưa có dữ liệu chi tiết -> giữ bố cục, ẩn số nếu undefined */}
-                <Card>
+                <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                   <CardHeader>
-                    <CardTitle>Thành tích theo môn</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">Thành tích theo môn</CardTitle>
+                    <CardDescription className="text-slate-400">
                       Điểm trung bình từng môn học
                     </CardDescription>
                   </CardHeader>
@@ -777,13 +843,13 @@ export default function TeacherGradesPage() {
                         return (
                           <div
                             key={sub}
-                            className="flex items-center justify-between"
+                            className="flex items-center justify-between p-3 bg-white/5 rounded-[12px] border border-white/10"
                           >
-                            <span className="font-medium">{label}</span>
+                            <span className="font-medium text-white">{label}</span>
                             <div className="flex items-center space-x-2">
-                              <div className="w-24 bg-gray-200 rounded-full h-3">
+                              <div className="w-24 bg-white/10 rounded-full h-3">
                                 <div
-                                  className="bg-blue-500 h-3 rounded-full"
+                                  className="bg-emerald-500 h-3 rounded-full"
                                   style={{
                                     width: val ? `${(val / 10) * 100}%` : "0%",
                                   }}
@@ -791,7 +857,15 @@ export default function TeacherGradesPage() {
                               </div>
                               <span
                                 className={`font-bold ${
-                                  val ? getGradeColor(val) : "text-gray-400"
+                                  val
+                                    ? val >= 9
+                                      ? "text-emerald-400"
+                                      : val >= 8
+                                      ? "text-teal-400"
+                                      : val >= 6.5
+                                      ? "text-yellow-400"
+                                      : "text-red-400"
+                                    : "text-slate-500"
                                 }`}
                               >
                                 {val ?? "--"}
@@ -806,42 +880,42 @@ export default function TeacherGradesPage() {
               </div>
 
               {/* Detailed Analysis */}
-              <Card>
+              <Card className="rounded-[28px] border border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-2xl">
                 <CardHeader>
-                  <CardTitle>Phân tích chi tiết</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-white">Phân tích chi tiết</CardTitle>
+                  <CardDescription className="text-slate-400">
                     Thống kê toàn diện về thành tích học tập
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-green-600">
+                    <div className="text-center p-6 bg-emerald-500/10 rounded-[20px] border border-emerald-500/20 backdrop-blur-xl transition hover:bg-emerald-500/15">
+                      <CheckCircle className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-emerald-400">
                         {distribution.excellent}
                       </div>
-                      <p className="text-sm text-green-700">Xuất sắc (9.0+)</p>
+                      <p className="text-sm text-emerald-300">Xuất sắc (9.0+)</p>
                     </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <Target className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-center p-6 bg-teal-500/10 rounded-[20px] border border-teal-500/20 backdrop-blur-xl transition hover:bg-teal-500/15">
+                      <Target className="h-8 w-8 text-teal-400 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-teal-400">
                         {distribution.good}
                       </div>
-                      <p className="text-sm text-blue-700">Giỏi (8.0-8.9)</p>
+                      <p className="text-sm text-teal-300">Giỏi (8.0-8.9)</p>
                     </div>
-                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                      <BookOpen className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-yellow-600">
+                    <div className="text-center p-6 bg-yellow-500/10 rounded-[20px] border border-yellow-500/20 backdrop-blur-xl transition hover:bg-yellow-500/15">
+                      <BookOpen className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-yellow-400">
                         {distribution.average}
                       </div>
-                      <p className="text-sm text-yellow-700">Khá (6.5-7.9)</p>
+                      <p className="text-sm text-yellow-300">Khá (6.5-7.9)</p>
                     </div>
-                    <div className="text-center p-4 bg-red-50 rounded-lg">
-                      <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-red-600">
+                    <div className="text-center p-6 bg-red-500/10 rounded-[20px] border border-red-500/20 backdrop-blur-xl transition hover:bg-red-500/15">
+                      <AlertCircle className="h-8 w-8 text-red-400 mx-auto mb-2" />
+                      <div className="text-2xl font-bold text-red-400">
                         {distribution.needsImprovement}
                       </div>
-                      <p className="text-sm text-red-700">
+                      <p className="text-sm text-red-300">
                         Cần cố gắng (&lt;6.5)
                       </p>
                     </div>
@@ -850,8 +924,8 @@ export default function TeacherGradesPage() {
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }
