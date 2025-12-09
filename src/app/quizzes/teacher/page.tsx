@@ -29,19 +29,13 @@ import {
   Eye,
   Trash2,
   Search,
-  Filter,
-  Calendar,
-  BarChart3,
-  ChevronDown,
-  Loader2,
-  Sparkles,
   FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useDeleteQuiz } from "../hook/quiz-hooks";
-import { useGroupedQuizzes, useQuizzesByClassInfinite } from "../hooks";
+import { useGroupedQuizzes } from "../hooks";
 import { TeacherQuizSkeleton } from "../components/TeacherQuizSkeleton";
 import {
   AlertDialog,
@@ -56,10 +50,6 @@ import {
 import { classDTO, QuizDTO } from "../api";
 
 type QuizStatus = "UPCOMING" | "OPEN" | "CLOSED";
-
-interface ExpandedClassState {
-  [classId: number]: boolean;
-}
 
 export default function TeacherQuizzesPage() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -78,15 +68,6 @@ export default function TeacherQuizzesPage() {
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<QuizStatus>("OPEN");
-  const [expandedClasses, setExpandedClasses] = useState<ExpandedClassState>(
-    {}
-  );
-
-  // Stores pagination queries for each class
-  const [classPaginationQueries, setClassPaginationQueries] = useState<{
-    [classId: number]: any;
-  }>({});
-
   const {
     data: groupedData,
     isLoading,
@@ -145,7 +126,7 @@ export default function TeacherQuizzesPage() {
     return (
       <Card
         key={quiz.id}
-        className="rounded-[28px] border border-white/10 bg-white/5 text-white transition hover:-translate-y-1 hover:bg-white/10 shadow-xl backdrop-blur-2xl"
+        className="rounded-xl border border-white/10 bg-slate-800 text-white shadow-sm"
       >
         <div className="p-6">
           <div className="mb-4">
@@ -226,96 +207,47 @@ export default function TeacherQuizzesPage() {
   }) => {
     const quizzes = classData.quizzes ?? [];
 
-    // Initialize pagination query for this class if needed
-    const classQuery = classPaginationQueries[classData.classId];
-
-    const {
-      data: paginatedData,
-      fetchNextPage,
-      hasNextPage,
-      isFetchingNextPage,
-      refetch: refetchClassQuizzes,
-    } = useQuizzesByClassInfinite(classData.classId, status, {
-      enabled: !!classQuery, // Only enabled when we need to fetch more data
-    });
-
-    const handleLoadMoreQuizzes = () => {
-      // Initialize the query for this class
-      if (!classQuery) {
-        setClassPaginationQueries((prev) => ({
-          ...prev,
-          [classData.classId]: true,
-        }));
-        // Need to wait for next render cycle for the query to be enabled
-        setTimeout(() => {
-          fetchNextPage();
-        }, 0);
-      } else {
-        // Trigger fetch next page
-        fetchNextPage();
-      }
-    };
-
-    const allQuizzes = [
-      ...quizzes,
-      ...(paginatedData?.pages?.flatMap((page) => page.content) || []),
-    ];
-
-    const uniqueQuizzes = allQuizzes.filter(
+    const uniqueQuizzes = quizzes.filter(
       (quiz, index, self) => index === self.findIndex((q) => q.id === quiz.id)
     );
 
     const totalQuizzes = classData.quizTotal;
-    const currentCount = uniqueQuizzes.length;
-    const remainingCount = Math.max(0, totalQuizzes - currentCount);
+    const displayedQuizzes = uniqueQuizzes.slice(0, 3);
 
-    const canLoadMore = currentCount < totalQuizzes;
+    const handleOpenClassDetail = () => {
+      router.push(
+        `/quizzes/teacher/Quizclass?classId=${classData.classId}&className=${encodeURIComponent(
+          classData.className
+        )}&subjectName=${encodeURIComponent(classData.subjectName)}`
+      );
+    };
+
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-semibold text-white">
-              Lớp {classData.className}
-            </h2>
-            <Badge className="rounded-full border border-white/20 bg-white/10 text-emerald-200 px-3 py-1">
-              {totalQuizzes} bài kiểm tra
-            </Badge>
+        <button
+          type="button"
+          onClick={handleOpenClassDetail}
+          className="flex w-full items-start justify-between text-left transition hover:translate-x-1"
+        >
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-semibold text-white underline-offset-4 hover:underline">
+                Lớp {classData.className}
+              </h2>
+              <Badge className="rounded-full border border-white/20 bg-white/10 text-emerald-200 px-3 py-1">
+                {totalQuizzes} bài kiểm tra
+              </Badge>
+            </div>
+            <p className="text-sm text-emerald-200/80">
+              Bấm để xem tất cả bài kiểm tra của lớp này
+            </p>
           </div>
-        </div>
+        </button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {uniqueQuizzes.map((quiz) => renderQuizCard(quiz))}
+          {displayedQuizzes.map((quiz) => renderQuizCard(quiz))}
         </div>
-
-        {canLoadMore && (
-          <div className="flex justify-center items-center gap-4 mt-6 p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
-            {remainingCount > 0 && (
-              <span className="text-sm text-slate-300">
-                Còn {remainingCount} bài kiểm tra khác
-              </span>
-            )}
-
-            <Button
-              variant="outline"
-              onClick={handleLoadMoreQuizzes}
-              disabled={isFetchingNextPage}
-              className="min-w-[120px] rounded-xl border-white/30 text-white hover:bg-white/10"
-            >
-              {isFetchingNextPage ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Đang tải...
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4 mr-2" />
-                  Xem thêm
-                </>
-              )}
-            </Button>
-          </div>
-        )}
       </div>
     );
   };
@@ -342,90 +274,47 @@ export default function TeacherQuizzesPage() {
     }) || [];
 
   return (
-    <div className="relative min-h-screen bg-slate-950 text-white">
-      <div className="absolute inset-0">
-        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-emerald-600/40 via-slate-900 to-slate-950 blur-3xl" />
-        <div className="absolute -right-24 top-24 h-64 w-64 rounded-full bg-teal-500/30 blur-[140px]" />
-        <div className="absolute -left-16 bottom-0 h-72 w-72 rounded-full bg-indigo-500/30 blur-[150px]" />
-        <div className="absolute inset-0 opacity-30">
-          {[...Array(30)].map((_, index) => (
-            <span
-              key={index}
-              className="absolute h-1 w-1 rounded-full bg-cyan-200/40"
-              style={{
-                left: `${(index * 37) % 100}%`,
-                top: `${(index * 21) % 100}%`,
-                animation: `pulse 6s ease-in-out ${index * 0.3}s infinite`,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-slate-900 text-white">
       <Navigation />
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
-        <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6 sm:px-6 lg:px-8">
+        <section className="rounded-2xl border border-white/10 bg-slate-800 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-200">
-                <FileText className="h-3.5 w-3.5" />
-                Quiz Management
-              </span>
-              <h1 className="mt-4 text-4xl font-black md:text-5xl">Quản lý trắc nghiệm</h1>
-              <p className="mt-3 max-w-2xl text-slate-300">
-                Tạo, điều phối và giám sát mọi bài kiểm tra trắc nghiệm trong một giao diện thống nhất. Theo dõi kết quả và tiến độ học sinh realtime.
-              </p>
+              <h1 className="text-3xl font-bold">Quản lý trắc nghiệm</h1>
+              <p className="mt-2 text-sm text-slate-300">Xem và chỉnh sửa nhanh các bài kiểm tra theo lớp.</p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <Link href="teacher/createQuiz">
-                <Button className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-5 text-base font-semibold shadow-emerald-500/40 hover:from-emerald-600 hover:to-teal-600">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Tạo bài kiểm tra mới
-                </Button>
-              </Link>
-            </div>
+            <Link href="teacher/createQuiz">
+              <Button className="rounded-xl bg-emerald-500 px-5 py-2.5 text-white hover:bg-emerald-600">
+                <Plus className="mr-2 h-4 w-4" />
+                Tạo bài kiểm tra mới
+              </Button>
+            </Link>
           </div>
         </section>
 
-        <section className="mt-10">
-          <Card className="rounded-[28px] border-white/10 bg-slate-900/70 text-white shadow-xl backdrop-blur-2xl">
-            <CardHeader className="border-b border-white/5 pb-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <CardTitle className="text-2xl font-semibold">Tìm kiếm & bộ lọc</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Lọc nhanh theo tên bài kiểm tra, môn học hoặc lớp học.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
+        <section className="mt-6">
+          <Card className="rounded-2xl border-white/10 bg-slate-800 text-white shadow-sm">
+            <CardContent className="pt-6">
               <div className="flex flex-col gap-3 md:flex-row">
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
                   <Input
-                    placeholder="Tìm kiếm theo tên bài kiểm tra..."
+                    placeholder="Tìm kiếm bài kiểm tra..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-white/5 text-white placeholder:text-slate-500 border-white/10"
+                    className="pl-10 bg-slate-900 text-white placeholder:text-slate-500 border-white/10"
                   />
                 </div>
 
-                <div className="min-w-[200px]">
-                  <Select
-                    value={selectedSubject}
-                    onValueChange={setSelectedSubject}
-                  >
-                    <SelectTrigger className="bg-white/5 text-white border-white/10">
-                      <SelectValue placeholder="Chọn môn học" />
+                <div className="min-w-[180px]">
+                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                    <SelectTrigger className="bg-slate-900 text-white border-white/10">
+                      <SelectValue placeholder="Môn học" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-900 border-white/10 text-white">
                       <SelectItem value="all">Tất cả môn học</SelectItem>
                       {groupedData?.classes?.map((classData, idx) => (
-                        <SelectItem
-                          key={`${classData.classId}-${idx}`}
-                          value={classData.subjectName}
-                        >
+                        <SelectItem key={`${classData.classId}-${idx}`} value={classData.subjectName}>
                           {classData.subjectName}
                         </SelectItem>
                       ))}
@@ -433,21 +322,15 @@ export default function TeacherQuizzesPage() {
                   </Select>
                 </div>
 
-                <div className="min-w-[200px]">
-                  <Select
-                    value={selectedClass}
-                    onValueChange={setSelectedClass}
-                  >
-                    <SelectTrigger className="bg-white/5 text-white border-white/10">
-                      <SelectValue placeholder="Chọn lớp học" />
+                <div className="min-w-[180px]">
+                  <Select value={selectedClass} onValueChange={setSelectedClass}>
+                    <SelectTrigger className="bg-slate-900 text-white border-white/10">
+                      <SelectValue placeholder="Lớp học" />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-900 border-white/10 text-white">
                       <SelectItem value="all">Tất cả lớp học</SelectItem>
                       {groupedData?.classes?.map((classData: classDTO) => (
-                        <SelectItem
-                          key={classData.classId}
-                          value={classData.className}
-                        >
+                        <SelectItem key={classData.classId} value={classData.className}>
                           {classData.className}
                         </SelectItem>
                       ))}
@@ -459,32 +342,29 @@ export default function TeacherQuizzesPage() {
           </Card>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-6">
           <Tabs
             value={activeTab}
             onValueChange={(value) => setActiveTab(value as QuizStatus)}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-3 bg-white/5 border border-white/10 rounded-2xl p-1 h-auto">
+            <TabsList className="grid w-full grid-cols-3 bg-slate-800 border border-white/10 rounded-xl p-1 h-auto">
               <TabsTrigger 
                 value="OPEN" 
-                className="flex items-center gap-2 data-[state=active]:bg-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 rounded-xl h-12 transition-all"
+                className="flex items-center justify-center gap-2 data-[state=active]:bg-emerald-500 data-[state=active]:text-white text-slate-300 rounded-lg h-11 transition-all"
               >
-                <span className="w-2 h-2 bg-emerald-500 rounded-full data-[state=active]:bg-white"></span>
                 Đang mở
               </TabsTrigger>
               <TabsTrigger 
                 value="UPCOMING" 
-                className="flex items-center gap-2 data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 rounded-xl h-12 transition-all"
+                className="flex items-center justify-center gap-2 data-[state=active]:bg-amber-500 data-[state=active]:text-white text-slate-300 rounded-lg h-11 transition-all"
               >
-                <span className="w-2 h-2 bg-amber-500 rounded-full data-[state=active]:bg-white"></span>
                 Sắp diễn ra
               </TabsTrigger>
               <TabsTrigger 
                 value="CLOSED" 
-                className="flex items-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white data-[state=active]:shadow-lg text-slate-300 rounded-xl h-12 transition-all"
+                className="flex items-center justify-center gap-2 data-[state=active]:bg-red-500 data-[state=active]:text-white text-slate-300 rounded-lg h-11 transition-all"
               >
-                <span className="w-2 h-2 bg-red-500 rounded-full data-[state=active]:bg-white"></span>
                 Đã đóng
               </TabsTrigger>
             </TabsList>
@@ -493,7 +373,7 @@ export default function TeacherQuizzesPage() {
               {isLoading ? (
                 <TeacherQuizSkeleton />
               ) : error ? (
-                <Card className="rounded-[28px] border-white/10 bg-white/5 text-white backdrop-blur-2xl">
+                <Card className="rounded-2xl border-white/10 bg-slate-800 text-white">
                   <CardContent className="p-8 text-center">
                     <p className="text-red-400 text-lg mb-4">
                       Có lỗi xảy ra khi tải dữ liệu
@@ -507,7 +387,7 @@ export default function TeacherQuizzesPage() {
                   </CardContent>
                 </Card>
               ) : filteredClasses.length === 0 ? (
-                <Card className="rounded-[28px] border-white/10 bg-white/5 text-white backdrop-blur-2xl">
+                <Card className="rounded-2xl border-white/10 bg-slate-800 text-white">
                   <CardContent className="p-8 text-center">
                     <p className="text-slate-300 text-lg">
                       Không tìm thấy bài kiểm tra nào
