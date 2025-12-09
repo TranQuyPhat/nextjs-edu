@@ -134,11 +134,22 @@ export async function fetchQuizzesByClass(params: {
   status: "UPCOMING" | "OPEN" | "CLOSED";
   page: number;
   size: number;
-}) {
+}): Promise<Page<any>> {
   const { classId, status, page, size } = params;
+  // Gọi API kèm tham số status bắt buộc
   const res = await apiClient.get<ApiResp<Page<any>>>(
     `/api/teacher/quizzes/class/${classId}`,
     { params: { status, page, size } }
   );
-  return res.data.data;
+  
+  const payload = res as unknown as ApiResp<Page<any>>; // apiClient interceptor trả res.data, nhưng type của axios không đổi
+  return payload.data; 
+}
+export async function fetchQuizzesByClassAll(params: { classId: number; page: number; size: number }) {
+  const { classId, page, size } = params;
+  const res = await apiClient.get<ApiResp<Page<any>>>(
+    `/api/teacher/quizzes/class/${classId}`,
+    { params: { page, size } }
+  );
+  return res.data;
 }

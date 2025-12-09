@@ -33,7 +33,7 @@ export function useGroupedQuizzes(status: "UPCOMING" | "OPEN" | "CLOSED") {
             fetchGroupedQuizzes({
                 status,
                 classPage: 0,
-                classSize: 5,
+                classSize: 50, // fetch enough classes to avoid missing any
                 quizPageSize: 3,
             }),
         staleTime: 5 * 60 * 1000,
