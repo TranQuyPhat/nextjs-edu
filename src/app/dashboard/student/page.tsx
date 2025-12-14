@@ -16,6 +16,9 @@ import {
   Calendar,
   Award,
   Target,
+  MapPin,
+  User,
+  ArrowRight,
 } from "lucide-react";
 
 import { StudentDashboardResponse } from "@/types/dashboard";
@@ -23,6 +26,7 @@ import { fetchStudentDashboard } from "@/services/dashboardService";
 import { useRecentScoreOfStudent } from "../hooks/useRecentScoreOfStudent";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { getScheduleByWeek, LessonItem } from "@/services/scheduleService";
 
 import { toast } from "react-toastify";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -33,6 +37,8 @@ export default function StudentDashboard() {
 
   const [user, setUser] = useState<{ fullName: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [todayLessons, setTodayLessons] = useState<LessonItem[]>([]);
+  const [loadingSchedule, setLoadingSchedule] = useState(true);
 
   // Dashboard state (kết hợp API + mock)
   const [dashboardData, setDashboardData] = useState<{
@@ -154,6 +160,38 @@ export default function StudentDashboard() {
       router.replace("/auth/login");
     }
   }, [router]);
+
+  // Fetch today's schedule
+  useEffect(() => {
+    const fetchTodaySchedule = async () => {
+      try {
+        setLoadingSchedule(true);
+        const today = format(new Date(), "yyyy-MM-dd");
+        const scheduleData = await getScheduleByWeek(today);
+        
+        // Find today's lessons
+        const todayDate = format(new Date(), "yyyy-MM-dd");
+        const todaySchedule = scheduleData.schedules.find(
+          (day) => day.date === todayDate
+        );
+        
+        if (todaySchedule) {
+          setTodayLessons(todaySchedule.lessons || []);
+        } else {
+          setTodayLessons([]);
+        }
+      } catch (error) {
+        console.error("Error fetching today's schedule:", error);
+        setTodayLessons([]);
+      } finally {
+        setLoadingSchedule(false);
+      }
+    };
+
+    if (user) {
+      fetchTodaySchedule();
+    }
+  }, [user]);
 
   const getGradeBadge = (grade: number, maxGrade: number) => {
     const percentage = (grade / maxGrade) * 100;
@@ -431,6 +469,126 @@ export default function StudentDashboard() {
           </div>
 
           <div className="space-y-6">
+            {/* Today's Schedule */}
+            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-blue-900">
+                    <Calendar className="h-5 w-5 text-blue-600" />
+                    Lịch học hôm nay
+                  </CardTitle>
+                  <Link href="/schedule/student">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
+                    >
+                      Xem tất cả
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loadingSchedule ? (
+                  <div className="text-center py-4 text-gray-500">
+                    <div className="inline-flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span className="text-sm">Đang tải...</span>
+                    </div>
+                  </div>
+                ) : todayLessons.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                    <p className="text-sm text-gray-500">Hôm nay không có lịch học</p>
+                    <Link href="/schedule/student">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                      >
+                        Xem thời khóa biểu
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {todayLessons.map((lesson, index) => {
+                      // Get color for subject
+                      let hash = 0;
+                      for (let i = 0; i < lesson.subjectName.length; i++) {
+                        hash = lesson.subjectName.charCodeAt(i) + ((hash << 5) - hash);
+                      }
+                      const colorIndex = Math.abs(hash) % 10;
+                      const colors = [
+                        "from-blue-500 to-blue-600",
+                        "from-purple-500 to-purple-600",
+                        "from-pink-500 to-pink-600",
+                        "from-indigo-500 to-indigo-600",
+                        "from-teal-500 to-teal-600",
+                        "from-cyan-500 to-cyan-600",
+                        "from-emerald-500 to-emerald-600",
+                        "from-amber-500 to-amber-600",
+                        "from-orange-500 to-orange-600",
+                        "from-rose-500 to-rose-600",
+                      ];
+                      const gradient = colors[colorIndex];
+                      
+                      return (
+                        <div
+                          key={lesson.sessionId || index}
+                          className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Time indicator */}
+                            <div className={`w-1 h-full min-h-[60px] bg-gradient-to-b ${gradient} rounded-full`}></div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                                    {lesson.subjectName}
+                                  </h4>
+                                  <p className="text-xs text-gray-600 mb-1">
+                                    {lesson.className}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                  <Clock className="h-3 w-3" />
+                                  <span>Tiết {lesson.startPeriod}-{lesson.endPeriod}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                                  <span>{lesson.location}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3.5 w-3.5 text-gray-400" />
+                                  <span className="truncate max-w-[120px]">{lesson.teacherName}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    <Link href="/schedule/student">
+                      <Button
+                        variant="outline"
+                        className="w-full mt-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+                      >
+                        Xem thời khóa biểu đầy đủ
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
