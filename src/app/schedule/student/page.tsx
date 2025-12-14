@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ThumbsUp, Plus, Calendar, MapPin, User, Clock, Sparkles, Bell, StickyNote, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Plus, Calendar, MapPin, User, Clock, Sparkles, Bell, FileText, X } from "lucide-react";
 import Loading from "@/components/loading";
 import { getScheduleByWeek, WeekSchedule, LessonItem, DaySchedule } from "@/services/scheduleService";
 import {
@@ -513,7 +513,7 @@ export default function SchedulePage() {
                                   }`}
                                   title={hasNote(lesson) ? "Chỉnh sửa ghi chú" : "Thêm ghi chú"}
                                 >
-                                  <StickyNote className="h-3.5 w-3.5" />
+                                  <FileText className="h-3.5 w-3.5" />
                                 </button>
                               </div>
                               
@@ -562,7 +562,7 @@ export default function SchedulePage() {
         <div className="fixed bottom-8 right-8 z-50">
           <button className="group relative bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-2xl p-4 shadow-2xl shadow-blue-500/40 border border-white/20 flex items-center gap-2 transition-all hover:scale-110 hover:shadow-blue-500/50">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <ThumbsUp className="h-5 w-5 relative z-10" />
+            <Heart className="h-5 w-5 relative z-10" />
             <Plus className="h-4 w-4 relative z-10" />
           </button>
         </div>
@@ -572,7 +572,7 @@ export default function SchedulePage() {
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <StickyNote className="h-5 w-5 text-blue-600" />
+                <FileText className="h-5 w-5 text-blue-600" />
                 Ghi chú môn học
               </DialogTitle>
               <DialogDescription>
@@ -610,7 +610,7 @@ export default function SchedulePage() {
                 onClick={saveNote}
                 className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white flex items-center gap-2"
               >
-                <StickyNote className="h-4 w-4" />
+                <FileText className="h-4 w-4" />
                 Lưu
               </Button>
             </DialogFooter>
