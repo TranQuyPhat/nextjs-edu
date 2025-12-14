@@ -3,9 +3,19 @@
 import { useState, useEffect, useMemo } from "react";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ThumbsUp, Plus, Calendar, MapPin, User, Clock, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, ThumbsUp, Plus, Calendar, MapPin, User, Clock, Sparkles, Bell, StickyNote, X } from "lucide-react";
 import Loading from "@/components/loading";
 import { getScheduleByWeek, WeekSchedule, LessonItem, DaySchedule } from "@/services/scheduleService";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 // Mapping Vietnamese day names to abbreviations
 const dayAbbreviationMap: Record<string, string> = {
@@ -162,12 +172,38 @@ const isToday = (dateString: string): boolean => {
   );
 };
 
+// Type for lesson notes
+type LessonNote = {
+  sessionId: number;
+  subjectName: string;
+  note: string;
+  weekStartDate: string;
+};
+
 export default function SchedulePage() {
   const [user, setUser] = useState<any>(null);
   const [weekStartDate, setWeekStartDate] = useState<string | null>(null);
   const [weekData, setWeekData] = useState<WeekSchedule | null>(null);
   const [loadingWeek, setLoadingWeek] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Note management
+  const [notes, setNotes] = useState<Record<string, LessonNote>>({});
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [currentLesson, setCurrentLesson] = useState<LessonItem | null>(null);
+  const [noteText, setNoteText] = useState("");
+
+  // Load notes from localStorage
+  useEffect(() => {
+    const savedNotes = localStorage.getItem("scheduleNotes");
+    if (savedNotes) {
+      try {
+        setNotes(JSON.parse(savedNotes));
+      } catch (e) {
+        console.error("Error loading notes:", e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -223,6 +259,67 @@ export default function SchedulePage() {
     if (!weekData) return Array.from({ length: 12 }, (_, i) => i + 1);
     return getAllPeriods(weekData.schedules);
   }, [weekData]);
+
+  // Get note key for a lesson
+  const getNoteKey = (lesson: LessonItem, weekStart: string) => {
+    return `${lesson.sessionId}-${weekStart}`;
+  };
+
+  // Check if lesson has note
+  const hasNote = (lesson: LessonItem) => {
+    if (!weekData) return false;
+    const key = getNoteKey(lesson, weekData.weekStartDate);
+    return !!notes[key]?.note;
+  };
+
+  // Get note for lesson
+  const getNote = (lesson: LessonItem) => {
+    if (!weekData) return "";
+    const key = getNoteKey(lesson, weekData.weekStartDate);
+    return notes[key]?.note || "";
+  };
+
+  // Open note modal
+  const openNoteModal = (lesson: LessonItem) => {
+    setCurrentLesson(lesson);
+    const existingNote = getNote(lesson);
+    setNoteText(existingNote);
+    setNoteModalOpen(true);
+  };
+
+  // Save note
+  const saveNote = () => {
+    if (!currentLesson || !weekData) return;
+    
+    const key = getNoteKey(currentLesson, weekData.weekStartDate);
+    const newNotes = {
+      ...notes,
+      [key]: {
+        sessionId: currentLesson.sessionId,
+        subjectName: currentLesson.subjectName,
+        note: noteText.trim(),
+        weekStartDate: weekData.weekStartDate,
+      },
+    };
+
+    // Remove note if empty
+    if (!noteText.trim()) {
+      delete newNotes[key];
+    }
+
+    setNotes(newNotes);
+    localStorage.setItem("scheduleNotes", JSON.stringify(newNotes));
+    setNoteModalOpen(false);
+    setCurrentLesson(null);
+    setNoteText("");
+  };
+
+  // Cancel note
+  const cancelNote = () => {
+    setNoteModalOpen(false);
+    setCurrentLesson(null);
+    setNoteText("");
+  };
 
   if (!user) {
     return <Loading />;
@@ -390,8 +487,38 @@ export default function SchedulePage() {
                               {/* Gradient accent bar on left */}
                               <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${colors?.accent} rounded-l shadow-lg`}></div>
                               
+                              {/* Note indicator and button */}
+                              <div className="absolute top-2 right-2 flex items-center gap-1">
+                                {hasNote(lesson) && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openNoteModal(lesson);
+                                    }}
+                                    className="p-1.5 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-700 transition-all hover:scale-110 shadow-sm"
+                                    title="Xem ghi chú"
+                                  >
+                                    <Bell className="h-3.5 w-3.5 fill-amber-500" />
+                                  </button>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openNoteModal(lesson);
+                                  }}
+                                  className={`p-1.5 rounded-lg transition-all hover:scale-110 shadow-sm ${
+                                    hasNote(lesson)
+                                      ? "bg-blue-100 hover:bg-blue-200 text-blue-700"
+                                      : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                                  }`}
+                                  title={hasNote(lesson) ? "Chỉnh sửa ghi chú" : "Thêm ghi chú"}
+                                >
+                                  <StickyNote className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                              
                               {/* Subject Name */}
-                              <div className={`font-bold text-sm ${colors?.text} mb-2 flex items-center gap-2`}>
+                              <div className={`font-bold text-sm ${colors?.text} mb-2 flex items-center gap-2 pr-16`}>
                                 <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${colors?.accent} shadow-sm`}></div>
                                 <span className="line-clamp-1">{lesson.subjectName}</span>
                               </div>
@@ -439,6 +566,56 @@ export default function SchedulePage() {
             <Plus className="h-4 w-4 relative z-10" />
           </button>
         </div>
+
+        {/* Note Modal */}
+        <Dialog open={noteModalOpen} onOpenChange={setNoteModalOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <StickyNote className="h-5 w-5 text-blue-600" />
+                Ghi chú môn học
+              </DialogTitle>
+              <DialogDescription>
+                {currentLesson && (
+                  <div className="mt-2">
+                    <div className="font-semibold text-gray-900">{currentLesson.subjectName}</div>
+                    <div className="text-sm text-gray-600">{currentLesson.className}</div>
+                  </div>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Label htmlFor="note" className="text-sm font-medium text-gray-700 mb-2 block">
+                Ghi chú quan trọng (ví dụ: có tiết kiểm tra, bài tập về nhà...)
+              </Label>
+              <Textarea
+                id="note"
+                placeholder="Nhập ghi chú của bạn ở đây..."
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                className="min-h-[120px] resize-none"
+                rows={5}
+              />
+            </div>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={cancelNote}
+                className="flex items-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                Hủy
+              </Button>
+              <Button
+                onClick={saveNote}
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white flex items-center gap-2"
+              >
+                <StickyNote className="h-4 w-4" />
+                Lưu
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
