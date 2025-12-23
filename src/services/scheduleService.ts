@@ -1,5 +1,5 @@
 // services/scheduleService.ts
-import { ApiResp } from '@/lib/type';
+import { ApiResp } from '../lib/type';
 
 export type LessonItem = {
   sessionId: number;
