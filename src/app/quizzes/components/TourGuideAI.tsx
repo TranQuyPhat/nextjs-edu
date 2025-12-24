@@ -115,7 +115,7 @@ export function TourGuide({
         ref.current?.classList.remove("ring-2", "ring-green-500");
       }, 4000);
     }
-  }, [stepIndex]);
+  }, [stepIndex, refs]);
 
   const handleNext = () => {
     if (stepIndex < tourSteps.length - 1) {

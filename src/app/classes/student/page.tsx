@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navigation from "@/components/navigation";
 import {
   Card,
@@ -57,18 +57,7 @@ export default function StudentClassesPage() {
   const [pageSize] = useState(6);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      console.log("parsedUser :", parsedUser);
-
-      loadStudentClasses(parsedUser.userId, currentPage);
-    }
-  }, [currentPage, pageSize]);
-
-  const loadStudentClasses = (userId: number, page: number) => {
+  const loadStudentClasses = useCallback((userId: number, page: number) => {
     getStudentClasses(userId, page, pageSize)
       .then((res) => {
         setClasses(Array.isArray(res.data) ? res.data : res.data || []);
@@ -84,7 +73,19 @@ export default function StudentClassesPage() {
             "Không thể tải danh sách lớp học!"
         );
       });
-  };
+  }, [pageSize]);
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+      console.log("parsedUser :", parsedUser);
+
+      loadStudentClasses(parsedUser.userId, currentPage);
+    }
+  }, [currentPage, loadStudentClasses]);
+
 
   // Function tìm kiếm lớp học của student với phân trang
   const handleSearchStudentClasses = async (
@@ -144,14 +145,13 @@ export default function StudentClassesPage() {
   };
 
   // Load lớp gợi ý khi mở tab tìm kiếm lần đầu
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (activeTab === "search" && searchResults.length === 0 && !searchTerm) {
       getLatestClasses().then((data) => {
         setSearchResults(Array.isArray(data) ? data : data || []);
       });
     }
-  }, [activeTab]);
+  }, [activeTab, searchResults.length, searchTerm]);
 
   const handleJoinClass = async () => {
     if (!joinCode) {

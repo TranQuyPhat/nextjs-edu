@@ -67,16 +67,6 @@ export default function ProfileModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset form khi modal đóng/mở
-  useEffect(() => {
-    if (isOpen) {
-      setFullName(user.fullName || "");
-      setPreviewImage(user.avatarBase64 || "");
-      setShowPasswordForm(false);
-      reset();
-    }
-  }, [isOpen, user]);
-
   const {
     register,
     handleSubmit,
@@ -87,6 +77,16 @@ export default function ProfileModal({
     resolver: yupResolver(passwordSchema),
     mode: "onChange",
   });
+
+  // Reset form khi modal đóng/mở
+  useEffect(() => {
+    if (isOpen) {
+      setFullName(user.fullName || "");
+      setPreviewImage(user.avatarBase64 || "");
+      setShowPasswordForm(false);
+      reset();
+    }
+  }, [isOpen, user, reset]);
 
   // Watch password fields để hiển thị form
   const watchedFields = watch([
