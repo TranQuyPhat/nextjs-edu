@@ -168,13 +168,13 @@ export default function StudentDashboard() {
         setLoadingSchedule(true);
         const today = format(new Date(), "yyyy-MM-dd");
         const scheduleData = await getScheduleByWeek(today);
-        
+
         // Find today's lessons
         const todayDate = format(new Date(), "yyyy-MM-dd");
         const todaySchedule = scheduleData.schedules.find(
           (day) => day.date === todayDate
         );
-        
+
         if (todaySchedule) {
           setTodayLessons(todaySchedule.lessons || []);
         } else {
@@ -500,13 +500,11 @@ export default function StudentDashboard() {
                 ) : todayLessons.length === 0 ? (
                   <div className="text-center py-6">
                     <Calendar className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                    <p className="text-sm text-gray-500">Hôm nay không có lịch học</p>
+                    <p className="text-sm text-gray-500">
+                      Hôm nay không có lịch học
+                    </p>
                     <Link href="/schedule/student">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                      >
+                      <Button variant="outline" size="sm" className="mt-3">
                         Xem thời khóa biểu
                       </Button>
                     </Link>
@@ -517,7 +515,9 @@ export default function StudentDashboard() {
                       // Get color for subject
                       let hash = 0;
                       for (let i = 0; i < lesson.subjectName.length; i++) {
-                        hash = lesson.subjectName.charCodeAt(i) + ((hash << 5) - hash);
+                        hash =
+                          lesson.subjectName.charCodeAt(i) +
+                          ((hash << 5) - hash);
                       }
                       const colorIndex = Math.abs(hash) % 10;
                       const colors = [
@@ -533,7 +533,7 @@ export default function StudentDashboard() {
                         "from-rose-500 to-rose-600",
                       ];
                       const gradient = colors[colorIndex];
-                      
+
                       return (
                         <div
                           key={lesson.sessionId || index}
@@ -541,8 +541,10 @@ export default function StudentDashboard() {
                         >
                           <div className="flex items-start gap-3">
                             {/* Time indicator */}
-                            <div className={`w-1 h-full min-h-[60px] bg-gradient-to-b ${gradient} rounded-full`}></div>
-                            
+                            <div
+                              className={`w-1 h-full min-h-[60px] bg-gradient-to-b ${gradient} rounded-full`}
+                            ></div>
+
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2 mb-2">
                                 <div className="flex-1">
@@ -555,10 +557,12 @@ export default function StudentDashboard() {
                                 </div>
                                 <div className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                                   <Clock className="h-3 w-3" />
-                                  <span>Tiết {lesson.startPeriod}-{lesson.endPeriod}</span>
+                                  <span>
+                                    Tiết {lesson.startPeriod}-{lesson.endPeriod}
+                                  </span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
                                 <div className="flex items-center gap-1">
                                   <MapPin className="h-3.5 w-3.5 text-gray-400" />
@@ -566,7 +570,9 @@ export default function StudentDashboard() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-3.5 w-3.5 text-gray-400" />
-                                  <span className="truncate max-w-[120px]">{lesson.teacherName}</span>
+                                  <span className="truncate max-w-[120px]">
+                                    {lesson.teacherName}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -574,7 +580,7 @@ export default function StudentDashboard() {
                         </div>
                       );
                     })}
-                    
+
                     <Link href="/schedule/student">
                       <Button
                         variant="outline"
@@ -597,47 +603,61 @@ export default function StudentDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {Math.round(
-                      (dashboardData.completedAssignments /
-                        dashboardData.totalAssignments) *
+                {dashboardData.totalAssignments === 0 ? (
+                  <div className="text-center py-8">
+                    <Target className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-muted-foreground mb-4">
+                      Bạn chưa có bài tập nào
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Các bài tập sẽ hiển thị ở đây khi giáo viên giao cho bạn
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-blue-600">
+                        {Math.round(
+                          (dashboardData.completedAssignments /
+                            dashboardData.totalAssignments) *
+                            100
+                        )}
+                        %
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Hoàn thành tổng thể
+                      </p>
+                    </div>
+                    <Progress
+                      value={
+                        (dashboardData.completedAssignments /
+                          dashboardData.totalAssignments) *
                         100
-                    )}
-                    %
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Hoàn thành tổng thể
-                  </p>
-                </div>
-                <Progress
-                  value={
-                    (dashboardData.completedAssignments /
-                      dashboardData.totalAssignments) *
-                    100
-                  }
-                  className="h-2"
-                />
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Đã hoàn thành</span>
-                    <span className="font-medium">
-                      {dashboardData.completedAssignments}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Chờ làm</span>
-                    <span className="font-medium text-orange-600">
-                      {dashboardData.pendingAssignments}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tổng cộng</span>
-                    <span className="font-medium">
-                      {dashboardData.totalAssignments}
-                    </span>
-                  </div>
-                </div>
+                      }
+                      className="h-2"
+                    />
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Đã hoàn thành</span>
+                        <span className="font-medium">
+                          {dashboardData.completedAssignments}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Chờ làm</span>
+                        <span className="font-medium text-orange-600">
+                          {dashboardData.pendingAssignments}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tổng cộng</span>
+                        <span className="font-medium">
+                          {dashboardData.totalAssignments}
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 

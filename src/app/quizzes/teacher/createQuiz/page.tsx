@@ -192,21 +192,6 @@ export default function CreateQuizzPage() {
 
       <Navigation />
       <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
-        <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl mb-10">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Create Quiz
-              </span>
-              <h1 className="mt-4 text-4xl font-black md:text-5xl">Tạo Đề Thi Mới</h1>
-              <p className="mt-3 max-w-2xl text-slate-300">
-                Lựa chọn phương thức tạo đề thi phù hợp với nhu cầu của bạn. Tạo từ file, AI hoặc ngân hàng đề.
-              </p>
-            </div>
-          </div>
-        </section>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="rounded-[28px] border-white/10 bg-slate-900/70 text-white shadow-xl backdrop-blur-2xl">
             <CardHeader className="border-b border-white/5 pb-5">
@@ -271,9 +256,7 @@ export default function CreateQuizzPage() {
                     <p className="text-sm text-slate-300 mb-4">
                       Tự động sinh đề thi dựa trên ngân hàng đề
                     </p>
-                    <Button
-                      className="rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-2 text-sm font-semibold shadow-purple-500/40 hover:from-purple-600 hover:to-pink-600"
-                    >
+                    <Button className="rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-2 text-sm font-semibold shadow-purple-500/40 hover:from-purple-600 hover:to-pink-600">
                       Tạo đề
                     </Button>
                   </div>
@@ -292,9 +275,7 @@ export default function CreateQuizzPage() {
                     <p className="text-sm text-slate-300 mb-4">
                       Upload đề thi giấy hoặc nhập thông tin từ file có sẵn
                     </p>
-                    <Button
-                      className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2 text-sm font-semibold shadow-amber-500/40 hover:from-amber-600 hover:to-orange-600"
-                    >
+                    <Button className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2 text-sm font-semibold shadow-amber-500/40 hover:from-amber-600 hover:to-orange-600">
                       Tải lên đề thi
                     </Button>
                   </div>

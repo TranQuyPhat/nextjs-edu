@@ -217,7 +217,7 @@ export default function SchedulePage() {
 
   // Load notes from localStorage
   useEffect(() => {
-    const savedNotes = localStorage.getItem("scheduleNotes");
+    const savedNotes = localStorage.getItem("scheduleNotesTeacher");
     if (savedNotes) {
       try {
         setNotes(JSON.parse(savedNotes));
@@ -332,7 +332,7 @@ export default function SchedulePage() {
     }
 
     setNotes(newNotes);
-    localStorage.setItem("scheduleNotes", JSON.stringify(newNotes));
+    localStorage.setItem("scheduleNotesTeacher", JSON.stringify(newNotes));
     setNoteModalOpen(false);
     setCurrentLesson(null);
     setNoteText("");
@@ -362,7 +362,7 @@ export default function SchedulePage() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Thời khóa biểu
+                  Lịch dạy
                 </h1>
                 {weekData && (
                   <p className="text-sm text-gray-600 mt-1">
@@ -413,9 +413,7 @@ export default function SchedulePage() {
 
         {error && (
           <div className="mb-6 rounded-2xl border border-red-200/50 bg-gradient-to-r from-red-50 to-rose-50 p-4 text-sm text-red-700 shadow-sm backdrop-blur-sm">
-            {error instanceof Error
-              ? error.message
-              : "Không thể tải thời khóa biểu"}
+            {error instanceof Error ? error.message : "Không thể tải lịch dạy"}
           </div>
         )}
 
@@ -424,7 +422,7 @@ export default function SchedulePage() {
           <div className="text-center py-16 text-gray-500">
             <div className="inline-flex items-center gap-2">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span>Đang tải thời khóa biểu...</span>
+              <span>Đang tải lịch dạy...</span>
             </div>
           </div>
         ) : !weekData ? (
@@ -440,7 +438,7 @@ export default function SchedulePage() {
             ) === 0 && (
               <div className="mb-6 rounded-2xl border border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 text-sm text-blue-700 shadow-sm backdrop-blur-sm flex items-center gap-3">
                 <Sparkles className="h-5 w-5 text-blue-500" />
-                <span>Tuần này không có môn học nào được lên lịch.</span>
+                <span>Tuần này không có lớp học nào được lên lịch.</span>
               </div>
             )}
             <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden shadow-2xl shadow-blue-500/10">
@@ -648,7 +646,7 @@ export default function SchedulePage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-blue-600" />
-                Ghi chú môn học
+                Ghi chú lớp học
               </DialogTitle>
               <DialogDescription>
                 {currentLesson && (
@@ -668,7 +666,8 @@ export default function SchedulePage() {
                 htmlFor="note"
                 className="text-sm font-medium text-gray-700 mb-2 block"
               >
-                Ghi chú quan trọng (ví dụ: có tiết kiểm tra, bài tập về nhà...)
+                Ghi chú quan trọng (ví dụ: nội dung bài giảng, công việc cần
+                chuẩn bị...)
               </Label>
               <Textarea
                 id="note"

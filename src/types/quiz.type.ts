@@ -66,7 +66,6 @@ export interface QuizCard {
     status: string;
 }
 export interface AiQuizSettings {
-    generationMode: "EXTRACT" | "AI";
     numQuestions?: number;
     quizTitle?: string;
     language?: string;

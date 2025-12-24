@@ -83,6 +83,12 @@ export default function Navigation() {
       icon: Trophy,
       color: "yellow",
     },
+    {
+      href: "/schedule/teacher",
+      label: "Lịch dạy",
+      icon: Calendar,
+      color: "orange",
+    },
   ];
 
   const studentNavItems = [
@@ -159,7 +165,8 @@ export default function Navigation() {
                   red: "from-red-500 to-rose-500",
                   orange: "from-orange-500 to-amber-500",
                 };
-                const gradient = colorMap[item.color] || "from-emerald-500 to-teal-500";
+                const gradient =
+                  colorMap[item.color] || "from-emerald-500 to-teal-500";
                 return (
                   <Link
                     key={item.href}
@@ -169,7 +176,13 @@ export default function Navigation() {
                         ? `bg-gradient-to-r ${gradient} text-white shadow-lg`
                         : "text-slate-300 hover:text-white hover:bg-white/10"
                     }`}
-                    style={isActive ? { boxShadow: `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.3)` } : {}}
+                    style={
+                      isActive
+                        ? {
+                            boxShadow: `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(16, 185, 129, 0.3)`,
+                          }
+                        : {}
+                    }
                   >
                     <Icon className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
                     {item.label}
@@ -237,10 +250,15 @@ export default function Navigation() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 p-4 bg-slate-900/95 border border-white/10 backdrop-blur-xl" align="end">
+                <DropdownMenuContent
+                  className="w-64 p-4 bg-slate-900/95 border border-white/10 backdrop-blur-xl"
+                  align="end"
+                >
                   <div className="flex flex-col gap-3 p-2">
                     <div className="text-center">
-                      <p className="font-semibold text-lg text-white">{user.fullName}</p>
+                      <p className="font-semibold text-lg text-white">
+                        {user.fullName}
+                      </p>
                       <p className="truncate text-sm text-slate-400">
                         {user.email}
                       </p>
@@ -312,7 +330,8 @@ export default function Navigation() {
                   red: "from-red-500 to-rose-500",
                   orange: "from-orange-500 to-amber-500",
                 };
-                const gradient = colorMap[item.color] || "from-emerald-500 to-teal-500";
+                const gradient =
+                  colorMap[item.color] || "from-emerald-500 to-teal-500";
                 return (
                   <Link
                     key={item.href}

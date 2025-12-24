@@ -54,7 +54,7 @@ export function QuizResultDialog({
     });
   };
 
-  const scorePercentage = Math.round((data.score / data.totalQuestions) * 100);
+  const scorePercentage = Math.round((data.score / 10) * 100);
   const getScoreColor = (percentage: number) => {
     if (percentage >= 80) return "text-green-600";
     if (percentage >= 60) return "text-yellow-600";

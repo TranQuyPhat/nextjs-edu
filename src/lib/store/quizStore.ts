@@ -39,7 +39,6 @@ type Actions = {
 };
 
 const defaultSettings: AiQuizSettings = {
-    generationMode: "EXTRACT",
     language: "",
     questionType: "",
     difficulty: "",
@@ -123,7 +122,6 @@ export const useQuizStore = create<State & Actions>((set, get) => ({
         };
 
         return {
-            generationMode: s.generationMode,
             numQuestions: s.numQuestions,
             quizTitle: s.quizTitle || "",
             language: language || "Tiếng Việt",

@@ -12,9 +12,7 @@ export function GenerateActions() {
   const { files, setGenerating, isGenerating, setQuiz } = useQuizStore();
 
   const hasFiles = files.length > 0;
-  const { generationMode } = useQuizStore((s) => s.settings);
-  const buttonLabel =
-    generationMode === "EXTRACT" ? "Extract Quiz" : "Generate AI Quiz";
+  const buttonLabel = "Generate AI Quiz";
 
   function isRealFile(x: any): x is File {
     return (

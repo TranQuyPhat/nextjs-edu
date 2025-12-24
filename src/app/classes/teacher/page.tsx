@@ -340,14 +340,20 @@ export default function TeacherClassesPage() {
         index === self.findIndex((c) => c && c.id === classItem.id)
     ) || [];
 
-  const autoClasses = uniqueClasses.filter((cls) => cls.joinMode === "AUTO").length;
-  const approvalClasses = uniqueClasses.filter((cls) => cls.joinMode === "APPROVAL").length;
+  const autoClasses = uniqueClasses.filter(
+    (cls) => cls.joinMode === "AUTO"
+  ).length;
+  const approvalClasses = uniqueClasses.filter(
+    (cls) => cls.joinMode === "APPROVAL"
+  ).length;
 
   const heroMetrics = [
     {
       label: "Lớp đang quản lý",
       value: uniqueClasses.length,
-      detail: `${uniqueClasses.length >= pageSize ? "Đang đầy tải" : "Ổn định"}`,
+      detail: `${
+        uniqueClasses.length >= pageSize ? "Đang đầy tải" : "Ổn định"
+      }`,
     },
     {
       label: "Tự động tham gia",
@@ -386,16 +392,6 @@ export default function TeacherClassesPage() {
       <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
         <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.4em] text-emerald-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Classroom OS
-              </span>
-              <h1 className="mt-4 text-4xl font-black md:text-5xl">Trung tâm quản lý lớp học</h1>
-              <p className="mt-3 max-w-2xl text-slate-300">
-                Tạo, điều phối và giám sát mọi lớp học trong một giao diện thống nhất. Hoạt động được đồng bộ realtime giữa giáo viên và học sinh.
-              </p>
-            </div>
             <div className="flex flex-wrap items-center gap-3">
               <DropdownNotificationBell teacherId={user.userId} />
               <SubjectManager
@@ -412,15 +408,6 @@ export default function TeacherClassesPage() {
               </Button>
             </div>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {heroMetrics.map((metric) => (
-              <div key={metric.label} className="rounded-2xl border border-white/10 bg-white/5 p-5">
-                <p className="text-sm text-slate-300">{metric.label}</p>
-                <p className="mt-2 text-3xl font-semibold text-white">{metric.value}</p>
-                <p className="text-xs text-emerald-200">{metric.detail}</p>
-              </div>
-            ))}
-          </div>
         </section>
 
         <section className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
@@ -428,7 +415,9 @@ export default function TeacherClassesPage() {
             <CardHeader className="border-b border-white/5 pb-5">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle className="text-2xl font-semibold">Tìm kiếm & bộ lọc</CardTitle>
+                  <CardTitle className="text-2xl font-semibold">
+                    Tìm kiếm & bộ lọc
+                  </CardTitle>
                   <CardDescription className="text-slate-400">
                     Lọc nhanh theo tên lớp để truy cập tức thì.
                   </CardDescription>
@@ -464,248 +453,227 @@ export default function TeacherClassesPage() {
                 <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
                   <div>
                     Tìm thấy{" "}
-                    <span className="font-semibold text-white">{uniqueClasses.length}</span> kết quả cho{" "}
-                    <span className="font-semibold text-emerald-200">&quot;{searchKeyword}&quot;</span>
+                    <span className="font-semibold text-white">
+                      {uniqueClasses.length}
+                    </span>{" "}
+                    kết quả cho{" "}
+                    <span className="font-semibold text-emerald-200">
+                      &quot;{searchKeyword}&quot;
+                    </span>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" onClick={clearSearch}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/10"
+                    onClick={clearSearch}
+                  >
                     <X className="mr-2 h-4 w-4" /> Xóa tìm kiếm
                   </Button>
                 </div>
               ) : (
                 <p className="text-sm text-slate-400">
                   Gợi ý: đặt tên lớp theo cấu trúc{" "}
-                  <span className="font-semibold text-white">[Môn]-[Khối]-[Năm]</span> để dễ tìm kiếm hơn.
+                  <span className="font-semibold text-white">
+                    [Môn]-[Khối]-[Năm]
+                  </span>{" "}
+                  để dễ tìm kiếm hơn.
                 </p>
               )}
             </CardContent>
           </Card>
-
-          <Card className="rounded-[28px] border-white/10 bg-white/5 text-white shadow-xl backdrop-blur-3xl">
-            <CardHeader className="border-b border-white/5 pb-5">
-              <div className="flex items-center gap-3">
-                <Layers className="h-5 w-5 text-emerald-200" />
-                <div>
-                  <CardTitle className="text-2xl font-semibold">Mô-đun bổ trợ</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Đồng bộ môn học và thông báo ngay tại đây.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6 text-sm text-slate-200">
-              <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-                <p className="text-base font-semibold text-white">Thông báo lớp học</p>
-                <p className="text-slate-400">Theo dõi yêu cầu tham gia và cập nhật mới.</p>
-                <div className="mt-3 inline-flex rounded-full border border-white/20 px-3 py-1 text-xs uppercase tracking-[0.3em] text-emerald-200">
-                  Realtime
-                </div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-4">
-                <p className="text-base font-semibold text-white">Quản lý môn học</p>
-                <p className="text-slate-400">Thêm mới, chỉnh sửa và phân loại môn để tái sử dụng.</p>
-                <div className="mt-3">
-                  <SubjectManager
-                    userId={user.userId}
-                    subjects={uniqueSubjects}
-                    reloadSubjects={async () => loadSubjects()}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </section>
 
-          {/* Dialog tạo/sửa lớp học */}
-          <Dialog
-            open={isModalOpen}
-            onOpenChange={(open) => {
-              if (!open) {
-                closeModal();
-              }
-            }}
-          >
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col">
-              <DialogHeader>
-                <DialogTitle className="text-green-700">
-                  {editingClass ? "Chỉnh sửa lớp học" : "Tạo lớp học mới"}
-                </DialogTitle>
-                <DialogDescription>
-                  {editingClass
-                    ? "Cập nhật thông tin lớp học"
-                    : "Nhập thông tin để tạo lớp học mới"}
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                onSubmit={classForm.handleSubmit(onSubmitClass)}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="className">Tên lớp</Label>
-                  <Input id="className" {...classForm.register("className")} />
-                  {classForm.formState.errors.className && (
-                    <p className="text-red-500 text-sm">
-                      {classForm.formState.errors.className.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="schoolYear">Niên khóa</Label>
-                  <Input
-                    id="schoolYear"
-                    type="number"
-                    {...classForm.register("schoolYear")}
-                  />
-                  {classForm.formState.errors.schoolYear && (
-                    <p className="text-red-500 text-sm">
-                      {classForm.formState.errors.schoolYear.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label>Học kỳ</Label>
-                  <Select
-                    key={`semester-select-${editingClass?.id || "new"}`}
-                    value={classForm.watch("semester") || ""}
-                    onValueChange={(val) => classForm.setValue("semester", val)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn học kỳ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Học kỳ 1">Học kỳ 1</SelectItem>
-                      <SelectItem value="Học kỳ 2">Học kỳ 2</SelectItem>
-                      <SelectItem value="Học kỳ hè">Học kỳ hè</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {classForm.formState.errors.semester && (
-                    <p className="text-red-500 text-sm">
-                      {classForm.formState.errors.semester.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Mô tả</Label>
-                  <Textarea
-                    id="description"
-                    {...classForm.register("description")}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Môn học</Label>
-                  <Select
-                    key={`subject-select-${editingClass?.id || "new"}`}
-                    value={classForm.watch("subjectId")?.toString() || ""}
-                    onValueChange={(val) =>
-                      classForm.setValue("subjectId", Number(val))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn môn học" />
-                    </SelectTrigger>
-                    <SelectContent side="top" className="max-h-60">
-                      {/* Ô tìm kiếm với event handling cải thiện */}
-                      <div className="p-2 sticky top-0 bg-white z-10 border-b">
-                        <Input
-                          placeholder="Tìm kiếm môn học..."
-                          value={searchSubject}
-                          onChange={(e) => setSearchSubject(e.target.value)}
-                          onKeyDown={(e) => {
-                            // Prevent Select from closing when typing
-                            e.stopPropagation();
-                          }}
-                          onClick={(e) => {
-                            // Prevent Select from closing when clicking on input
-                            e.stopPropagation();
-                          }}
-                          className="h-8"
-                        />
-                      </div>
+        {/* Dialog tạo/sửa lớp học */}
+        <Dialog
+          open={isModalOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              closeModal();
+            }
+          }}
+        >
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="text-green-700">
+                {editingClass ? "Chỉnh sửa lớp học" : "Tạo lớp học mới"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingClass
+                  ? "Cập nhật thông tin lớp học"
+                  : "Nhập thông tin để tạo lớp học mới"}
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              onSubmit={classForm.handleSubmit(onSubmitClass)}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="className">Tên lớp</Label>
+                <Input id="className" {...classForm.register("className")} />
+                {classForm.formState.errors.className && (
+                  <p className="text-red-500 text-sm">
+                    {classForm.formState.errors.className.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="schoolYear">Niên khóa</Label>
+                <Input
+                  id="schoolYear"
+                  type="number"
+                  {...classForm.register("schoolYear")}
+                />
+                {classForm.formState.errors.schoolYear && (
+                  <p className="text-red-500 text-sm">
+                    {classForm.formState.errors.schoolYear.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Học kỳ</Label>
+                <Select
+                  key={`semester-select-${editingClass?.id || "new"}`}
+                  value={classForm.watch("semester") || ""}
+                  onValueChange={(val) => classForm.setValue("semester", val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn học kỳ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Học kỳ 1">Học kỳ 1</SelectItem>
+                    <SelectItem value="Học kỳ 2">Học kỳ 2</SelectItem>
+                    <SelectItem value="Học kỳ hè">Học kỳ hè</SelectItem>
+                  </SelectContent>
+                </Select>
+                {classForm.formState.errors.semester && (
+                  <p className="text-red-500 text-sm">
+                    {classForm.formState.errors.semester.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Mô tả</Label>
+                <Textarea
+                  id="description"
+                  {...classForm.register("description")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Môn học</Label>
+                <Select
+                  key={`subject-select-${editingClass?.id || "new"}`}
+                  value={classForm.watch("subjectId")?.toString() || ""}
+                  onValueChange={(val) =>
+                    classForm.setValue("subjectId", Number(val))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn môn học" />
+                  </SelectTrigger>
+                  <SelectContent side="top" className="max-h-60">
+                    {/* Ô tìm kiếm với event handling cải thiện */}
+                    <div className="p-2 sticky top-0 bg-white z-10 border-b">
+                      <Input
+                        placeholder="Tìm kiếm môn học..."
+                        value={searchSubject}
+                        onChange={(e) => setSearchSubject(e.target.value)}
+                        onKeyDown={(e) => {
+                          // Prevent Select from closing when typing
+                          e.stopPropagation();
+                        }}
+                        onClick={(e) => {
+                          // Prevent Select from closing when clicking on input
+                          e.stopPropagation();
+                        }}
+                        className="h-8"
+                      />
+                    </div>
 
-                      {/* Danh sách đã filter */}
-                      <div className="max-h-48 overflow-y-auto">
-                        {filteredSubjects.length > 0 ? (
-                          filteredSubjects.map((subject, index) => (
-                            <SelectItem
-                              key={`subject-${subject.id}-${index}`}
-                              value={subject.id.toString()}
-                              className="cursor-pointer hover:bg-gray-100"
-                            >
-                              <div className="flex items-center">
-                                <span>{subject.subjectName}</span>
-                              </div>
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-3 py-6 text-center">
-                            <div className="text-sm text-gray-500 mb-1">
-                              Không tìm thấy môn học
+                    {/* Danh sách đã filter */}
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredSubjects.length > 0 ? (
+                        filteredSubjects.map((subject, index) => (
+                          <SelectItem
+                            key={`subject-${subject.id}-${index}`}
+                            value={subject.id.toString()}
+                            className="cursor-pointer hover:bg-gray-100"
+                          >
+                            <div className="flex items-center">
+                              <span>{subject.subjectName}</span>
                             </div>
-                            <div className="text-xs text-gray-400">
-                              Thử từ khóa khác hoặc kiểm tra lại chính tả
-                            </div>
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="px-3 py-6 text-center">
+                          <div className="text-sm text-gray-500 mb-1">
+                            Không tìm thấy môn học
                           </div>
-                        )}
-                      </div>
-                    </SelectContent>
-                  </Select>
+                          <div className="text-xs text-gray-400">
+                            Thử từ khóa khác hoặc kiểm tra lại chính tả
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </SelectContent>
+                </Select>
 
-                  {classForm.formState.errors.subjectId && (
-                    <p className="text-red-500 text-sm">
-                      {classForm.formState.errors.subjectId.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label>Chế độ tham gia lớp</Label>
-                  <Select
-                    key={`joinmode-select-${editingClass?.id || "new"}`}
-                    value={classForm.watch("joinMode") || ""}
-                    onValueChange={(val) =>
-                      classForm.setValue("joinMode", val as "AUTO" | "APPROVAL")
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn chế độ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AUTO">
-                        Tự động vào (không cần duyệt)
-                      </SelectItem>
-                      <SelectItem value="APPROVAL">
-                        Cần giáo viên duyệt
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {classForm.formState.errors.joinMode && (
-                    <p className="text-red-500 text-sm">
-                      {classForm.formState.errors.joinMode.message}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-green-700 hover:bg-green-800"
-                  disabled={classForm.formState.isSubmitting}
+                {classForm.formState.errors.subjectId && (
+                  <p className="text-red-500 text-sm">
+                    {classForm.formState.errors.subjectId.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Chế độ tham gia lớp</Label>
+                <Select
+                  key={`joinmode-select-${editingClass?.id || "new"}`}
+                  value={classForm.watch("joinMode") || ""}
+                  onValueChange={(val) =>
+                    classForm.setValue("joinMode", val as "AUTO" | "APPROVAL")
+                  }
                 >
-                  {classForm.formState.isSubmitting
-                    ? "Đang xử lý..."
-                    : editingClass
-                    ? "Cập nhật lớp"
-                    : "Tạo lớp"}
-                </Button>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn chế độ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AUTO">
+                      Tự động vào (không cần duyệt)
+                    </SelectItem>
+                    <SelectItem value="APPROVAL">
+                      Cần giáo viên duyệt
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {classForm.formState.errors.joinMode && (
+                  <p className="text-red-500 text-sm">
+                    {classForm.formState.errors.joinMode.message}
+                  </p>
+                )}
+              </div>
+              <Button
+                type="submit"
+                className="w-full bg-green-700 hover:bg-green-800"
+                disabled={classForm.formState.isSubmitting}
+              >
+                {classForm.formState.isSubmitting
+                  ? "Đang xử lý..."
+                  : editingClass
+                  ? "Cập nhật lớp"
+                  : "Tạo lớp"}
+              </Button>
 
-                {/* Thêm button hủy */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={closeModal}
-                >
-                  Hủy
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
+              {/* Thêm button hủy */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={closeModal}
+              >
+                Hủy
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         <section className="mt-12 space-y-8">
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -717,9 +685,12 @@ export default function TeacherClassesPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
-                      <CardTitle className="text-xl font-semibold">{classItem.className}</CardTitle>
+                      <CardTitle className="text-xl font-semibold">
+                        {classItem.className}
+                      </CardTitle>
                       <CardDescription className="text-sm text-slate-300 line-clamp-2">
-                        {classItem.description || "Chưa có mô tả cho lớp học này."}
+                        {classItem.description ||
+                          "Chưa có mô tả cho lớp học này."}
                       </CardDescription>
                     </div>
                     <Badge
@@ -741,8 +712,12 @@ export default function TeacherClassesPage() {
                 <CardContent className="space-y-4 pt-0">
                   <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
                     <div className="flex items-center gap-2 text-sm text-slate-300">
-                      <span className="text-xs uppercase tracking-[0.3em] text-slate-500">Mã lớp</span>
-                      <span className="font-mono text-lg text-white">#{classItem.id}</span>
+                      <span className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                        Mã lớp
+                      </span>
+                      <span className="font-mono text-lg text-white">
+                        #{classItem.id}
+                      </span>
                     </div>
                     <Button
                       size="sm"
@@ -805,7 +780,11 @@ export default function TeacherClassesPage() {
                   : "Chưa có lớp học nào. Hãy tạo lớp đầu tiên để bắt đầu hành trình giảng dạy số."}
               </p>
               {isSearching && (
-                <Button variant="outline" className="mt-6 border-white/30 text-white hover:bg-white/10" onClick={clearSearch}>
+                <Button
+                  variant="outline"
+                  className="mt-6 border-white/30 text-white hover:bg-white/10"
+                  onClick={clearSearch}
+                >
                   Xóa bộ lọc
                 </Button>
               )}
