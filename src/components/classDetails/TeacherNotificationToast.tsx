@@ -99,7 +99,7 @@ export default function TeacherNotificationToast({
       stompClient.deactivate();
       setClient(null);
     };
-  }, [teacherId]);
+  }, [teacherId, router]);
 
   return (
     <>

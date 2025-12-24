@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -308,7 +309,7 @@ export default function AttendancePage() {
     } finally {
       setIsSaving(false);
     }
-  }, [sessionId, attendance, sessionNote, isSaving, session]);
+  }, [sessionId, attendance, sessionNote, isSaving, session, classId, router]);
 
   // Computed values
   const stats = useMemo(() => {
@@ -321,12 +322,12 @@ export default function AttendancePage() {
 
   const sessionDate = useMemo(
     () => (session ? new Date(session.sessionDate) : new Date()),
-    [session?.sessionDate]
+    [session]
   );
 
   const dayOfWeek = useMemo(
     () => (session ? getDayOfWeek(session.sessionDate) : 0),
-    [session?.sessionDate]
+    [session]
   );
 
   const getStatusIcon = useCallback(
@@ -583,9 +584,11 @@ export default function AttendancePage() {
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                               {student.avatar ? (
-                                <img
+                                <Image
                                   src={student.avatar}
                                   alt={student.fullName}
+                                  width={32}
+                                  height={32}
                                   className="h-8 w-8 rounded-full object-cover"
                                 />
                               ) : (

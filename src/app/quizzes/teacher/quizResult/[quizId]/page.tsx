@@ -74,8 +74,10 @@ export default function QuizResultsPage() {
       }
     };
 
-    fetchData();
-  }, []);
+    if (quizId) {
+      fetchData();
+    }
+  }, [quizId]);
 
   const getScoreColor = (score: number) => {
     if (score >= 8) return "bg-emerald-50 text-emerald-700 border-emerald-200";

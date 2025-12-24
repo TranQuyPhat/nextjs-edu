@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Navigation from "@/components/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,9 @@ import {
   MapPin,
   User,
   ArrowRight,
+  Sparkles,
+  BarChart3,
+  Layers,
 } from "lucide-react";
 
 import { StudentDashboardResponse } from "@/types/dashboard";
@@ -26,7 +29,11 @@ import { fetchStudentDashboard } from "@/services/dashboardService";
 import { useRecentScoreOfStudent } from "../hooks/useRecentScoreOfStudent";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { getScheduleByWeek, LessonItem } from "@/services/scheduleService";
+import {
+  getScheduleByWeek,
+  LessonItem,
+  DaySchedule,
+} from "../../../services/scheduleService";
 
 import { toast } from "react-toastify";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
@@ -172,7 +179,7 @@ export default function StudentDashboard() {
         // Find today's lessons
         const todayDate = format(new Date(), "yyyy-MM-dd");
         const todaySchedule = scheduleData.schedules.find(
-          (day) => day.date === todayDate
+          (day: DaySchedule) => day.date === todayDate
         );
 
         if (todaySchedule) {
@@ -204,11 +211,50 @@ export default function StudentDashboard() {
     return <Badge variant="destructive">Yếu</Badge>;
   };
 
+  const completionRate = useMemo(() => {
+    if (!dashboardData.totalAssignments) return 0;
+    return Math.round(
+      (dashboardData.completedAssignments / dashboardData.totalAssignments) *
+        100
+    );
+  }, [dashboardData.completedAssignments, dashboardData.totalAssignments]);
+
+  const quickActions = [
+    {
+      label: "Bài tập",
+      description: "Xem và nộp nhanh",
+      href: "/quizzes/student",
+      icon: FileText,
+      accent: "from-cyan-400 to-blue-500",
+    },
+    {
+      label: "Lớp học",
+      description: "Theo dõi tiến độ",
+      href: "/classes/student",
+      icon: BookOpen,
+      accent: "from-emerald-400 to-lime-500",
+    },
+    {
+      label: "Điểm số",
+      description: "Biểu đồ & lịch sử",
+      href: "/grades/student",
+      icon: TrendingUp,
+      accent: "from-purple-400 to-pink-500",
+    },
+    {
+      label: "Thời khóa biểu",
+      description: "Lịch học trong ngày",
+      href: "/schedule/student",
+      icon: Calendar,
+      accent: "from-amber-400 to-orange-500",
+    },
+  ];
+
   if (loading) {
     return (
-      <div>
+      <div className="relative min-h-screen bg-slate-950 text-white">
         <Navigation />
-        <div className="container mx-auto p-6 h-52 flex justify-center items-center">
+        <div className="container mx-auto flex h-64 items-center justify-center">
           <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
@@ -242,207 +288,267 @@ export default function StudentDashboard() {
     }
   };
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-indigo-600/40 via-slate-900 to-slate-950 blur-3xl" />
+        <div className="absolute -right-16 top-32 h-64 w-64 rounded-full bg-blue-500/30 blur-[120px]" />
+        <div className="absolute -left-12 bottom-0 h-72 w-72 rounded-full bg-violet-500/30 blur-[140px]" />
+        <div className="absolute inset-0 opacity-30">
+          {[...Array(26)].map((_, index) => (
+            <span
+              key={index}
+              className="absolute h-1 w-1 rounded-full bg-cyan-200/50"
+              style={{
+                left: `${(index * 29) % 100}%`,
+                top: `${(index * 17) % 100}%`,
+                animation: `pulse 6s ease-in-out ${index * 0.25}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+
       <Navigation />
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Chào mừng, {user.fullName}!
-          </h1>
-          <p className="text-gray-600">
-            Theo dõi tiến độ học tập và hoàn thành bài tập
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Lớp học</CardTitle>
-              <BookOpen className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dashboardData.enrolledClasses}
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+        <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <div>
+                <p className="text-sm uppercase tracking-[0.45em] text-slate-300">
+                  Học viên chủ động
+                </p>
+                <h1 className="mt-3 text-4xl font-black md:text-5xl">
+                  Chào {user.fullName}
+                </h1>
+                <p className="mt-2 text-slate-300">
+                  Theo dõi tiến độ, hạn nộp và lịch học mới nhất.
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">Đang theo học</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Bài tập</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {dashboardData.completedAssignments}/
-                {dashboardData.totalAssignments}
+              <div className="rounded-2xl border border-white/10 bg-white/10 px-6 py-4 text-right text-sm text-slate-200">
+                <p className="text-lg font-semibold text-white">
+                  {format(new Date(), "EEEE", { locale: vi })}
+                </p>
+                <p>{format(new Date(), "dd MMMM yyyy", { locale: vi })}</p>
+                <p className="text-cyan-200">
+                  {format(new Date(), "HH:mm", { locale: vi })}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">Đã hoàn thành</p>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Điểm TB</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {dashboardData.averageGrade}
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm text-slate-300">Lớp đang học</p>
+                <p className="mt-2 text-3xl font-semibold text-white">
+                  {dashboardData.enrolledClasses}
+                </p>
+                <p className="text-xs text-emerald-300">Cập nhật realtime</p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                <span className="text-green-600">+0.3</span> từ tháng trước
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Chờ làm</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {dashboardData.pendingAssignments}
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm text-slate-300">Bài đã nộp</p>
+                <p className="mt-2 text-3xl font-semibold text-white">
+                  {dashboardData.completedAssignments}/
+                  {dashboardData.totalAssignments}
+                </p>
+                <p className="text-xs text-cyan-300">Ưu tiên bài đến hạn</p>
               </div>
-              <p className="text-xs text-muted-foreground">Bài tập mới</p>
-            </CardContent>
-          </Card>
-        </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-sm text-slate-300">Điểm trung bình</p>
+                <p className="mt-2 text-3xl font-semibold text-white">
+                  {dashboardData.averageGrade}
+                </p>
+                <p className="text-xs text-amber-300">Ổn định tuần này</p>
+              </div>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Thao tác nhanh</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Link href="#">
-                    <Button className="w-full h-20 flex flex-col gap-2">
-                      <FileText className="h-5 w-5" />
-                      <span className="text-xs">Bài tập</span>
-                    </Button>
-                  </Link>
-                  <Link href="/classes/student">
-                    <Button
-                      variant="outline"
-                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
-                    >
-                      <BookOpen className="h-5 w-5" />
-                      <span className="text-xs">Lớp học</span>
-                    </Button>
-                  </Link>
-                  <Link href="/grades/student">
-                    <Button
-                      variant="outline"
-                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
-                    >
-                      <Award className="h-5 w-5" />
-                      <span className="text-xs">Điểm số</span>
-                    </Button>
-                  </Link>
-                  <Link href="/quizzes/student">
-                    <Button
-                      variant="outline"
-                      className="w-full h-20 flex flex-col gap-2 bg-transparent"
-                    >
-                      <Calendar className="h-5 w-5" />
-                      <span className="text-xs">Trắc nghiệm</span>
-                    </Button>
-                  </Link>
+          <div className="grid gap-6">
+            <Card className="rounded-[28px] border-white/10 bg-slate-900/70 p-6 text-white shadow-xl backdrop-blur-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-slate-300">Tổng bài cần làm</p>
+                  <p className="mt-2 text-4xl font-bold">
+                    {dashboardData.pendingAssignments}
+                  </p>
                 </div>
-              </CardContent>
+                <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-4">
+                  <Clock className="h-6 w-6" />
+                </div>
+              </div>
+              <p className="mt-4 text-sm text-slate-300">
+                Ưu tiên hoàn thành trước hạn để giữ nhịp học.
+              </p>
             </Card>
 
-            {/* Upcoming Deadlines */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5" />
-                  Hạn nộp sắp tới
-                </CardTitle>
+            <Card className="rounded-[28px] border-white/10 bg-slate-900/70 p-6 text-white shadow-xl backdrop-blur-2xl">
+              <div className="flex items-center gap-4">
+                <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 p-4">
+                  <BarChart3 className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-slate-300">Tiến độ tổng thể</p>
+                  <p className="text-3xl font-bold text-white">
+                    {completionRate}%
+                  </p>
+                </div>
+              </div>
+              <Progress value={completionRate} className="mt-4 h-2" />
+            </Card>
+          </div>
+        </section>
+
+        <section className="mt-10 grid gap-8">
+          <div className="rounded-[32px] border border-white/5 bg-white/5 p-6 shadow-2xl backdrop-blur-3xl">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3 text-white">
+                <div className="rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 p-2">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm uppercase tracking-[0.35em] text-slate-300">
+                    Lối tắt nhanh
+                  </p>
+                  <h2 className="text-2xl font-semibold text-white">
+                    Thao tác nổi bật
+                  </h2>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {quickActions.map(
+                ({ label, description, href, icon: Icon, accent }) => (
+                  <Link key={label} href={href}>
+                    <div className="group rounded-3xl border border-white/10 bg-white/5 p-5 transition hover:-translate-y-1 hover:bg-white/10">
+                      <div
+                        className={`mb-4 inline-flex rounded-2xl bg-gradient-to-br ${accent} p-3 text-white shadow-lg`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <p className="text-lg font-semibold text-white">
+                        {label}
+                      </p>
+                      <p className="text-sm text-slate-300">{description}</p>
+                    </div>
+                  </Link>
+                )
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-8 grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-8">
+            <Card className="rounded-[28px] border-white/5 bg-slate-900/60 p-6 text-white shadow-xl backdrop-blur-2xl">
+              <CardHeader className="flex flex-col gap-2 border-b border-white/5 pb-4">
+                <div className="flex items-center gap-3 text-slate-200">
+                  <Clock className="h-5 w-5 text-cyan-200" />
+                  <CardTitle>Hạn nộp sắp tới</CardTitle>
+                </div>
+                <p className="text-sm text-slate-400">
+                  Đừng để lỡ deadline quan trọng
+                </p>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 {dashboardData.upcomingDeadlines.map((deadline) => (
-                  <div key={deadline.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h4 className="font-medium">{deadline.title}</h4>
-                        <Badge variant="outline">{deadline.className}</Badge>
+                  <div
+                    key={deadline.id}
+                    className="rounded-2xl border border-white/5 p-4 transition hover:border-white/10 hover:bg-white/5"
+                  >
+                    <div className="flex justify-between gap-4">
+                      <div className="space-y-1">
+                        <h4 className="text-lg font-semibold text-white">
+                          {deadline.title}
+                        </h4>
+                        <Badge
+                          variant="outline"
+                          className="border-white/20 text-white"
+                        >
+                          {deadline.className}
+                        </Badge>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-medium text-orange-600">
+                        <span className="text-sm font-medium text-amber-300">
                           {deadline.daysLeft}
                         </span>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-slate-400">
                           {deadline.dueDate}
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button size="sm">Làm bài</Button>
-                      <Button size="sm" variant="outline">
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        size="sm"
+                        className="bg-white text-slate-900 hover:bg-slate-200"
+                      >
+                        Làm bài
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-white/20 text-white hover:bg-white/10"
+                      >
                         Xem chi tiết
                       </Button>
                     </div>
                   </div>
                 ))}
                 {dashboardData.upcomingDeadlines.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CheckCircle className="h-12 w-12 mx-auto mb-2" />
+                  <div className="py-8 text-center text-slate-400">
+                    <CheckCircle className="mx-auto mb-2 h-12 w-12 opacity-70" />
                     <p>Bạn đã hoàn thành tất cả bài tập!</p>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* Recent Grades */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Điểm số gần đây
-                </CardTitle>
+            <Card className="rounded-[28px] border-white/5 bg-slate-900/60 p-6 text-white shadow-xl backdrop-blur-2xl">
+              <CardHeader className="flex items-center gap-3 border-b border-white/5 pb-4">
+                <Award className="h-5 w-5 text-yellow-300" />
+                <div>
+                  <CardTitle>Điểm số gần đây</CardTitle>
+                  <p className="text-sm text-slate-400">
+                    Theo dõi kết quả mới nhất
+                  </p>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 {data?.map((score, idx) => (
                   <div
                     key={idx}
-                    className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className="rounded-2xl border border-white/5 p-4 transition hover:border-white/10 hover:bg-white/5"
                   >
-                    {/* Header with title and score */}
-                    <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="mb-2 flex items-center gap-2">
                           {getTypeIcon(score.type)}
-                          <h4 className="font-semibold text-lg">
+                          <h4 className="text-lg font-semibold text-white">
                             {score.title}
                           </h4>
                         </div>
-                        <Badge variant="outline" className="text-xs">
+                        <Badge
+                          variant="outline"
+                          className="text-xs border-white/20 text-white"
+                        >
                           {score.className}
                         </Badge>
                       </div>
-                      <div className="text-right ml-4">
-                        <div className="text-2xl font-bold text-primary mb-1">
+                      <div className="text-right">
+                        <div className="mb-1 text-2xl font-bold text-white">
                           {score.score}/10
                         </div>
                         {getGradeBadge(score.score, 10)}
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <div className="mt-3 flex items-center justify-between border-t border-white/5 pt-3 text-sm text-slate-400">
                       <Badge
                         variant="outline"
-                        className={`${getTypeColor(score.type)} font-medium`}
+                        className={`${getTypeColor(
+                          score.type
+                        )} border-none text-xs font-medium`}
                       >
                         {score.type}
                       </Badge>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         <span>
                           {format(
@@ -459,8 +565,8 @@ export default function StudentDashboard() {
                 ))}
 
                 {(!data || data.length === 0) && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <div className="py-8 text-center text-slate-400">
+                    <FileText className="mx-auto mb-3 h-12 w-12 opacity-50" />
                     <p>Chưa có kết quả nào</p>
                   </div>
                 )}
@@ -468,32 +574,34 @@ export default function StudentDashboard() {
             </Card>
           </div>
 
-          <div className="space-y-6">
-            {/* Today's Schedule */}
-            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-blue-900">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                    Lịch học hôm nay
-                  </CardTitle>
-                  <Link href="/schedule/student">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-100"
-                    >
-                      Xem tất cả
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </Link>
+          <div className="space-y-8">
+            <Card className="rounded-[28px] border-white/10 bg-gradient-to-br from-slate-900/80 to-slate-950/70 p-6 text-white shadow-xl backdrop-blur-3xl">
+              <CardHeader className="flex items-center justify-between border-b border-white/5 pb-4">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-cyan-200" />
+                  <div>
+                    <CardTitle>Lịch học hôm nay</CardTitle>
+                    <p className="text-sm text-slate-400">
+                      Những buổi không thể bỏ lỡ
+                    </p>
+                  </div>
                 </div>
+                <Link href="/schedule/student">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="border border-white/25 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                  >
+                    Xem tất cả
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </Link>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 {loadingSchedule ? (
-                  <div className="text-center py-4 text-gray-500">
+                  <div className="py-4 text-center text-slate-400">
                     <div className="inline-flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-cyan-400" />
                       <span className="text-sm">Đang tải...</span>
                     </div>
                   </div>
@@ -512,7 +620,6 @@ export default function StudentDashboard() {
                 ) : (
                   <div className="space-y-3">
                     {todayLessons.map((lesson, index) => {
-                      // Get color for subject
                       let hash = 0;
                       for (let i = 0; i < lesson.subjectName.length; i++) {
                         hash =
@@ -537,7 +644,7 @@ export default function StudentDashboard() {
                       return (
                         <div
                           key={lesson.sessionId || index}
-                          className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all"
+                          className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm transition hover:border-white/20 hover:bg-white/10"
                         >
                           <div className="flex items-start gap-3">
                             {/* Time indicator */}
@@ -546,16 +653,16 @@ export default function StudentDashboard() {
                             ></div>
 
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="mb-2 flex items-start justify-between gap-2">
                                 <div className="flex-1">
-                                  <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                                  <h4 className="text-sm font-semibold text-white">
                                     {lesson.subjectName}
                                   </h4>
-                                  <p className="text-xs text-gray-600 mb-1">
+                                  <p className="text-xs text-slate-300">
                                     {lesson.className}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-1 text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                <div className="flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs font-medium text-slate-200">
                                   <Clock className="h-3 w-3" />
                                   <span>
                                     Tiết {lesson.startPeriod}-{lesson.endPeriod}
@@ -563,14 +670,14 @@ export default function StudentDashboard() {
                                 </div>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
                                 <div className="flex items-center gap-1">
-                                  <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
                                   <span>{lesson.location}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  <User className="h-3.5 w-3.5 text-gray-400" />
-                                  <span className="truncate max-w-[120px]">
+                                  <User className="h-3.5 w-3.5 text-slate-400" />
+                                  <span className="truncate max-w-[140px]">
                                     {lesson.teacherName}
                                   </span>
                                 </div>
@@ -669,52 +776,60 @@ export default function StudentDashboard() {
                   Tiến độ theo lớp
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {dashboardData.classProgress.map((classItem, index) => (
-                  <div key={index} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">{classItem.className}</span>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>
+              <CardContent className="space-y-4 pt-4">
+                {dashboardData.classProgress.map((classItem, index) => {
+                  const percent = Math.round(
+                    (classItem.completed / classItem.total) * 100
+                  );
+                  return (
+                    <div
+                      key={index}
+                      className="space-y-2 rounded-2xl border border-white/5 p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-white">
+                          <Layers className="h-4 w-4 text-cyan-200" />
+                          <span className="font-medium">
+                            {classItem.className}
+                          </span>
+                        </div>
+                        <span className="text-sm text-slate-300">
                           {classItem.completed}/{classItem.total} bài tập
                         </span>
-                        <span>
-                          {Math.round(
-                            (classItem.completed / classItem.total) * 100
-                          )}
-                          %
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span>Hoàn thành</span>
+                        <span className="font-semibold text-white">
+                          {percent}%
                         </span>
                       </div>
-                      <Progress
-                        value={(classItem.completed / classItem.total) * 100}
-                        className="h-2"
-                      />
+                      <Progress value={percent} className="h-2" />
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
 
-            {/* Achievement */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Thành tích
-                </CardTitle>
+            <Card className="rounded-[28px] border-white/5 bg-white/5 p-6 text-white shadow-xl backdrop-blur-3xl">
+              <CardHeader className="flex items-center gap-3 border-b border-white/5 pb-4">
+                <Award className="h-5 w-5 text-yellow-300" />
+                <div>
+                  <CardTitle>Thành tích</CardTitle>
+                  <p className="text-sm text-slate-300">
+                    Sẽ cập nhật khi có huy hiệu mới
+                  </p>
+                </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-center py-8 text-muted-foreground">
-                  <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+              <CardContent className="space-y-3 pt-4">
+                <div className="py-8 text-center text-slate-400">
+                  <FileText className="mx-auto mb-3 h-12 w-12 opacity-50" />
                   <p>Hiện tại bạn chưa có thành tích nào!</p>
                 </div>
               </CardContent>
             </Card>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -345,9 +346,11 @@ const [sessionNote, setSessionNote] = useState(session.note || "");
                       <TableCell>
                         <div className="flex items-center gap-3">
                           {student.avatar ? (
-                            <img
+                            <Image
                               src={student.avatar}
                               alt={student.fullName}
+                              width={32}
+                              height={32}
                               className="h-8 w-8 rounded-full object-cover"
                             />
                           ) : (
