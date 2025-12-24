@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import Navigation from "@/components/navigation";
 import {
   Card,
@@ -97,13 +97,16 @@ export default function TeacherClassesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<any>(null);
 
-  const uniqueSubjects =
-    subjects?.filter(
-      (subject, index, self) =>
-        subject &&
-        subject.id &&
-        index === self.findIndex((s) => s && s.id === subject.id)
-    ) || [];
+  const uniqueSubjects = useMemo(() => {
+    return (
+      subjects?.filter(
+        (subject, index, self) =>
+          subject &&
+          subject.id &&
+          index === self.findIndex((s) => s && s.id === subject.id)
+      ) || []
+    );
+  }, [subjects]);
 
   const filteredSubjects = useMemo(() => {
     if (!uniqueSubjects || uniqueSubjects.length === 0) {
@@ -125,12 +128,13 @@ export default function TeacherClassesPage() {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
 
-      loadClasses(parsedUser.userId, pageNumber);
+      loadClasses(parsedUser.userId, 0);
       loadSubjects();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadClasses = (userId: number, page: number) => {
+  const loadClasses = useCallback((userId: number, page: number) => {
     getTeacherClasses(userId, page, pageSize)
       .then((res) => {
         setClasses(res.data);
@@ -143,9 +147,9 @@ export default function TeacherClassesPage() {
           err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách lớp!"
         );
       });
-  };
+  }, [pageSize]);
 
-  const loadSubjects = () => {
+  const loadSubjects = useCallback(() => {
     getAllSubjects()
       .then((data) => {
         setSubjects(data);
@@ -157,7 +161,7 @@ export default function TeacherClassesPage() {
             "Không thể tải danh sách môn học!"
         );
       });
-  };
+  }, []);
 
   // Hàm tìm kiếm bằng backend
   const handleSearch = async () => {

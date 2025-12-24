@@ -188,7 +188,7 @@ export default function AssignmentNotificationToast({
       console.log("🧹 Component cleanup");
       unsubscribe();
     };
-  }, [studentId]);
+  }, [studentId, router, wsManager]);
 
   // Cleanup on page unload
   useEffect(() => {

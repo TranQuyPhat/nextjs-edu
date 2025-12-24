@@ -62,56 +62,6 @@ export default function QuizPage() {
     typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Khởi tạo timer khi có quiz data
-  useEffect(() => {
-    if (quiz && quiz.timeLimit && !startTime) {
-      const now = new Date();
-      setStartTime(now);
-      setTimeLeft(quiz.timeLimit * 60); // Convert minutes to seconds
-    }
-  }, [quiz, startTime]);
-
-  // Timer logic
-  useEffect(() => {
-    if (isSubmited || isSubmitting || timeLeft <= 0) {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-
-      if (timeLeft <= 0 && !isSubmited && !isSubmitting && startTime) {
-        handleSubmit();
-      }
-
-      return;
-    }
-
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        const newTime = prev - 1;
-        return newTime;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [timeLeft, isSubmitting, isSubmited, startTime]);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
-
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -126,33 +76,6 @@ export default function QuizPage() {
       .getMinutes()
       .toString()
       .padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
-  };
-
-  const handleAnswerChange = (
-    questionId: number,
-    answer: string | string[]
-  ) => {
-    setQuizAnswers((prev) => ({
-      ...prev,
-      [Number(questionId)]: answer,
-    }));
-  };
-
-  const calculateProgress = () => {
-    if (!quiz || !quiz.questions?.length) return 0;
-    if (!quizAnswers) return 0;
-
-    const answeredCount =
-      quiz?.questions?.filter((q: any) => {
-        const answer = quizAnswers[q.id as number];
-        return (
-          (Array.isArray(answer) && answer.length > 0) ||
-          (!Array.isArray(answer) && answer !== "")
-        );
-      }).length ?? 0;
-    return quiz?.questions?.length
-      ? (answeredCount / quiz.questions.length) * 100
-      : 0;
   };
 
   const handleSubmit = useCallback(async () => {
@@ -265,6 +188,84 @@ export default function QuizPage() {
       setIsSubmitting(false);
     }
   }, [id, startTime, quiz, quizAnswers, isSubmitting, isSubmited, token]);
+
+  const handleAnswerChange = (
+    questionId: number,
+    answer: string | string[]
+  ) => {
+    setQuizAnswers((prev) => ({
+      ...prev,
+      [Number(questionId)]: answer,
+    }));
+  };
+
+  const calculateProgress = () => {
+    if (!quiz || !quiz.questions?.length) return 0;
+    if (!quizAnswers) return 0;
+
+    const answeredCount =
+      quiz?.questions?.filter((q: any) => {
+        const answer = quizAnswers[q.id as number];
+        return (
+          (Array.isArray(answer) && answer.length > 0) ||
+          (!Array.isArray(answer) && answer !== "")
+        );
+      }).length ?? 0;
+    return quiz?.questions?.length
+      ? (answeredCount / quiz.questions.length) * 100
+      : 0;
+  };
+
+  // Khởi tạo timer khi có quiz data
+  useEffect(() => {
+    if (quiz && quiz.timeLimit && !startTime) {
+      const now = new Date();
+      setStartTime(now);
+      setTimeLeft(quiz.timeLimit * 60); // Convert minutes to seconds
+    }
+  }, [quiz, startTime]);
+
+  // Timer logic
+  useEffect(() => {
+    if (isSubmited || isSubmitting || timeLeft <= 0) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      if (timeLeft <= 0 && !isSubmited && !isSubmitting && startTime) {
+        handleSubmit();
+      }
+
+      return;
+    }
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        const newTime = prev - 1;
+        return newTime;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [timeLeft, isSubmitting, isSubmited, startTime, handleSubmit]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
+
   if (error) {
     return (
       <QueryError
