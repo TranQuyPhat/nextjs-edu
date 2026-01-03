@@ -39,6 +39,7 @@ import { quizFormSchema } from "@/lib/validation/quizFormSchema";
 import { useTeacherClasses } from "../../hook/useTeacherClasses";
 import { QuizFormm } from "./QuizForm";
 import Navigation from "@/components/navigation";
+import { getAccessToken } from "@/lib/auth";
 
 interface QuizFormDataExtended extends QuizzFormData {
   files: File[];
@@ -46,10 +47,7 @@ interface QuizFormDataExtended extends QuizzFormData {
   classId: number;
   createdBy: number;
 }
-let token: string | null = null;
-if (typeof window !== "undefined") {
-  token = localStorage.getItem("accessToken");
-}
+
 // API response type
 
 interface ApiResponse {
@@ -60,13 +58,13 @@ interface ApiResponse {
 const extractQuestionsFromFiles = async (
   files: File[]
 ): Promise<Question[]> => {
+  const token = getAccessToken();
   const formData = new FormData();
 
   // Add all files to FormData
   files.forEach((file) => {
     formData.append("file", file);
   });
-  // hoặc lấy từ context/store
 
   try {
     const response = await fetch(

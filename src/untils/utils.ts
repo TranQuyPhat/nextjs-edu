@@ -1,8 +1,7 @@
 import { BackendQuizResponse, QuizzFormData } from "@/types/quiz.type";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { jwtDecode } from "jwt-decode";
-
+import { jwtDecode } from "jwt-decode"; import Cookies from \"js-cookie\";
 export function cn(...inputs: ClassValue[]) {
 
   return twMerge(clsx(inputs))
@@ -45,7 +44,7 @@ interface JwtPayload {
 export function getCurrentUser(): JwtPayload | null {
   if (typeof window === "undefined") return null; // ✅ bảo vệ SSR
 
-  const token = localStorage.getItem("accessToken");
+  const token = Cookies.get(\"accessToken\");
   if (!token) return null;
 
   try {
@@ -59,7 +58,7 @@ export function getCurrentUser(): JwtPayload | null {
 export function getCurrentUserId(): number | null {
   if (typeof window === "undefined") return null;
 
-  const token = localStorage.getItem("accessToken");
+  const token = Cookies.get(\"accessToken\");
   if (!token) return null;
 
   try {

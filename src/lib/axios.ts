@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const apiClient = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api`,
@@ -8,15 +9,13 @@ const apiClient = axios.create({
   timeout: 20000,
 });
 
-// Interceptor gửi token
+// Interceptor gửi token từ cookie
 apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("accessToken");
+      const token = Cookies.get("accessToken");
       if (token && token !== "undefined" && token !== "") {
         config.headers.Authorization = `Bearer ${token}`;
-      } else {
-        localStorage.removeItem("accessToken");
       }
     }
     return config;
@@ -39,25 +38,25 @@ apiClient.interceptors.response.use(
         data: error.response.data,
         headers: error.response.headers,
       });
-      
+
       // Xử lý lỗi 401 (token hết hạn hoặc invalid)
       if (error.response.status === 401) {
         if (typeof window !== "undefined") {
-          localStorage.removeItem("accessToken");
+          Cookies.remove("accessToken");
           localStorage.removeItem("user");
           localStorage.removeItem("role");
           window.location.href = "/auth/login";
         }
       }
-      
+
       // Xử lý lỗi 500 (Internal Server Error)
       if (error.response.status === 500) {
-        const errorMessage = error.response.data?.message || 
-                           error.response.data?.error || 
-                           error.response.data?.errorMessage ||
-                           "Lỗi máy chủ (500). Vui lòng thử lại sau.";
+        const errorMessage = error.response.data?.message ||
+          error.response.data?.error ||
+          error.response.data?.errorMessage ||
+          "Lỗi máy chủ (500). Vui lòng thử lại sau.";
         const fullUrl = `${error.config?.baseURL || ''}${error.config?.url || ''}`;
-        
+
         console.error("❌ Server Error (500):", {
           endpoint: fullUrl,
           method: error.config?.method?.toUpperCase(),
@@ -65,7 +64,7 @@ apiClient.interceptors.response.use(
           details: error.response.data,
           timestamp: new Date().toISOString(),
         });
-        
+
         // Hiển thị toast notification cho user
         if (typeof window !== "undefined") {
           // Import toast dynamically để tránh circular dependency
@@ -90,7 +89,7 @@ apiClient.interceptors.response.use(
       // Lỗi khi setup request
       console.error("API Error - Request Setup:", error.message);
     }
-    
+
     return Promise.reject(error);
   }
 );

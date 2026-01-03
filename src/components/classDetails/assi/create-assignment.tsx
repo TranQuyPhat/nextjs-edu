@@ -27,7 +27,7 @@ import * as yup from "yup";
 import { createAssignment } from "@/services/assignmentService";
 import { ClassItem } from "@/types/classes";
 import { on } from "events";
-import { format } from "date-fns";
+import { format, startOfToday } from "date-fns";
 import { toast } from "react-toastify";
 
 interface CreateAssignmentFormData {
@@ -53,18 +53,20 @@ const assignmentSchema = yup.object().shape({
   dueDate: yup
     .date()
     .required("Hạn nộp là bắt buộc")
-    .min(new Date(), "Hạn nộp phải >= hôm nay"),
+    .typeError("Hạn nộp phải là ngày hợp lệ")
+    .min(startOfToday(), "Hạn nộp không được chọn ngày trong quá khứ"),
   maxScore: yup
     .number()
     .required("Điểm tối đa là bắt buộc")
-    .min(0)
-    .typeError("Phải là số"),
+    .min(0, "Điểm tối đa phải >= 0")
+    .typeError("Điểm phải là số"),
   classId: yup
     .number()
     .required("Lớp là bắt buộc")
     .typeError("Vui lòng chọn một lớp"),
   file: yup
     .mixed<File>()
+    .required("Tệp đính kèm là bắt buộc")
     .test("fileSize", "Tệp quá lớn (tối đa 10MB)", (value) =>
       value ? value.size <= 10 * 1024 * 1024 : true
     )
@@ -150,7 +152,9 @@ export default function CreateAssignment({
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Tiêu đề</Label>
+            <Label htmlFor="title">
+              Tiêu đề <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="title"
               {...register("title")}
@@ -170,7 +174,9 @@ export default function CreateAssignment({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dueDate">Hạn nộp</Label>
+            <Label htmlFor="dueDate">
+              Hạn nộp <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="dueDate"
               type="datetime-local"
@@ -182,7 +188,9 @@ export default function CreateAssignment({
           </div>
           {/* Điểm tối đa */}
           <div className="space-y-2">
-            <Label htmlFor="maxScore">Điểm tối đa</Label>
+            <Label htmlFor="maxScore">
+              Điểm tối đa <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="maxScore"
               type="number"
@@ -194,7 +202,9 @@ export default function CreateAssignment({
           </div>
           {/* Lớp học (auto fill) */}
           <div className="space-y-2">
-            <Label htmlFor="classId">Chọn lớp</Label>
+            <Label htmlFor="classId">
+              Chọn lớp <span className="text-red-500">*</span>
+            </Label>
             <Select
               value={watchedClassId?.toString() || ""}
               onValueChange={(v) => setValue("classId", parseInt(v))}
@@ -216,13 +226,21 @@ export default function CreateAssignment({
           </div>
           {/* File đính kèm */}
           <div className="space-y-2">
-            <Label htmlFor="file">Tệp đính kèm</Label>
+            <Label htmlFor="file">
+              Tệp đính kèm <span className="text-red-500">*</span>
+            </Label>
             <div
-              className="border-2 border-dashed p-6 text-center cursor-pointer"
+              className="border-2 border-dashed p-6 text-center cursor-pointer rounded-lg hover:bg-slate-50"
               onClick={() => document.getElementById("file")?.click()}
             >
               <Upload className="h-8 w-8 mx-auto mb-2" />
-              {watchedFile && <p>{watchedFile.name}</p>}
+              {watchedFile ? (
+                <p className="text-sm text-slate-700">{watchedFile.name}</p>
+              ) : (
+                <p className="text-sm text-slate-500">
+                  Nhấp để chọn tệp hoặc kéo thả tệp vào đây
+                </p>
+              )}
             </div>
             <input
               id="file"
@@ -230,6 +248,9 @@ export default function CreateAssignment({
               className="hidden"
               onChange={(e) => setValue("file", e.target.files?.[0] || null)}
             />
+            {errors.file && (
+              <p className="text-red-500 text-sm">{errors.file.message}</p>
+            )}
           </div>
           <Button type="submit" className="w-full">
             Tạo bài tập

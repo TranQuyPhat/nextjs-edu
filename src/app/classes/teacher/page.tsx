@@ -56,6 +56,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import DropdownNotificationBell from "@/components/classDetails/DropdownNotificationBell";
 import SubjectManager from "@/components/classes/SubjectManager";
+import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,7 +66,6 @@ import {
 
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 // Schema validate form lớp học
 const classSchema = yup.object().shape({
@@ -96,6 +96,7 @@ export default function TeacherClassesPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading state cho page
 
   const uniqueSubjects = useMemo(() => {
     return (
@@ -128,26 +129,43 @@ export default function TeacherClassesPage() {
       const parsedUser = JSON.parse(userData);
       setUser(parsedUser);
 
-      loadClasses(parsedUser.userId, 0);
-      loadSubjects();
+      // Chờ cả 2 request (classes + subjects) hoàn thành
+      Promise.all([
+        getTeacherClasses(parsedUser.userId, 0, 6),
+        getAllSubjects(),
+      ])
+        .then(([classesRes, subjectsRes]) => {
+          setClasses(classesRes.data);
+          setPageNumber(classesRes.pageNumber);
+          setTotalPages(classesRes.totalPages);
+          setSubjects(subjectsRes);
+          setIsLoading(false); // Chỉ tắt loading khi cả 2 request xong
+        })
+        .catch((err) => {
+          console.error("Lỗi khi tải dữ liệu:", err);
+          toast.error("Không thể tải dữ liệu!");
+          setIsLoading(false); // Tắt loading thậm chí khi có lỗi
+        });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const loadClasses = useCallback((userId: number, page: number) => {
-    getTeacherClasses(userId, page, pageSize)
-      .then((res) => {
-        setClasses(res.data);
-        setPageNumber(res.pageNumber);
-        setTotalPages(res.totalPages);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy lớp:", err);
-        toast.error(
-          err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách lớp!"
-        );
-      });
-  }, [pageSize]);
+  const loadClasses = useCallback(
+    (userId: number, page: number) => {
+      getTeacherClasses(userId, page, pageSize)
+        .then((res) => {
+          setClasses(res.data);
+          setPageNumber(res.pageNumber);
+          setTotalPages(res.totalPages);
+        })
+        .catch((err) => {
+          console.error("Lỗi khi lấy lớp:", err);
+          toast.error(
+            err?.response?.data?.messages?.[0] ?? "Không thể tải danh sách lớp!"
+          );
+        });
+    },
+    [pageSize]
+  );
 
   const loadSubjects = useCallback(() => {
     getAllSubjects()
@@ -325,12 +343,30 @@ export default function TeacherClassesPage() {
     toast.success("Đã sao chép mã lớp!");
   };
 
-  if (!user) {
+  if (!user || isLoading) {
     return (
       <div>
         <Navigation />
-        <div className="container mx-auto p-6 h-52 flex justify-center items-center">
-          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+        <div className="container mx-auto p-6">
+          <div className="mb-8 rounded-[32px] border border-white/5 bg-white/5 p-8">
+            <div className="space-y-4">
+              <div className="h-8 w-2/3 rounded-lg bg-gradient-to-r from-white/10 to-white/5 animate-pulse"></div>
+              <div className="h-4 w-1/2 rounded-lg bg-gradient-to-r from-white/10 to-white/5 animate-pulse"></div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl border border-white/10 bg-white/5 p-4 animate-pulse"
+                  >
+                    <div className="h-3 w-1/3 rounded bg-gradient-to-r from-white/10 to-white/5 mb-2"></div>
+                    <div className="h-6 w-1/2 rounded bg-gradient-to-r from-white/10 to-white/5 mb-2"></div>
+                    <div className="h-2 w-2/3 rounded bg-gradient-to-r from-white/10 to-white/5"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <CardSkeletonGrid count={6} />
         </div>
       </div>
     );
@@ -394,97 +430,46 @@ export default function TeacherClassesPage() {
 
       <Navigation />
       <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
-        <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              <DropdownNotificationBell teacherId={user.userId} />
+        <section className="rounded-[32px] border border-white/5 bg-white/5 p-6 shadow-2xl backdrop-blur-3xl">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3 flex-1">
+              <Input
+                placeholder="Nhập tên lớp, môn học hoặc mã lớp..."
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                className="flex-1 bg-white/5 text-white placeholder:text-slate-500"
+              />
+              <Button
+                onClick={handleSearch}
+                className="rounded-xl bg-emerald-500 px-6 py-2.5 text-white hover:bg-emerald-600 whitespace-nowrap"
+                disabled={!searchKeyword.trim()}
+              >
+                <Search className="mr-2 h-4 w-4" />
+                Tìm kiếm lớp học
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-3">
               <SubjectManager
                 userId={user.userId}
                 subjects={uniqueSubjects}
                 reloadSubjects={async () => loadSubjects()}
               />
               <Button
-                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-5 text-base font-semibold shadow-emerald-500/40 hover:from-emerald-600 hover:to-teal-600"
+                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-2.5 font-semibold shadow-emerald-500/40 hover:from-emerald-600 hover:to-teal-600 whitespace-nowrap"
                 onClick={openCreateModal}
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Tạo lớp mới
+                Tạo lớp
               </Button>
+              <DropdownNotificationBell teacherId={user.userId} />
             </div>
           </div>
-        </section>
-
-        <section className="mt-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-          <Card className="rounded-[28px] border-white/10 bg-slate-900/70 text-white shadow-xl backdrop-blur-2xl">
-            <CardHeader className="border-b border-white/5 pb-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <CardTitle className="text-2xl font-semibold">
-                    Tìm kiếm & bộ lọc
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Lọc nhanh theo tên lớp để truy cập tức thì.
-                  </CardDescription>
-                </div>
-                <div className="rounded-full border border-white/10 px-4 py-1 text-xs text-slate-300">
-                  {uniqueClasses.length} lớp hiện hoạt
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-6">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Input
-                  placeholder="Nhập tên lớp, môn học hoặc mã lớp..."
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSearch();
-                    }
-                  }}
-                  className="flex-1 bg-white/5 text-white placeholder:text-slate-500"
-                />
-                <Button
-                  onClick={handleSearch}
-                  className="rounded-xl bg-emerald-500 px-6 py-5 text-white hover:bg-emerald-600"
-                  disabled={!searchKeyword.trim()}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  Tìm lớp
-                </Button>
-              </div>
-              {isSearching ? (
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
-                  <div>
-                    Tìm thấy{" "}
-                    <span className="font-semibold text-white">
-                      {uniqueClasses.length}
-                    </span>{" "}
-                    kết quả cho{" "}
-                    <span className="font-semibold text-emerald-200">
-                      &quot;{searchKeyword}&quot;
-                    </span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-white hover:bg-white/10"
-                    onClick={clearSearch}
-                  >
-                    <X className="mr-2 h-4 w-4" /> Xóa tìm kiếm
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-sm text-slate-400">
-                  Gợi ý: đặt tên lớp theo cấu trúc{" "}
-                  <span className="font-semibold text-white">
-                    [Môn]-[Khối]-[Năm]
-                  </span>{" "}
-                  để dễ tìm kiếm hơn.
-                </p>
-              )}
-            </CardContent>
-          </Card>
         </section>
 
         {/* Dialog tạo/sửa lớp học */}
@@ -786,7 +771,7 @@ export default function TeacherClassesPage() {
               {isSearching && (
                 <Button
                   variant="outline"
-                  className="mt-6 border-white/30 text-white hover:bg-white/10"
+                  className="mt-6 border-white/10 bg-white/10 text-white hover:bg-white/30 hover:border-white/30 hover:text-white"
                   onClick={clearSearch}
                 >
                   Xóa bộ lọc

@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getAccessToken } from "@/lib/auth";
 import { differenceInSeconds, format, parseISO } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -49,7 +50,7 @@ export default function QuizResultsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("accessToken"); // hoặc nơi bạn lưu token
+        const token = getAccessToken();
 
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/quiz-submissions/by-quiz/${quizId}`,

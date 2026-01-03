@@ -106,12 +106,30 @@ export default function GradesPage() {
   const getGradeBadge = (grade: number, maxGrade: number) => {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90)
-      return <Badge className="border-none bg-emerald-500/20 text-emerald-100">Xuất sắc</Badge>;
-    if (percentage >= 80) return <Badge className="border-none bg-blue-500/20 text-blue-100">Giỏi</Badge>;
-    if (percentage >= 65) return <Badge className="border-none bg-amber-500/20 text-amber-100">Khá</Badge>;
+      return (
+        <Badge className="border-none bg-emerald-500/20 text-emerald-100">
+          Xuất sắc
+        </Badge>
+      );
+    if (percentage >= 80)
+      return (
+        <Badge className="border-none bg-blue-500/20 text-blue-100">Giỏi</Badge>
+      );
+    if (percentage >= 65)
+      return (
+        <Badge className="border-none bg-amber-500/20 text-amber-100">
+          Khá
+        </Badge>
+      );
     if (percentage >= 50)
-      return <Badge className="border-none bg-orange-500/20 text-orange-100">Trung bình</Badge>;
-    return <Badge className="border-none bg-rose-500/20 text-rose-100">Yếu</Badge>;
+      return (
+        <Badge className="border-none bg-orange-500/20 text-orange-100">
+          Trung bình
+        </Badge>
+      );
+    return (
+      <Badge className="border-none bg-rose-500/20 text-rose-100">Yếu</Badge>
+    );
   };
 
   const getTypeIcon = (type: string) => {
@@ -153,7 +171,9 @@ export default function GradesPage() {
               {overallStats.averageGrade}
             </div>
             <p className="text-xs text-slate-400">
-              <span className="text-emerald-300">{overallStats.improvement}</span>{" "}
+              <span className="text-emerald-300">
+                {overallStats.improvement}
+              </span>{" "}
               từ kỳ trước
             </p>
           </CardContent>
@@ -168,7 +188,8 @@ export default function GradesPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-white">
-              {overallStats.completedAssignments}/{overallStats.totalAssignments}
+              {overallStats.completedAssignments}/
+              {overallStats.totalAssignments}
             </div>
             <Progress
               value={
@@ -216,7 +237,9 @@ export default function GradesPage() {
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-bold text-white">{subject.average}</span>
+                  <span className="font-bold text-white">
+                    {subject.average}
+                  </span>
                   {getTrendIcon(subject.trend)}
                 </div>
               </div>
@@ -249,7 +272,9 @@ export default function GradesPage() {
                   <div className="flex items-center space-x-3">
                     {getTypeIcon(assignment.type)}
                     <div>
-                      <p className="font-medium text-white">{assignment.name}</p>
+                      <p className="font-medium text-white">
+                        {assignment.name}
+                      </p>
                       <p className="text-sm text-slate-400">
                         {assignment.subject} • {assignment.date}
                       </p>
@@ -279,13 +304,17 @@ export default function GradesPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl text-white">{subject.subject}</CardTitle>
+                <CardTitle className="text-xl text-white">
+                  {subject.subject}
+                </CardTitle>
                 <CardDescription className="text-slate-300">
                   {subject.className}
                 </CardDescription>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-white">{subject.average}</div>
+                <div className="text-2xl font-bold text-white">
+                  {subject.average}
+                </div>
                 <div className="flex items-center gap-1 text-sm text-slate-400">
                   <span>Điểm TB</span>
                   {getTrendIcon(subject.trend)}
@@ -313,14 +342,20 @@ export default function GradesPage() {
                     <TableCell className="text-slate-200">
                       <div className="flex items-center gap-2">
                         {getTypeIcon(assignment.type)}
-                        <span className="text-sm">{getTypeName(assignment.type)}</span>
+                        <span className="text-sm">
+                          {getTypeName(assignment.type)}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-slate-200">{assignment.date}</TableCell>
+                    <TableCell className="text-slate-200">
+                      {assignment.date}
+                    </TableCell>
                     <TableCell className="font-bold text-white">
                       {assignment.grade}/{assignment.maxGrade}
                     </TableCell>
-                    <TableCell>{getGradeBadge(assignment.grade, assignment.maxGrade)}</TableCell>
+                    <TableCell>
+                      {getGradeBadge(assignment.grade, assignment.maxGrade)}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -340,51 +375,8 @@ export default function GradesPage() {
       </div>
 
       <Navigation />
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
-        <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1 text-xs uppercase tracking-[0.35em] text-blue-200">
-                <Sparkles className="h-3.5 w-3.5" />
-                Kết quả
-              </span>
-              <div>
-                <h1 className="text-4xl font-black md:text-5xl text-white">
-                  Kết quả học tập
-                </h1>
-                <p className="mt-2 max-w-2xl text-slate-300">
-                  Theo dõi điểm số, tiến độ và chi tiết từng môn học của bạn.
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  { label: "Điểm TB", value: overallStats.averageGrade, detail: `${overallStats.improvement} từ kỳ trước` },
-                  {
-                    label: "Hoàn thành",
-                    value: `${overallStats.completedAssignments}/${overallStats.totalAssignments}`,
-                    detail: "Bài đã nộp",
-                  },
-                  { label: "Môn học", value: data?.length || 0, detail: "Đang theo học" },
-                ].map((metric) => (
-                  <div
-                    key={metric.label}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white"
-                  >
-                    <p className="text-sm text-slate-300">{metric.label}</p>
-                    <p className="mt-1 text-2xl font-semibold">{metric.value}</p>
-                    <p className="text-xs text-blue-200">{metric.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-slate-200">
-              <p className="text-lg font-semibold text-white">Mẹo</p>
-              <p className="text-slate-300">Ưu tiên môn có xu hướng giảm để giữ ổn định điểm TB.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-10 rounded-[32px] border border-white/5 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-2xl">
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 lg:px-8">
+        <section className=" rounded-[32px] border border-white/5 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-2xl">
           <Tabs defaultValue="overview" className="space-y-6">
             <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/5 p-1">
               <TabsTrigger

@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
+import { getAccessToken } from "@/lib/auth";
 import {
   Card,
   CardContent,
@@ -58,8 +59,7 @@ export default function QuizPage() {
   const [quizResult, setQuizResult] = useState<QuizResultData | null>(null);
   const [isResultOpen, setIsResultOpen] = useState(false);
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  const token = getAccessToken();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const formatTime = (seconds: number) => {
@@ -313,7 +313,10 @@ export default function QuizPage() {
                     {Math.round(calculateProgress())}%
                   </span>
                 </div>
-                <Progress value={calculateProgress()} className="h-2 bg-white/10" />
+                <Progress
+                  value={calculateProgress()}
+                  className="h-2 bg-white/10"
+                />
               </div>
 
               <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -326,7 +329,9 @@ export default function QuizPage() {
 
                 <div className="grid grid-cols-5 gap-2">
                   {quiz.questions.map((q: any, index: number) => {
-                    const pageOfQuestion = Math.floor(index / QUESTIONS_PER_PAGE);
+                    const pageOfQuestion = Math.floor(
+                      index / QUESTIONS_PER_PAGE
+                    );
                     const isInCurrentPage = pageOfQuestion === currentPage;
                     const answer = quizAnswers[q.id];
                     const isAnswered = Array.isArray(answer)
@@ -339,7 +344,9 @@ export default function QuizPage() {
                         size="icon"
                         onClick={() => setCurrentPage(pageOfQuestion)}
                         className={`rounded-lg border-white/20 text-white hover:bg-white/10 ${
-                          isInCurrentPage ? "border-2 border-blue-400 bg-white/10" : "border"
+                          isInCurrentPage
+                            ? "border-2 border-blue-400 bg-white/10"
+                            : "border"
                         } ${
                           isAnswered
                             ? "border-emerald-300/60 bg-emerald-500/30"
@@ -394,7 +401,8 @@ export default function QuizPage() {
                     Trang trước
                   </Button>
 
-                  {(currentPage + 1) * QUESTIONS_PER_PAGE < quiz.questions.length ? (
+                  {(currentPage + 1) * QUESTIONS_PER_PAGE <
+                  quiz.questions.length ? (
                     <Button
                       onClick={() => setCurrentPage((prev) => prev + 1)}
                       disabled={isSubmited}

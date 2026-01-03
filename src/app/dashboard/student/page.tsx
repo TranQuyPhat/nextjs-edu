@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useRouter } from "next/navigation";
+import { getAccessToken } from "@/lib/auth";
 import {
   BookOpen,
   FileText,
@@ -47,6 +48,23 @@ export default function StudentDashboard() {
   const [todayLessons, setTodayLessons] = useState<LessonItem[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(true);
 
+  useEffect(() => {
+    const token = getAccessToken();
+    const userData = localStorage.getItem("user");
+
+    if (!token || !userData) {
+      router.replace("/auth/login");
+      return;
+    }
+
+    try {
+      setUser(JSON.parse(userData));
+    } catch {
+      localStorage.removeItem("user");
+      router.replace("/auth/login");
+    }
+  }, [router]);
+
   // Dashboard state (kết hợp API + mock)
   const [dashboardData, setDashboardData] = useState<{
     enrolledClasses: number;
@@ -63,24 +81,7 @@ export default function StudentDashboard() {
     completedAssignments: 0,
     pendingAssignments: 0,
     averageGrade: 8.5,
-    upcomingDeadlines: [
-      {
-        id: 1,
-        title: "Bài tập Chương 4 - Hàm số",
-        class: "Toán 12A1",
-        dueDate: "2024-01-28",
-        timeLeft: "3 ngày",
-        status: "pending",
-      },
-      {
-        id: 2,
-        title: "Kiểm tra giữa kỳ",
-        class: "Vật lý 12A1",
-        dueDate: "2024-01-30",
-        timeLeft: "5 ngày",
-        status: "pending",
-      },
-    ],
+    upcomingDeadlines: [],
     recentGrades: [
       {
         id: 1,
@@ -130,7 +131,7 @@ export default function StudentDashboard() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     const userData = localStorage.getItem("user");
     if (!token || !userData) {
       router.replace("/auth/login");

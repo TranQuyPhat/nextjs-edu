@@ -1,7 +1,8 @@
-// hooks/useAuth.ts - FIXED VERSION (đã đổi id -> userId)
+// hooks/useAuth.ts - Using Cookies instead of localStorage
 import { useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import apiClient from '@/lib/axios';
+import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
 
 async function validateToken(token: string): Promise<boolean> {
@@ -13,11 +14,10 @@ async function validateToken(token: string): Promise<boolean> {
     return res.status === 200;
 }
 
-// ✅ đổi field id -> userId để khớp với dữ liệu bạn lưu ở localStorage
 type UserData = {
     userId: number;
     username: string;
-    fullName?: string;   // nếu bạn có lưu fullName
+    fullName?: string;
     email: string;
     roles: string[];
 };
@@ -31,9 +31,9 @@ export const useAuth = () => {
     const pathname = usePathname();
 
     const clearAuthData = useCallback(() => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('role');
+        Cookies.remove("accessToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("role");
         setUser(null);
         setUserRole(null);
         setIsAuthenticated(false);
@@ -59,9 +59,9 @@ export const useAuth = () => {
     }, [pathname, router]);
 
     const { isLoading: loading } = useQuery<UserData | null>({
-        queryKey: ['auth', typeof window !== 'undefined' && localStorage.getItem('accessToken')],
+        queryKey: ['auth', typeof window !== 'undefined' && Cookies.get('accessToken')],
         queryFn: async () => {
-            const token = localStorage.getItem('accessToken');
+            const token = Cookies.get('accessToken');
             const userData = localStorage.getItem('user');
             const role = localStorage.getItem('role');
             if (!token || !userData) {
@@ -89,7 +89,11 @@ export const useAuth = () => {
 
 
     const login = (userData: any) => {
-        localStorage.setItem('accessToken', userData.accessToken);
+        Cookies.set("accessToken", userData.accessToken, {
+            expires: 7,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Lax"
+        });
         localStorage.setItem('user', JSON.stringify(userData));
         setIsAuthenticated(true);
         setUser(userData);

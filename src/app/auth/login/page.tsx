@@ -23,6 +23,7 @@ import { authService } from "@/services/authService";
 import { useAuth } from "../hook/useAuth";
 import Navigation from "@/components/navigation";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { setAccessToken } from "@/lib/auth";
 import { Mail, Lock, ArrowLeft, Shield, KeyRound, Loader2 } from "lucide-react";
 
 // Định nghĩa schema cho từng step
@@ -148,7 +149,10 @@ export default function LoginPage() {
     try {
       const res = await authService.login(data);
       console.log("res :", res);
-      localStorage.setItem("accessToken", res.accessToken);
+
+      // Lưu token vào cookie
+      setAccessToken(res.accessToken, 7);
+
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -159,7 +163,7 @@ export default function LoginPage() {
           roles: res.roles,
         })
       );
-      toast.success("Login successful!");
+      toast.success("Đăng nhập thành công!");
       if (res.roles && res.roles.length === 1) {
         const role = res.roles[0].toLowerCase();
         localStorage.setItem("role", role);
@@ -273,7 +277,10 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <Label
+                htmlFor="email"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Email
               </Label>
               <div className="relative">
@@ -295,7 +302,10 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <Label
+                htmlFor="password"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Mật khẩu
               </Label>
               <div className="relative">
@@ -333,7 +343,10 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <Label
+                htmlFor="email"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Email
               </Label>
               <div className="relative">
@@ -361,7 +374,10 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="otp" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <Label
+                htmlFor="otp"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Mã OTP
               </Label>
               <div className="relative">
@@ -382,7 +398,10 @@ export default function LoginPage() {
                 </p>
               )}
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                Mã OTP đã được gửi về email: <strong className="text-blue-600 dark:text-blue-400">{email}</strong>
+                Mã OTP đã được gửi về email:{" "}
+                <strong className="text-blue-600 dark:text-blue-400">
+                  {email}
+                </strong>
               </p>
             </div>
           </>
@@ -393,7 +412,10 @@ export default function LoginPage() {
         return (
           <>
             <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <Label
+                htmlFor="newPassword"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Mật khẩu mới
               </Label>
               <div className="relative">
@@ -414,7 +436,10 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              >
                 Xác nhận mật khẩu
               </Label>
               <div className="relative">
@@ -448,8 +473,8 @@ export default function LoginPage() {
         <Button
           type="submit"
           className={`w-full h-12 text-base font-semibold shadow-lg transition-all duration-200 ${
-            step === "login" 
-              ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" 
+            step === "login"
+              ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
               : "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white"
           } disabled:opacity-50 disabled:cursor-not-allowed`}
           disabled={isLoading}
@@ -542,8 +567,12 @@ export default function LoginPage() {
             <div className="p-3 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
               {step === "login" && <Lock className="h-6 w-6 text-white" />}
               {step === "forgot" && <Mail className="h-6 w-6 text-white" />}
-              {step === "verifyOtp" && <Shield className="h-6 w-6 text-white" />}
-              {step === "resetPassword" && <KeyRound className="h-6 w-6 text-white" />}
+              {step === "verifyOtp" && (
+                <Shield className="h-6 w-6 text-white" />
+              )}
+              {step === "resetPassword" && (
+                <KeyRound className="h-6 w-6 text-white" />
+              )}
             </div>
           </div>
           <CardTitle className="text-3xl font-bold text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -564,7 +593,9 @@ export default function LoginPage() {
           {step === "login" && (
             <>
               <div className="mt-6 text-center text-sm">
-                <span className="text-gray-600 dark:text-gray-400">Chưa có tài khoản? </span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  Chưa có tài khoản?{" "}
+                </span>
                 <Link
                   href="/auth/register"
                   className="font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors underline-offset-4 hover:underline"
@@ -575,7 +606,9 @@ export default function LoginPage() {
 
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-600" />
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">hoặc</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  hoặc
+                </span>
                 <div className="flex-grow h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent dark:via-gray-600" />
               </div>
 

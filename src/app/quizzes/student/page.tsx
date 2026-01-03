@@ -25,6 +25,7 @@ import {
 import { useRouter } from "next/navigation";
 import { formatDateTime } from "@/untils/dateFormatter";
 import Loading from "@/components/loading";
+import { getAccessToken } from "@/lib/auth";
 
 type StudentQuiz = {
   id: number;
@@ -59,7 +60,7 @@ export default function StudentQuizzesPage() {
 
     const fetchQuizzes = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
+        const token = getAccessToken();
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/quizzes/student`,
           {
@@ -182,21 +183,36 @@ export default function StudentQuizzesPage() {
                   Bài kiểm tra trắc nghiệm
                 </h1>
                 <p className="mt-2 max-w-2xl text-slate-300">
-                  Theo dõi bài đang mở, sắp diễn ra và đã nộp trong một giao diện thống nhất.
+                  Theo dõi bài đang mở, sắp diễn ra và đã nộp trong một giao
+                  diện thống nhất.
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  { label: "Tổng bài", value: totalCount, detail: "Bao gồm mọi trạng thái" },
-                  { label: "Đang mở", value: availableQuizzes.length, detail: "Có thể làm ngay" },
-                  { label: "Đã nộp", value: completedQuizzes.length, detail: "Xem kết quả" },
+                  {
+                    label: "Tổng bài",
+                    value: totalCount,
+                    detail: "Bao gồm mọi trạng thái",
+                  },
+                  {
+                    label: "Đang mở",
+                    value: availableQuizzes.length,
+                    detail: "Có thể làm ngay",
+                  },
+                  {
+                    label: "Đã nộp",
+                    value: completedQuizzes.length,
+                    detail: "Xem kết quả",
+                  },
                 ].map((metric) => (
                   <div
                     key={metric.label}
                     className="rounded-2xl border border-white/10 bg-white/5 p-4"
                   >
                     <p className="text-sm text-slate-300">{metric.label}</p>
-                    <p className="mt-1 text-2xl font-semibold text-white">{metric.value}</p>
+                    <p className="mt-1 text-2xl font-semibold text-white">
+                      {metric.value}
+                    </p>
                     <p className="text-xs text-blue-200">{metric.detail}</p>
                   </div>
                 ))}
@@ -204,7 +220,9 @@ export default function StudentQuizzesPage() {
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-slate-200">
               <p className="text-lg font-semibold text-white">Lưu ý</p>
-              <p className="text-slate-300">Hãy kiểm tra thời gian mở/đóng trước khi bắt đầu.</p>
+              <p className="text-slate-300">
+                Hãy kiểm tra thời gian mở/đóng trước khi bắt đầu.
+              </p>
             </div>
           </div>
         </section>
@@ -213,10 +231,19 @@ export default function StudentQuizzesPage() {
           <Tabs defaultValue="available" className="space-y-6">
             <TabsList className="flex w-full flex-wrap gap-2 rounded-2xl border border-white/10 bg-white/5 p-1">
               {[
-                { value: "available", label: `Có thể làm (${availableQuizzes.length})` },
-                { value: "upcoming", label: `Sắp diễn ra (${upcomingQuizzes.length})` },
+                {
+                  value: "available",
+                  label: `Có thể làm (${availableQuizzes.length})`,
+                },
+                {
+                  value: "upcoming",
+                  label: `Sắp diễn ra (${upcomingQuizzes.length})`,
+                },
                 { value: "closed", label: `Đã đóng (${closedQuizzes.length})` },
-                { value: "completed", label: `Đã nộp (${completedQuizzes.length})` },
+                {
+                  value: "completed",
+                  label: `Đã nộp (${completedQuizzes.length})`,
+                },
               ].map((tab) => (
                 <TabsTrigger
                   key={tab.value}
@@ -244,7 +271,10 @@ export default function StudentQuizzesPage() {
             </TabsContent>
 
             <TabsContent value="closed" className="space-y-4">
-              <QuizList emptyText="Không có bài đã đóng." items={closedQuizzes} />
+              <QuizList
+                emptyText="Không có bài đã đóng."
+                items={closedQuizzes}
+              />
             </TabsContent>
 
             <TabsContent value="completed" className="space-y-4">
@@ -306,16 +336,21 @@ export default function StudentQuizzesPage() {
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="space-y-1">
-              <CardTitle className="text-lg font-semibold">{quiz.title}</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                {quiz.title}
+              </CardTitle>
               <CardDescription className="text-sm text-slate-300">
-                {quiz.className || "Lớp chưa rõ"} • {quiz.timeLimit} phút • {totalQuestions} câu hỏi
+                {quiz.className || "Lớp chưa rõ"} • {quiz.timeLimit} phút •{" "}
+                {totalQuestions} câu hỏi
               </CardDescription>
             </div>
             {getStatusBadge(quiz.submitted, quiz.endDate ?? undefined)}
           </div>
         </CardHeader>
         <CardContent className="space-y-4 pt-0">
-          {quiz.description && <p className="text-sm text-slate-200">{quiz.description}</p>}
+          {quiz.description && (
+            <p className="text-sm text-slate-200">{quiz.description}</p>
+          )}
 
           <div className="grid gap-2 text-sm text-slate-200">
             {quiz.startDate && (

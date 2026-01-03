@@ -41,27 +41,27 @@ export const getScheduleByWeek = async (date?: string): Promise<WeekSchedule> =>
       url += `?date=${encodeURIComponent(date)}`;
     }
 
-    // Lấy token từ localStorage
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    
+    // Lấy token từ cookie
+    const token = getAccessToken();
+
     // Log để debug
     console.log('🔑 Token exists:', !!token);
     console.log('🔑 Token length:', token?.length || 0);
     if (token) {
       console.log('🔑 Token preview:', token.substring(0, 20) + '...');
     }
-    
+
     // Tạo headers
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     } else {
       console.warn('⚠️ No token found in localStorage!');
     }
-    
+
     console.log('📤 Request URL:', url);
     console.log('📤 Request headers:', headers);
 
@@ -71,15 +71,15 @@ export const getScheduleByWeek = async (date?: string): Promise<WeekSchedule> =>
       headers,
       credentials: 'include', // Để gửi cookies nếu có
     });
-    
+
     console.log('📥 Response status:', response.status);
     console.log('📥 Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
-        errorData.message || 
-        errorData.error || 
+        errorData.message ||
+        errorData.error ||
         `HTTP error! status: ${response.status}`
       );
     }
@@ -87,7 +87,7 @@ export const getScheduleByWeek = async (date?: string): Promise<WeekSchedule> =>
     // Đọc response text trước để debug
     const responseText = await response.text();
     console.log('📄 Raw response text (first 500 chars):', responseText.substring(0, 500));
-    
+
     let payload: ApiResp<WeekSchedule>;
     try {
       payload = JSON.parse(responseText);
@@ -96,11 +96,11 @@ export const getScheduleByWeek = async (date?: string): Promise<WeekSchedule> =>
       console.error('❌ Response text:', responseText);
       throw new Error('Invalid JSON response from server');
     }
-    
+
     console.log('📦 Raw API response (full):', JSON.stringify(payload, null, 2));
     console.log('✅ Success:', payload?.success);
     console.log('📊 Data exists:', !!payload?.data);
-    
+
     if (payload && payload.success && payload.data) {
       // Log chi tiết từng ngày
       console.log('📅 Schedules array length:', payload.data.schedules?.length);
@@ -110,14 +110,14 @@ export const getScheduleByWeek = async (date?: string): Promise<WeekSchedule> =>
           console.log(`    ✅ Lessons:`, day.lessons);
         }
       });
-      
+
       // Log số lượng lessons
       const totalLessons = payload.data.schedules.reduce(
-        (sum, day) => sum + (day.lessons?.length || 0), 
+        (sum, day) => sum + (day.lessons?.length || 0),
         0
       );
       console.log(`📚 Total lessons in week: ${totalLessons}`);
-      
+
       if (totalLessons === 0) {
         console.warn('⚠️ No lessons found in schedule data');
         console.warn('⚠️ This might be because:');
@@ -125,7 +125,7 @@ export const getScheduleByWeek = async (date?: string): Promise<WeekSchedule> =>
         console.warn('   2. User has no classes or sessions assigned');
         console.warn('   3. Sessions are not in this week range');
       }
-      
+
       return payload.data;
     } else {
       throw new Error(payload?.message || 'Invalid response format');

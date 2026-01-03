@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Navigation from "@/components/navigation";
 import { Button } from "@/components/ui/button";
+import { getAccessToken } from "@/lib/auth";
 import {
   ChevronLeft,
   ChevronRight,
@@ -239,7 +240,7 @@ export default function SchedulePage() {
     }
 
     // Log token để debug
-    const token = localStorage.getItem("accessToken");
+    const token = getAccessToken();
     console.log("🔑 Access token exists:", !!token);
     if (token) {
       try {

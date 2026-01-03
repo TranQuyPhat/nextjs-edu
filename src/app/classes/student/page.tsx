@@ -34,12 +34,13 @@ import {
 } from "@/services/classService";
 import StudentNotificationToast from "@/components/classDetails/StudentNotificationToast";
 import { toast } from "react-toastify";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { CardSkeletonGrid } from "@/components/skeletons/CardSkeleton";
 
 export default function StudentClassesPage() {
   const [user, setUser] = useState<any>(null);
   const [classes, setClasses] = useState<any[]>([]);
   const [joinCode, setJoinCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true); // Loading state cho page
 
   // States cho tìm kiếm chính
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -57,23 +58,26 @@ export default function StudentClassesPage() {
   const [pageSize] = useState(6);
   const [totalPages, setTotalPages] = useState(1);
 
-  const loadStudentClasses = useCallback((userId: number, page: number) => {
-    getStudentClasses(userId, page, pageSize)
-      .then((res) => {
-        setClasses(Array.isArray(res.data) ? res.data : res.data || []);
-        setTotalPages(res.totalPages || 1);
-        setIsSearching(false);
-        console.log("res", res);
-      })
-      .catch((error) => {
-        console.error("Lỗi khi lấy lớp học:", error);
-        setIsSearching(false);
-        toast.error(
-          error?.response?.data?.messages?.[0] ??
-            "Không thể tải danh sách lớp học!"
-        );
-      });
-  }, [pageSize]);
+  const loadStudentClasses = useCallback(
+    (userId: number, page: number) => {
+      getStudentClasses(userId, page, pageSize)
+        .then((res) => {
+          setClasses(Array.isArray(res.data) ? res.data : res.data || []);
+          setTotalPages(res.totalPages || 1);
+          setIsSearching(false);
+          console.log("res", res);
+        })
+        .catch((error) => {
+          console.error("Lỗi khi lấy lớp học:", error);
+          setIsSearching(false);
+          toast.error(
+            error?.response?.data?.messages?.[0] ??
+              "Không thể tải danh sách lớp học!"
+          );
+        });
+    },
+    [pageSize]
+  );
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -82,10 +86,23 @@ export default function StudentClassesPage() {
       setUser(parsedUser);
       console.log("parsedUser :", parsedUser);
 
-      loadStudentClasses(parsedUser.userId, currentPage);
+      // Chờ request classes hoàn thành trước khi tắt loading
+      getStudentClasses(parsedUser.userId, 0, 6)
+        .then((res) => {
+          setClasses(Array.isArray(res.data) ? res.data : res.data || []);
+          setTotalPages(res.totalPages || 1);
+          setIsLoading(false); // Tắt loading khi dữ liệu sẵn sàng
+        })
+        .catch((error) => {
+          console.error("Lỗi khi lấy lớp học:", error);
+          toast.error(
+            error?.response?.data?.messages?.[0] ??
+              "Không thể tải danh sách lớp học!"
+          );
+          setIsLoading(false); // Tắt loading thậm chí khi có lỗi
+        });
     }
-  }, [currentPage, loadStudentClasses]);
-
+  }, []);
 
   // Function tìm kiếm lớp học của student với phân trang
   const handleSearchStudentClasses = async (
@@ -260,13 +277,48 @@ export default function StudentClassesPage() {
     }
   };
 
-  if (!user) {
+  if (!user || isLoading) {
     return (
-      <div>
-        <Navigation />
-        <div className="container mx-auto p-6 h-96 flex justify-center items-center">
-          <DotLottieReact src="/animations/loading.lottie" loop autoplay />
+      <div className="relative min-h-screen bg-slate-950 text-white">
+        <div className="absolute inset-0">
+          <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-emerald-600/35 via-slate-900 to-slate-950 blur-3xl" />
+          <div className="absolute -right-20 top-24 h-64 w-64 rounded-full bg-teal-500/25 blur-[130px]" />
+          <div className="absolute -left-12 bottom-0 h-72 w-72 rounded-full bg-indigo-500/25 blur-[140px]" />
         </div>
+
+        <Navigation />
+        <main className="relative z-10 mx-auto max-w-7xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+          <section className="rounded-[32px] border border-white/5 bg-white/5 p-8 shadow-2xl backdrop-blur-3xl animate-pulse">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-3">
+                <div className="h-6 w-48 rounded-full bg-gradient-to-r from-white/10 to-white/5"></div>
+                <div className="h-10 w-2/3 rounded bg-gradient-to-r from-white/10 to-white/5"></div>
+                <div className="h-4 w-3/4 rounded bg-gradient-to-r from-white/10 to-white/5"></div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                    >
+                      <div className="h-3 w-1/3 rounded bg-gradient-to-r from-white/10 to-white/5 mb-2"></div>
+                      <div className="h-6 w-1/2 rounded bg-gradient-to-r from-white/10 to-white/5 mb-2"></div>
+                      <div className="h-2 w-2/3 rounded bg-gradient-to-r from-white/10 to-white/5"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row">
+                <div className="h-11 w-full rounded-2xl bg-gradient-to-r from-white/10 to-white/5 sm:w-80"></div>
+                <div className="h-11 w-full rounded-2xl bg-gradient-to-r from-white/10 to-white/5 sm:w-auto"></div>
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-10">
+            <CardSkeletonGrid count={6} />
+          </section>
+        </main>
       </div>
     );
   }
@@ -304,7 +356,9 @@ export default function StudentClassesPage() {
                 Lớp học
               </span>
               <div>
-                <h1 className="text-4xl font-black md:text-5xl">Lớp học của tôi</h1>
+                <h1 className="text-4xl font-black md:text-5xl">
+                  Lớp học của tôi
+                </h1>
                 <p className="mt-2 max-w-2xl text-slate-300">
                   {isSearching && searchKeyword.trim()
                     ? `Kết quả tìm kiếm cho “${searchKeyword}”.`
@@ -313,7 +367,11 @@ export default function StudentClassesPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  { label: "Tổng lớp", value: totalClassCount, detail: "Đang theo học" },
+                  {
+                    label: "Tổng lớp",
+                    value: totalClassCount,
+                    detail: "Đang theo học",
+                  },
                   {
                     label: "Trang hiện tại",
                     value: `${currentPage + 1}/${totalPages || 1}`,
@@ -322,7 +380,9 @@ export default function StudentClassesPage() {
                   {
                     label: "Trạng thái",
                     value: isSearching ? "Đang lọc" : "Toàn bộ",
-                    detail: isSearching ? "Kết quả tìm kiếm" : "Hiển thị đầy đủ",
+                    detail: isSearching
+                      ? "Kết quả tìm kiếm"
+                      : "Hiển thị đầy đủ",
                   },
                 ].map((metric) => (
                   <div
@@ -330,7 +390,9 @@ export default function StudentClassesPage() {
                     className="rounded-2xl border border-white/10 bg-white/5 p-4"
                   >
                     <p className="text-sm text-slate-300">{metric.label}</p>
-                    <p className="mt-1 text-2xl font-semibold text-white">{metric.value}</p>
+                    <p className="mt-1 text-2xl font-semibold text-white">
+                      {metric.value}
+                    </p>
                     <p className="text-xs text-emerald-200">{metric.detail}</p>
                   </div>
                 ))}
@@ -367,7 +429,9 @@ export default function StudentClassesPage() {
                 </DialogTrigger>
                 <DialogContent className="max-w-xl rounded-3xl border border-white/10 bg-slate-900/80 text-white backdrop-blur-2xl">
                   <DialogHeader>
-                    <DialogTitle className="text-xl text-white">Tham gia lớp học</DialogTitle>
+                    <DialogTitle className="text-xl text-white">
+                      Tham gia lớp học
+                    </DialogTitle>
                     <DialogDescription className="text-slate-400">
                       Chọn cách tham gia phù hợp
                     </DialogDescription>
@@ -436,7 +500,9 @@ export default function StudentClassesPage() {
                       </div>
                       <div className="max-h-60 space-y-3 overflow-y-auto">
                         {searchResults.length === 0 && (
-                          <p className="text-sm text-slate-400">Không có lớp nào.</p>
+                          <p className="text-sm text-slate-400">
+                            Không có lớp nào.
+                          </p>
                         )}
                         {searchResults.map((item) => (
                           <Card
@@ -445,7 +511,9 @@ export default function StudentClassesPage() {
                           >
                             <div className="flex items-center justify-between gap-3">
                               <div>
-                                <p className="font-semibold text-white">{item.className}</p>
+                                <p className="font-semibold text-white">
+                                  {item.className}
+                                </p>
                                 <p className="text-sm text-slate-300">
                                   GV: {item.teacher?.fullName || "Chưa rõ"}
                                 </p>
@@ -471,7 +539,10 @@ export default function StudentClassesPage() {
 
         {isSearching && searchKeyword.trim() && (
           <div className="mt-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
-            <Badge variant="outline" className="border-white/20 bg-white/5 text-white">
+            <Badge
+              variant="outline"
+              className="border-white/20 bg-white/5 text-white"
+            >
               <Search className="mr-1 h-3 w-3" />
               Đang tìm kiếm
             </Badge>
@@ -527,7 +598,10 @@ export default function StudentClassesPage() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-2">
-                      <Link href={`/classes/${classItem.id}`} className="flex-1">
+                      <Link
+                        href={`/classes/${classItem.id}`}
+                        className="flex-1"
+                      >
                         <Button className="w-full rounded-xl bg-emerald-500 text-white hover:bg-emerald-600">
                           <Eye className="mr-2 h-4 w-4" />
                           Vào lớp học

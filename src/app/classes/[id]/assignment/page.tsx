@@ -1,11 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Navigation from "@/components/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { useState, useEffect } from "react";
+import Navigation from "@/components/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +26,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Calendar,
   Download,
@@ -26,31 +45,36 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react"
-import type { Assignment, Submission } from "@/types/assignment"
+} from "lucide-react";
+import type { Assignment, Submission } from "@/types/assignment";
 import {
   downloadAssignmentFile,
   deleteAssignment,
   getAssignmentsByClassIdPaginated,
-} from "@/services/assignmentService"
-import type { ClassItem } from "@/types/classes"
-import { useParams, useRouter } from "next/navigation"
-import { getClassById } from "@/services/classService"
-import CreateAssignment from "@/components/classDetails/assi/create-assignment"
-import { formatDateTime } from "@/untils/dateFormatter"
-import Swal from "sweetalert2"
-import UpdateAssignment from "@/components/classDetails/assi/UpdateAssignment"
-import UploadSubmission from "@/components/classDetails/assi/UploadSubmission"
+} from "@/services/assignmentService";
+import type { ClassItem } from "@/types/classes";
+import { useParams, useRouter } from "next/navigation";
+import { getClassById } from "@/services/classService";
+import CreateAssignment from "@/components/classDetails/assi/create-assignment";
+import { formatDateTime } from "@/untils/dateFormatter";
+import Swal from "sweetalert2";
+import UpdateAssignment from "@/components/classDetails/assi/UpdateAssignment";
+import UploadSubmission from "@/components/classDetails/assi/UploadSubmission";
 import {
   downloadSubmissionFile,
   getSubmissionsByClassId,
   getSubmissionStudentByClass,
-} from "@/services/submissionService"
-import { DotLottieReact } from "@lottiefiles/dotlottie-react"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Input } from "@/components/ui/input"
-import UpdateUploadSubmission from "@/components/classDetails/assi/UpdateUploadSubmission"
-import { handleViewFile } from "@/untils/fileViewer"
+} from "@/services/submissionService";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import UpdateUploadSubmission from "@/components/classDetails/assi/UpdateUploadSubmission";
+import { handleViewFile } from "@/untils/fileViewer";
 
 type FilterType =
   | "all"
@@ -61,211 +85,244 @@ type FilterType =
   | "ungraded"
   | "partial"
   | "submitted"
-  | "not_submitted"
+  | "not_submitted";
 
 export default function AssignmentsPage() {
-  const router = useRouter()
-  const params = useParams()
-  const [user, setUser] = useState<any>(null)
-  const [assignments, setAssignments] = useState<Assignment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filter, setFilter] = useState<FilterType>("all")
-  const [statusFilter, setStatusFilter] = useState<FilterType | "">("")
-  const [progressFilter, setProgressFilter] = useState<FilterType | "">("")
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false)
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
-  const [classes, setClasses] = useState<ClassItem | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const router = useRouter();
+  const params = useParams();
+  const [user, setUser] = useState<any>(null);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [statusFilter, setStatusFilter] = useState<FilterType | "">("");
+  const [progressFilter, setProgressFilter] = useState<FilterType | "">("");
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+  const [selectedAssignment, setSelectedAssignment] =
+    useState<Assignment | null>(null);
+  const [classes, setClasses] = useState<ClassItem | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const PAGE_SIZE = 5
-  const [currentPage, setCurrentPage] = useState(0) // 0-based for API
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalRecords, setTotalRecords] = useState(0)
-  const [hasNext, setHasNext] = useState(false)
-  const [hasPrevious, setHasPrevious] = useState(false)
+  const PAGE_SIZE = 5;
+  const [currentPage, setCurrentPage] = useState(0); // 0-based for API
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
+    const userData = localStorage.getItem("user");
     if (userData) {
       try {
-        const parsedUser = JSON.parse(userData)
+        const parsedUser = JSON.parse(userData);
         if (parsedUser) {
-          setUser(parsedUser)
+          setUser(parsedUser);
         }
       } catch (e) {
-        console.error("Lỗi parse user:", e)
+        console.error("Lỗi parse user:", e);
       }
     }
-  }, [])
+  }, []);
 
-  const role = user?.roles?.[0] || "student"
-  console.log("User role:", role)
+  const role = user?.roles?.[0] || "student";
+  console.log("User role:", role);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classId = Number(params.id)
-        console.log("Fetching class data for ID:", classId)
+        const classId = Number(params.id);
+        console.log("Fetching class data for ID:", classId);
 
-        const data = await getClassById(classId)
-        console.log("Classes data:", data)
-        setClasses(data)
+        const data = await getClassById(classId);
+        console.log("Classes data:", data);
+        setClasses(data);
       } catch (error) {
-        console.error("Lỗi khi tải dữ liệu lớp học:", error)
+        console.error("Lỗi khi tải dữ liệu lớp học:", error);
       }
-    }
+    };
     if (params.id) {
-      fetchData()
+      fetchData();
     }
-  }, [params.id])
+  }, [params.id]);
 
   useEffect(() => {
     const fetchAssignmentsPage = async () => {
-      if (!classes || !user) return
+      if (!classes || !user) return;
       try {
-        setLoading(true)
-        console.log("Fetching assignments for page:", currentPage)
+        setLoading(true);
+        console.log("Fetching assignments for page:", currentPage);
 
-        const paginatedData = await getAssignmentsByClassIdPaginated(classes.id, currentPage, PAGE_SIZE)
-        console.log("Paginated data:", paginatedData)
+        const paginatedData = await getAssignmentsByClassIdPaginated(
+          classes.id,
+          currentPage,
+          PAGE_SIZE
+        );
+        console.log("Paginated data:", paginatedData);
 
         // Merge submissions như cũ
-        let submissionsData: Submission[] = []
+        let submissionsData: Submission[] = [];
         if (role === "student") {
-          const studentSubs = await getSubmissionStudentByClass(classes.id, user.userId)
-          submissionsData = Array.isArray(studentSubs) ? studentSubs : [studentSubs]
+          const studentSubs = await getSubmissionStudentByClass(
+            classes.id,
+            user.userId
+          );
+          submissionsData = Array.isArray(studentSubs)
+            ? studentSubs
+            : [studentSubs];
         } else if (role === "teacher") {
-          submissionsData = await getSubmissionsByClassId(classes.id)
+          submissionsData = await getSubmissionsByClassId(classes.id);
         }
 
-        const withSubmissions = paginatedData.data.map((assignment: Assignment) => {
-          const relatedSubs = submissionsData.filter((sub) => sub.assignmentId === assignment.id)
-          return { ...assignment, submissions: relatedSubs }
-        })
+        const withSubmissions = paginatedData.data.map(
+          (assignment: Assignment) => {
+            const relatedSubs = submissionsData.filter(
+              (sub) => sub.assignmentId === assignment.id
+            );
+            return { ...assignment, submissions: relatedSubs };
+          }
+        );
 
-        setAssignments(withSubmissions)
-        setCurrentPage(paginatedData.pageNumber)
-        setTotalPages(paginatedData.totalPages)
-        setTotalRecords(paginatedData.totalRecords)
-        setHasNext(paginatedData.hasNext)
-        setHasPrevious(paginatedData.hasPrevious)
+        setAssignments(withSubmissions);
+        setCurrentPage(paginatedData.pageNumber);
+        setTotalPages(paginatedData.totalPages);
+        setTotalRecords(paginatedData.totalRecords);
+        setHasNext(paginatedData.hasNext);
+        setHasPrevious(paginatedData.hasPrevious);
       } catch (error) {
-        console.error("Error fetching assignments:", error)
+        console.error("Error fetching assignments:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchAssignmentsPage()
-  }, [classes, user, role, currentPage])
+    };
+    fetchAssignmentsPage();
+  }, [classes, user, role, currentPage]);
 
   const goToNextPage = () => {
-    if (hasNext) setCurrentPage((prev) => prev + 1)
-  }
+    if (hasNext) setCurrentPage((prev) => prev + 1);
+  };
 
   const goToPrevPage = () => {
-    if (hasPrevious) setCurrentPage((prev) => prev - 1)
-  }
+    if (hasPrevious) setCurrentPage((prev) => prev - 1);
+  };
 
   const goToFirstPage = () => {
-    setCurrentPage(0)
-  }
+    setCurrentPage(0);
+  };
 
   const goToLastPage = () => {
-    setCurrentPage(totalPages - 1)
-  }
+    setCurrentPage(totalPages - 1);
+  };
 
   const getFilteredAssignments = () => {
-    let filtered = [...assignments]
-    const now = new Date()
-    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+    let filtered = [...assignments];
+    const now = new Date();
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     // Apply search filter
     if (searchTerm) {
       filtered = filtered.filter(
         (assignment) =>
           assignment.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          assignment.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+          assignment.description
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+      );
     }
 
     // 1. Lọc theo trạng thái
     switch (statusFilter) {
       case "near_deadline":
         filtered = filtered.filter(
-          (assignment) => new Date(assignment.dueDate) <= threeDaysFromNow && new Date(assignment.dueDate) > now,
-        )
-        break
+          (assignment) =>
+            new Date(assignment.dueDate) <= threeDaysFromNow &&
+            new Date(assignment.dueDate) > now
+        );
+        break;
       case "overdue":
-        filtered = filtered.filter((assignment) => new Date(assignment.dueDate) < now)
-        break
+        filtered = filtered.filter(
+          (assignment) => new Date(assignment.dueDate) < now
+        );
+        break;
       case "open":
-        filtered = filtered.filter((assignment) => new Date(assignment.dueDate) > threeDaysFromNow)
-        break
+        filtered = filtered.filter(
+          (assignment) => new Date(assignment.dueDate) > threeDaysFromNow
+        );
+        break;
     }
 
     // 2. Lọc theo tình trạng
     if (role === "teacher") {
       switch (progressFilter) {
         case "graded":
-          filtered = filtered.filter((a) => a.submissions?.every((s) => s.status === "GRADED"))
-          break
+          filtered = filtered.filter((a) =>
+            a.submissions?.every((s) => s.status === "GRADED")
+          );
+          break;
         case "ungraded":
-          filtered = filtered.filter((a) => a.submissions?.some((s) => s.status !== "GRADED"))
-          break
+          filtered = filtered.filter((a) =>
+            a.submissions?.some((s) => s.status !== "GRADED")
+          );
+          break;
         case "partial":
           filtered = filtered.filter((a) => {
-            const total = a.submissions?.length || 0
-            const graded = a.submissions?.filter((s) => s.status === "GRADED").length || 0
-            return total > 0 && graded > 0 && graded < total
-          })
-          break
+            const total = a.submissions?.length || 0;
+            const graded =
+              a.submissions?.filter((s) => s.status === "GRADED").length || 0;
+            return total > 0 && graded > 0 && graded < total;
+          });
+          break;
       }
     } else if (role === "student") {
       switch (progressFilter) {
         case "submitted":
-          filtered = filtered.filter((a) => a.submissions?.some((s) => s.student?.id === user.userId))
-          break
+          filtered = filtered.filter((a) =>
+            a.submissions?.some((s) => s.student?.id === user.userId)
+          );
+          break;
         case "not_submitted":
-          filtered = filtered.filter((a) => !a.submissions?.some((s) => s.student?.id === user.userId))
-          break
+          filtered = filtered.filter(
+            (a) => !a.submissions?.some((s) => s.student?.id === user.userId)
+          );
+          break;
       }
     }
 
-    return filtered
-  }
+    return filtered;
+  };
 
-  const filteredAssignments = getFilteredAssignments()
+  const filteredAssignments = getFilteredAssignments();
 
   const handleDownloadAssignment = async (
     assignmentId: number,
     filePath: string,
     fileName: string,
-    fileType: string,
+    fileType: string
   ) => {
     try {
       // 1. Gọi API tải file (trả blob từ backend)
-      const blob = await downloadAssignmentFile(assignmentId)
+      const blob = await downloadAssignmentFile(assignmentId);
 
       // 2. Tạo URL từ blob với type chuẩn
-      const url = window.URL.createObjectURL(new Blob([blob], { type: fileType }))
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: fileType })
+      );
 
       // 3. Dùng đúng tên gốc từ DB
-      const link = document.createElement("a")
-      link.href = url
-      link.setAttribute("download", fileName)
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
 
-      document.body.appendChild(link)
-      link.click()
+      document.body.appendChild(link);
+      link.click();
 
       // 4. Xoá sau khi tải
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Tải file thất bại:", error)
+      console.error("Tải file thất bại:", error);
     }
-  }
+  };
 
   const handleDeleteAssignment = async (id: number) => {
     Swal.fire({
@@ -280,8 +337,10 @@ export default function AssignmentsPage() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteAssignment(id)
-          setAssignments((prev) => prev.filter((assignment) => assignment.id !== id))
+          await deleteAssignment(id);
+          setAssignments((prev) =>
+            prev.filter((assignment) => assignment.id !== id)
+          );
 
           Swal.fire({
             title: "Đã xóa!",
@@ -289,97 +348,103 @@ export default function AssignmentsPage() {
             icon: "success",
             timer: 1500,
             showConfirmButton: false,
-          })
+          });
         } catch (error) {
-          console.error("Error deleting assignment:", error)
+          console.error("Error deleting assignment:", error);
           Swal.fire({
             title: "Lỗi!",
             text: "Không thể xóa bài tập. Vui lòng thử lại.",
             icon: "error",
-          })
+          });
         }
       }
-    })
-  }
+    });
+  };
 
   const getStatusBadge = (assignment: Assignment) => {
-    const now = new Date()
-    const dueDate = new Date(assignment.dueDate)
-    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)
+    const now = new Date();
+    const dueDate = new Date(assignment.dueDate);
+    const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     if (dueDate < now) {
-      return <Badge variant="destructive">Đã hết hạn</Badge>
+      return <Badge variant="destructive">Đã hết hạn</Badge>;
     } else if (dueDate <= threeDaysFromNow) {
-      return <Badge variant="secondary">Gần hết hạn</Badge>
+      return <Badge variant="secondary">Gần hết hạn</Badge>;
     } else {
-      return <Badge variant="success">Đang mở</Badge>
+      return <Badge variant="success">Đang mở</Badge>;
     }
-  }
+  };
 
   const getSubmissionStatus = (assignment: Assignment) => {
     if (role === "student") {
-      const userSubmission = (assignment.submissions ?? []).find((sub) => sub.student.id === user.userId)
+      const userSubmission = (assignment.submissions ?? []).find(
+        (sub) => sub.student.id === user.userId
+      );
       if (userSubmission) {
         return userSubmission.status === "GRADED" ? (
           <Badge variant="default">Đã chấm</Badge>
         ) : (
           <Badge variant="secondary">Đã nộp</Badge>
-        )
+        );
       }
-      return <Badge variant="outline">Chưa nộp</Badge>
+      return <Badge variant="outline">Chưa nộp</Badge>;
     }
 
     if (role === "teacher") {
-      const totalSubmissions = assignment.submissions?.length || 0
-      const graded = assignment.submissions?.filter((sub) => sub.status === "GRADED").length || 0
-      const ungraded = totalSubmissions - graded
+      const totalSubmissions = assignment.submissions?.length || 0;
+      const graded =
+        assignment.submissions?.filter((sub) => sub.status === "GRADED")
+          .length || 0;
+      const ungraded = totalSubmissions - graded;
 
       if (graded > 0 && ungraded === 0) {
-        return <Badge variant="default">Đã chấm</Badge>
+        return <Badge variant="default">Đã chấm</Badge>;
       }
       if (graded > 0 && ungraded > 0) {
         return (
           <Badge variant="secondary">
             Đang chấm {graded}/{totalSubmissions}
           </Badge>
-        )
+        );
       }
       if (ungraded > 0) {
-        return <Badge variant="secondary">Chưa chấm</Badge>
+        return <Badge variant="secondary">Chưa chấm</Badge>;
       }
-      return <Badge variant="outline">Chưa nộp</Badge>
+      return <Badge variant="outline">Chưa nộp</Badge>;
     }
-    return null
-  }
+    return null;
+  };
 
   const handleDownloadSubmission = async (
     submissionId: number,
     filePath: string,
     fileName: string,
-    fileType: string,
+    fileType: string
   ) => {
     try {
       // 1. Gọi API tải file (backend trả blob)
-      const blob = await downloadSubmissionFile(submissionId)
+      const blob = await downloadSubmissionFile(submissionId);
 
       // 2. Tạo URL từ blob với đúng MIME type
-      const url = window.URL.createObjectURL(new Blob([blob], { type: fileType }))
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: fileType })
+      );
 
       // 3. Dùng tên file gốc từ DB
-      const link = document.createElement("a")
-      link.href = url
-      link.setAttribute("download", fileName)
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
 
-      document.body.appendChild(link)
-      link.click()
+      document.body.appendChild(link);
+      link.click();
 
       // 4. Xoá sau khi tải
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      link.remove();
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Tải file thất bại:", error)
+      console.error("Tải file thất bại:", error);
     }
-  }
+  };
 
   if (loading) {
     return (
@@ -389,7 +454,7 @@ export default function AssignmentsPage() {
           <DotLottieReact src="/animations/loading.lottie" loop autoplay />
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -408,7 +473,9 @@ export default function AssignmentsPage() {
           {role === "teacher" && (
             <CreateAssignment
               classData={classes ? [classes] : []}
-              onAssignmentCreated={(newAssignment) => setAssignments((prev) => [...prev, newAssignment])}
+              onAssignmentCreated={(newAssignment) =>
+                setAssignments((prev) => [...prev, newAssignment])
+              }
             />
           )}
         </div>
@@ -431,7 +498,10 @@ export default function AssignmentsPage() {
 
               {/* Bộ lọc trạng thái */}
               <div className="w-full md:w-48">
-                <Select value={statusFilter} onValueChange={(value: FilterType) => setStatusFilter(value)}>
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value: FilterType) => setStatusFilter(value)}
+                >
                   <SelectTrigger>
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Lọc theo trạng thái" />
@@ -447,11 +517,20 @@ export default function AssignmentsPage() {
 
               {/* Bộ lọc tình trạng */}
               <div className="w-full md:w-48">
-                <Select value={progressFilter} onValueChange={(value: FilterType | "") => setProgressFilter(value)}>
+                <Select
+                  value={progressFilter}
+                  onValueChange={(value: FilterType | "") =>
+                    setProgressFilter(value)
+                  }
+                >
                   <SelectTrigger>
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue
-                      placeholder={role === "teacher" ? "Lọc theo chấm bài" : "Lọc theo nộp bài"}
+                      placeholder={
+                        role === "teacher"
+                          ? "Lọc theo chấm bài"
+                          : "Lọc theo nộp bài"
+                      }
                     />
                   </SelectTrigger>
                   <SelectContent>
@@ -502,8 +581,12 @@ export default function AssignmentsPage() {
               <TableBody>
                 {filteredAssignments.map((assignment) => (
                   <TableRow key={assignment.id}>
-                    <TableCell className="font-medium">{assignment.title}</TableCell>
-                    <TableCell className="max-w-xs truncate">{assignment.description}</TableCell>
+                    <TableCell className="font-medium">
+                      {assignment.title}
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {assignment.description}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
@@ -519,7 +602,7 @@ export default function AssignmentsPage() {
                             assignment.id,
                             assignment.filePath,
                             assignment.fileName,
-                            assignment.fileType,
+                            assignment.fileType
                           )
                         }
                       >
@@ -528,8 +611,12 @@ export default function AssignmentsPage() {
                       ({assignment.fileSize})
                     </TableCell>
                     <TableCell>{getStatusBadge(assignment)}</TableCell>
-                    {role === "teacher" && <TableCell>{getSubmissionStatus(assignment)}</TableCell>}
-                    {role === "student" && <TableCell>{getSubmissionStatus(assignment)}</TableCell>}
+                    {role === "teacher" && (
+                      <TableCell>{getSubmissionStatus(assignment)}</TableCell>
+                    )}
+                    {role === "student" && (
+                      <TableCell>{getSubmissionStatus(assignment)}</TableCell>
+                    )}
                     <TableCell>
                       <div className="flex gap-2">
                         {role === "teacher" && (
@@ -539,7 +626,11 @@ export default function AssignmentsPage() {
                               assignment={assignment}
                               classData={classes ? [classes] : []}
                               onSuccess={(updated) => {
-                                setAssignments((prev) => prev.map((item) => (item.id === updated.id ? updated : item)))
+                                setAssignments((prev) =>
+                                  prev.map((item) =>
+                                    item.id === updated.id ? updated : item
+                                  )
+                                );
                               }}
                             />
 
@@ -550,7 +641,9 @@ export default function AssignmentsPage() {
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() => handleDeleteAssignment(assignment.id)}
+                                    onClick={() =>
+                                      handleDeleteAssignment(assignment.id)
+                                    }
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </Button>
@@ -565,7 +658,8 @@ export default function AssignmentsPage() {
 
                         {role === "student" && (
                           <div>
-                            {assignment.submissions && assignment.submissions.length > 0 ? (
+                            {assignment.submissions &&
+                            assignment.submissions.length > 0 ? (
                               // Nếu đã nộp -> nút "Xem lại bài nộp"
                               <Dialog>
                                 <DialogTrigger asChild>
@@ -576,28 +670,44 @@ export default function AssignmentsPage() {
                                 </DialogTrigger>
                                 <DialogContent className="max-w-2xl">
                                   <DialogHeader>
-                                    <DialogTitle>Bài nộp của bạn - {assignment.title}</DialogTitle>
-                                    <DialogDescription>Chi tiết bài nộp và điểm số</DialogDescription>
+                                    <DialogTitle>
+                                      Bài nộp của bạn - {assignment.title}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                      Chi tiết bài nộp và điểm số
+                                    </DialogDescription>
                                   </DialogHeader>
 
                                   {assignment.submissions.map((submission) => (
-                                    <Card key={submission.id} className="border">
+                                    <Card
+                                      key={submission.id}
+                                      className="border"
+                                    >
                                       <CardHeader className="pb-3">
                                         <div className="flex justify-between items-start">
                                           <div>
-                                            <h4 className="font-medium">Bài nộp của bạn</h4>
+                                            <h4 className="font-medium">
+                                              Bài nộp của bạn
+                                            </h4>
                                             <p className="text-sm text-gray-500">
-                                              Nộp lúc: {formatDateTime(submission.submittedAt)}
+                                              Nộp lúc:{" "}
+                                              {formatDateTime(
+                                                submission.submittedAt
+                                              )}
                                             </p>
                                           </div>
                                           <div className="text-right">
-                                            {submission.status?.toLowerCase() === "graded" ? (
-                                              submission.assignment?.published ? (
+                                            {submission.status?.toLowerCase() ===
+                                            "graded" ? (
+                                              submission.assignment
+                                                ?.published ? (
                                                 <div>
-                                                  <Badge className="bg-green-500 mb-1">Đã chấm</Badge>
+                                                  <Badge className="bg-green-500 mb-1">
+                                                    Đã chấm
+                                                  </Badge>
                                                   <p
                                                     className={`text-lg font-bold ${getGradeColor(
-                                                      submission.score ?? 0,
+                                                      submission.score ?? 0
                                                     )}`}
                                                   >
                                                     {submission.score}/10
@@ -605,14 +715,21 @@ export default function AssignmentsPage() {
                                                 </div>
                                               ) : (
                                                 <div>
-                                                  <Badge variant="secondary" className="mb-1">
+                                                  <Badge
+                                                    variant="secondary"
+                                                    className="mb-1"
+                                                  >
                                                     Chờ công bố
                                                   </Badge>
-                                                  <p className="text-sm text-gray-500">Giáo viên chưa công bố điểm</p>
+                                                  <p className="text-sm text-gray-500">
+                                                    Giáo viên chưa công bố điểm
+                                                  </p>
                                                 </div>
                                               )
                                             ) : (
-                                              <Badge variant="secondary">Chờ chấm</Badge>
+                                              <Badge variant="secondary">
+                                                Chờ chấm
+                                              </Badge>
                                             )}
                                           </div>
                                         </div>
@@ -620,38 +737,58 @@ export default function AssignmentsPage() {
                                       <CardContent className="pt-0">
                                         <div className="space-y-3">
                                           <div className="flex items-center justify-between text-sm">
-                                            <span className="text-gray-600">Tệp đính kèm:</span>
+                                            <span className="text-gray-600">
+                                              Tệp đính kèm:
+                                            </span>
                                             <div className="flex items-center space-x-2">
                                               <FileText className="h-4 w-4" />
                                               <span>{submission.fileName}</span>
-                                              <span className="text-gray-500">({submission.fileSize})</span>
+                                              <span className="text-gray-500">
+                                                ({submission.fileSize})
+                                              </span>
                                             </div>
                                           </div>
 
-                                          {submission.status === "GRADED" && submission.teacherComment && (
-                                            <div className="bg-gray-50 p-3 rounded-lg">
-                                              <p className="text-sm font-medium mb-1">Nhận xét:</p>
-                                              <p className="text-sm text-gray-700">
-                                                {submission.teacherComment ? (
-                                                  role === "teacher" || submission.assignment.published ? (
-                                                    <div
-                                                      className="max-w-xs truncate"
-                                                      title={submission.teacherComment}
-                                                    >
-                                                      {submission.teacherComment}
-                                                    </div>
+                                          {submission.status === "GRADED" &&
+                                            submission.teacherComment && (
+                                              <div className="bg-gray-50 p-3 rounded-lg">
+                                                <p className="text-sm font-medium mb-1">
+                                                  Nhận xét:
+                                                </p>
+                                                <p className="text-sm text-gray-700">
+                                                  {submission.teacherComment ? (
+                                                    role === "teacher" ||
+                                                    submission.assignment
+                                                      .published ? (
+                                                      <div
+                                                        className="max-w-xs truncate"
+                                                        title={
+                                                          submission.teacherComment
+                                                        }
+                                                      >
+                                                        {
+                                                          submission.teacherComment
+                                                        }
+                                                      </div>
+                                                    ) : (
+                                                      <span className="text-gray-400">
+                                                        Chờ công bố
+                                                      </span>
+                                                    )
                                                   ) : (
-                                                    <span className="text-gray-400">Chờ công bố</span>
-                                                  )
-                                                ) : (
-                                                  <span className="text-gray-400">Không có</span>
-                                                )}
-                                              </p>
-                                              <p className="text-xs text-gray-500 mt-2">
-                                                Chấm lúc {formatDateTime(submission.gradedAt)}
-                                              </p>
-                                            </div>
-                                          )}
+                                                    <span className="text-gray-400">
+                                                      Không có
+                                                    </span>
+                                                  )}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-2">
+                                                  Chấm lúc{" "}
+                                                  {formatDateTime(
+                                                    submission.gradedAt
+                                                  )}
+                                                </p>
+                                              </div>
+                                            )}
 
                                           <div className="flex gap-2 pt-2">
                                             <Button
@@ -660,7 +797,7 @@ export default function AssignmentsPage() {
                                                   submission.id,
                                                   submission.filePath,
                                                   submission.fileName,
-                                                  submission.fileType,
+                                                  submission.fileType
                                                 )
                                               }
                                               size="sm"
@@ -674,7 +811,7 @@ export default function AssignmentsPage() {
                                                 handleViewFile(
                                                   submission.filePath,
                                                   submission.fileType,
-                                                  submission.fileName,
+                                                  submission.fileName
                                                 )
                                               }
                                               size="sm"
@@ -695,15 +832,22 @@ export default function AssignmentsPage() {
                                                       ? {
                                                           ...a,
                                                           submissions:
-                                                            a.submissions?.map((s) =>
-                                                              s.id === updated.id ? updated : s,
+                                                            a.submissions?.map(
+                                                              (s) =>
+                                                                s.id ===
+                                                                updated.id
+                                                                  ? updated
+                                                                  : s
                                                             ) || [],
                                                         }
-                                                      : a,
-                                                  ),
-                                                )
+                                                      : a
+                                                  )
+                                                );
                                               }}
-                                              disabled={submission.status?.toUpperCase() === "GRADED"}
+                                              disabled={
+                                                submission.status?.toUpperCase() ===
+                                                "GRADED"
+                                              }
                                             />
                                           </div>
                                         </div>
@@ -722,11 +866,14 @@ export default function AssignmentsPage() {
                                       item.id === assignment.id
                                         ? {
                                             ...item,
-                                            submissions: [...(item.submissions || []), newSubmission],
+                                            submissions: [
+                                              ...(item.submissions || []),
+                                              newSubmission,
+                                            ],
                                           }
-                                        : item,
-                                    ),
-                                  )
+                                        : item
+                                    )
+                                  );
                                 }}
                               />
                             )}
@@ -748,36 +895,57 @@ export default function AssignmentsPage() {
 
           <CardFooter className="flex justify-between items-center border-t pt-6">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={goToFirstPage} disabled={!hasPrevious}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToFirstPage}
+                disabled={!hasPrevious}
+              >
                 <ChevronLeft className="h-4 w-4" />
                 <ChevronLeft className="h-4 w-4 -ml-1" />
               </Button>
-              <Button variant="outline" size="sm" onClick={goToPrevPage} disabled={!hasPrevious}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToPrevPage}
+                disabled={!hasPrevious}
+              >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Trước
               </Button>
-              <Button variant="outline" size="sm" onClick={goToNextPage} disabled={!hasNext}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToNextPage}
+                disabled={!hasNext}
+              >
                 Sau
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
-              <Button variant="outline" size="sm" onClick={goToLastPage} disabled={!hasNext}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToLastPage}
+                disabled={!hasNext}
+              >
                 <ChevronRight className="h-4 w-4" />
                 <ChevronRight className="h-4 w-4 -ml-1" />
               </Button>
             </div>
             <div className="text-sm text-gray-600">
-              Trang {currentPage + 1} / {totalPages} • Tổng {totalRecords} bài tập
+              Trang {currentPage + 1} / {totalPages} • Tổng {totalRecords} bài
+              tập
             </div>
           </CardFooter>
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 const getGradeColor = (grade: number) => {
-  if (grade >= 9) return "text-green-600"
-  if (grade >= 8) return "text-blue-600"
-  if (grade >= 6.5) return "text-yellow-600"
-  return "text-red-600"
-}
+  if (grade >= 9) return "text-green-600";
+  if (grade >= 8) return "text-blue-600";
+  if (grade >= 6.5) return "text-yellow-600";
+  return "text-red-600";
+};
