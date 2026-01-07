@@ -141,7 +141,7 @@ export default function HomePage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn lớp học" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="hover:text-white">
                       {classes.map((cls) => (
                         <SelectItem key={cls.id} value={cls.id.toString()}>
                           {cls.className}

@@ -102,77 +102,77 @@ const getSubjectColor = (subjectName: string) => {
     hash = subjectName.charCodeAt(i) + ((hash << 5) - hash);
   }
 
-  // Modern gradient color palette
+  // Modern vibrant color palette with better contrast
   const colors = [
     {
-      bg: "bg-gradient-to-br from-blue-50 to-blue-100",
-      border: "border-blue-300/50",
+      bg: "bg-blue-100",
+      border: "border-blue-400",
       text: "text-blue-900",
-      accent: "from-blue-400 to-blue-500",
-      shadow: "shadow-blue-200/50",
+      accent: "from-blue-500 to-blue-600",
+      shadow: "shadow-blue-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-purple-50 to-purple-100",
-      border: "border-purple-300/50",
+      bg: "bg-purple-100",
+      border: "border-purple-400",
       text: "text-purple-900",
-      accent: "from-purple-400 to-purple-500",
-      shadow: "shadow-purple-200/50",
+      accent: "from-purple-500 to-purple-600",
+      shadow: "shadow-purple-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-pink-50 to-pink-100",
-      border: "border-pink-300/50",
+      bg: "bg-pink-100",
+      border: "border-pink-400",
       text: "text-pink-900",
-      accent: "from-pink-400 to-pink-500",
-      shadow: "shadow-pink-200/50",
+      accent: "from-pink-500 to-pink-600",
+      shadow: "shadow-pink-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-indigo-50 to-indigo-100",
-      border: "border-indigo-300/50",
+      bg: "bg-indigo-100",
+      border: "border-indigo-400",
       text: "text-indigo-900",
-      accent: "from-indigo-400 to-indigo-500",
-      shadow: "shadow-indigo-200/50",
+      accent: "from-indigo-500 to-indigo-600",
+      shadow: "shadow-indigo-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-teal-50 to-teal-100",
-      border: "border-teal-300/50",
+      bg: "bg-teal-100",
+      border: "border-teal-400",
       text: "text-teal-900",
-      accent: "from-teal-400 to-teal-500",
-      shadow: "shadow-teal-200/50",
+      accent: "from-teal-500 to-teal-600",
+      shadow: "shadow-teal-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-cyan-50 to-cyan-100",
-      border: "border-cyan-300/50",
+      bg: "bg-cyan-100",
+      border: "border-cyan-400",
       text: "text-cyan-900",
-      accent: "from-cyan-400 to-cyan-500",
-      shadow: "shadow-cyan-200/50",
+      accent: "from-cyan-500 to-cyan-600",
+      shadow: "shadow-cyan-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-emerald-50 to-emerald-100",
-      border: "border-emerald-300/50",
+      bg: "bg-emerald-100",
+      border: "border-emerald-400",
       text: "text-emerald-900",
-      accent: "from-emerald-400 to-emerald-500",
-      shadow: "shadow-emerald-200/50",
+      accent: "from-emerald-500 to-emerald-600",
+      shadow: "shadow-emerald-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-amber-50 to-amber-100",
-      border: "border-amber-300/50",
+      bg: "bg-amber-100",
+      border: "border-amber-400",
       text: "text-amber-900",
-      accent: "from-amber-400 to-amber-500",
-      shadow: "shadow-amber-200/50",
+      accent: "from-amber-500 to-amber-600",
+      shadow: "shadow-amber-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-orange-50 to-orange-100",
-      border: "border-orange-300/50",
+      bg: "bg-orange-100",
+      border: "border-orange-400",
       text: "text-orange-900",
-      accent: "from-orange-400 to-orange-500",
-      shadow: "shadow-orange-200/50",
+      accent: "from-orange-500 to-orange-600",
+      shadow: "shadow-orange-300/40",
     },
     {
-      bg: "bg-gradient-to-br from-rose-50 to-rose-100",
-      border: "border-rose-300/50",
+      bg: "bg-rose-100",
+      border: "border-rose-400",
       text: "text-rose-900",
-      accent: "from-rose-400 to-rose-500",
-      shadow: "shadow-rose-200/50",
+      accent: "from-rose-500 to-rose-600",
+      shadow: "shadow-rose-300/40",
     },
   ];
 
@@ -351,9 +351,14 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50">
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-indigo-600/35 via-slate-900 to-slate-950 blur-3xl" />
+        <div className="absolute -right-16 top-28 h-64 w-64 rounded-full bg-blue-500/25 blur-[130px]" />
+        <div className="absolute -left-14 bottom-0 h-72 w-72 rounded-full bg-violet-500/25 blur-[140px]" />
+      </div>
       <Navigation />
-      <div className="max-w-[95vw] mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-[95vw] mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Modern Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -362,11 +367,11 @@ export default function SchedulePage() {
                 <Calendar className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold text-white">
                   Thời khóa biểu
                 </h1>
                 {weekData && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-slate-300 mt-1">
                     Tuần {weekData.weekNumber} •{" "}
                     {formatDate(weekData.weekStartDate)} -{" "}
                     {formatDate(weekData.weekEndDate)}
@@ -383,7 +388,7 @@ export default function SchedulePage() {
                   setWeekStartDate(weekData.previousWeekStartDate)
                 }
                 disabled={!weekData?.previousWeekStartDate}
-                className="shadow-sm hover:shadow-md transition-all"
+                className="border-white/10 bg-white/5 text-white hover:bg-white/10 shadow-sm hover:shadow-md transition-all"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -392,7 +397,7 @@ export default function SchedulePage() {
                 size="sm"
                 onClick={() => setWeekStartDate(null)}
                 disabled={!weekStartDate}
-                className="shadow-sm hover:shadow-md transition-all"
+                className="border-white/10 bg-white/5 text-white hover:bg-white/10 shadow-sm hover:shadow-md transition-all"
               >
                 Tuần này
               </Button>
@@ -404,7 +409,7 @@ export default function SchedulePage() {
                   setWeekStartDate(weekData.nextWeekStartDate)
                 }
                 disabled={!weekData?.nextWeekStartDate}
-                className="shadow-sm hover:shadow-md transition-all"
+                className="border-white/10 bg-white/5 text-white hover:bg-white/10 shadow-sm hover:shadow-md transition-all"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -413,7 +418,7 @@ export default function SchedulePage() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-200/50 bg-gradient-to-r from-red-50 to-rose-50 p-4 text-sm text-red-700 shadow-sm backdrop-blur-sm">
+          <div className="mb-6 rounded-2xl border border-red-500/50 bg-red-900/20 p-4 text-sm text-red-200 shadow-sm backdrop-blur-sm">
             {error instanceof Error
               ? error.message
               : "Không thể tải thời khóa biểu"}
@@ -422,14 +427,34 @@ export default function SchedulePage() {
 
         {/* Calendar Grid */}
         {loadingWeek ? (
-          <div className="text-center py-16 text-gray-500">
-            <div className="inline-flex items-center gap-2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-              <span>Đang tải thời khóa biểu...</span>
+          <div className="rounded-[32px] border border-white/10 bg-slate-900/60 overflow-hidden shadow-2xl backdrop-blur-2xl">
+            <div className="p-8 space-y-4">
+              {/* Header skeleton */}
+              <div className="flex gap-4">
+                <div className="h-12 w-24 bg-slate-800/50 rounded-lg animate-pulse" />
+                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                  <div
+                    key={i}
+                    className="flex-1 h-12 bg-slate-800/50 rounded-lg animate-pulse"
+                  />
+                ))}
+              </div>
+              {/* Rows skeleton */}
+              {[1, 2, 3, 4, 5, 6].map((row) => (
+                <div key={row} className="flex gap-4">
+                  <div className="h-20 w-24 bg-slate-800/50 rounded-lg animate-pulse" />
+                  {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <div
+                      key={i}
+                      className="flex-1 h-20 bg-slate-800/30 rounded-lg animate-pulse"
+                    />
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         ) : !weekData ? (
-          <div className="text-center py-16 text-gray-500">
+          <div className="text-center py-16 text-slate-300">
             Không có dữ liệu
           </div>
         ) : (
@@ -439,16 +464,16 @@ export default function SchedulePage() {
               (sum, day) => sum + day.lessons.length,
               0
             ) === 0 && (
-              <div className="mb-6 rounded-2xl border border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 p-5 text-sm text-blue-700 shadow-sm backdrop-blur-sm flex items-center gap-3">
-                <Sparkles className="h-5 w-5 text-blue-500" />
+              <div className="mb-6 rounded-2xl border border-blue-500/30 bg-blue-900/20 p-5 text-sm text-blue-200 shadow-sm backdrop-blur-sm flex items-center gap-3">
+                <Sparkles className="h-5 w-5 text-blue-400" />
                 <span>Tuần này không có môn học nào được lên lịch.</span>
               </div>
             )}
-            <div className="bg-white/80 backdrop-blur-xl rounded-3xl border border-white/20 overflow-hidden shadow-2xl shadow-blue-500/10">
+            <div className="rounded-[32px] border border-white/10 bg-slate-900/60 overflow-hidden shadow-2xl backdrop-blur-2xl">
               <table className="w-full border-collapse">
                 <thead>
                   <tr>
-                    <th className="p-4 bg-gradient-to-br from-gray-50 to-gray-100/50 border-b border-gray-200/50"></th>
+                    <th className="p-4 bg-slate-800/50 border-b-2 border-r-2 border-white/10"></th>
                     {weekData.schedules.map((daySchedule, idx) => {
                       const dayAbbr =
                         dayAbbreviationMap[daySchedule.day] || daySchedule.day;
@@ -457,22 +482,22 @@ export default function SchedulePage() {
                       return (
                         <th
                           key={idx}
-                          className={`p-4 border-b border-gray-200/50 text-center transition-all ${
+                          className={`p-4 border-b-2 border-r-2 border-white/10 text-center transition-all ${
                             today
-                              ? "bg-gradient-to-br from-blue-100 to-indigo-100 border-blue-300/50 shadow-lg shadow-blue-200/30"
-                              : "bg-gradient-to-br from-gray-50 to-gray-100/50 hover:from-gray-100 hover:to-gray-150"
+                              ? "bg-blue-500/20 border-blue-400/50"
+                              : "bg-slate-800/30 hover:bg-slate-800/50"
                           }`}
                         >
                           <div
                             className={`text-sm font-bold ${
-                              today ? "text-blue-900" : "text-gray-700"
+                              today ? "text-blue-300" : "text-slate-200"
                             }`}
                           >
                             {dayAbbr}
                           </div>
                           <div
                             className={`text-xs mt-1.5 font-medium ${
-                              today ? "text-blue-700" : "text-gray-600"
+                              today ? "text-blue-200" : "text-slate-400"
                             }`}
                           >
                             {dateFormatted}
@@ -491,12 +516,12 @@ export default function SchedulePage() {
                   {periods.map((period) => (
                     <tr
                       key={period}
-                      className="border-b border-gray-200/30 last:border-b-0 hover:bg-gray-50/30 transition-colors"
+                      className="border-b border-white/5 last:border-b-0 hover:bg-white/5 transition-colors"
                     >
                       {/* Period Label */}
-                      <td className="p-3 bg-gradient-to-br from-gray-50 to-gray-100/50 border-r border-gray-200/50 text-center text-xs font-semibold text-gray-700 w-24">
+                      <td className="p-3 bg-slate-800/30 border-r-2 border-b border-white/10 text-center text-xs font-semibold text-slate-200 w-24">
                         <div className="flex items-center justify-center gap-1">
-                          <Clock className="h-3.5 w-3.5 text-gray-500" />
+                          <Clock className="h-3.5 w-3.5 text-slate-400" />
                           <span>Tiết {period}</span>
                         </div>
                       </td>
@@ -526,19 +551,19 @@ export default function SchedulePage() {
                           <td
                             key={`${period}-${dayIdx}`}
                             rowSpan={lesson && isFirst ? spanRows : 1}
-                            className={`border-r border-gray-200/30 min-h-[90px] align-top transition-all ${
+                            className={`border-r-2 border-b border-white/10 min-h-[90px] align-top transition-all ${
                               lesson
-                                ? `${colors?.bg} ${colors?.border} border-l-4 ${colors?.shadow} shadow-lg hover:shadow-xl hover:scale-[1.02]`
+                                ? `${colors?.bg} ${colors?.border} border-l-[6px] ${colors?.shadow} shadow-md hover:shadow-lg`
                                 : today
-                                ? "bg-gradient-to-br from-blue-50/40 to-indigo-50/20"
-                                : "bg-white/50"
+                                ? "bg-blue-500/10"
+                                : "bg-slate-800/20"
                             }`}
                           >
                             {lesson && isFirst && (
                               <div className="p-4 h-full flex flex-col justify-center relative group">
-                                {/* Gradient accent bar on left */}
+                                {/* Accent indicator dot */}
                                 <div
-                                  className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${colors?.accent} rounded-l shadow-lg`}
+                                  className={`absolute left-2 top-2 w-3 h-3 rounded-full bg-gradient-to-br ${colors?.accent} shadow-md`}
                                 ></div>
 
                                 {/* Note indicator and button */}

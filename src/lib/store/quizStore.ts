@@ -39,13 +39,13 @@ type Actions = {
 };
 
 const defaultSettings: AiQuizSettings = {
-    language: "",
-    questionType: "",
-    difficulty: "",
-    studyMode: "",
-    userPrompt: "",
-    numQuestions: 0,
+    language: "Tiếng Việt",
+    difficulty: "medium",
+    numOneChoice: 5,
+    numTrueFalse: 3,
+    numFillBlank: 2,
     quizTitle: "",
+    userPrompt: "",
 };
 
 export const useQuizStore = create<State & Actions>((set, get) => ({
@@ -100,35 +100,14 @@ export const useQuizStore = create<State & Actions>((set, get) => ({
 
     getBackendSettings: (): AiQuizSettings => {
         const s = get().settings;
-
-        const language = s.language === "Auto" ? null : s.language;
-        const questionTypeMap: Record<string, string> = {
-            "Multiple Choice": "multiple_choice",
-            "True/False": "true_false",
-            "Free Response": "free_response",
-        };
-
-        // difficulty UI -> BE (lower)
-        const difficultyMap: Record<string, string> = {
-            Easy: "easy",
-            Medium: "medium",
-            Hard: "hard",
-        };
-
-        const studyModeMap: Record<string, string> = {
-            Quiz: "quiz",
-            Flashcard: "flashcard",
-            "Study Guide": "study_guide",
-        };
-
         return {
-            numQuestions: s.numQuestions,
             quizTitle: s.quizTitle || "",
-            language: language || "Tiếng Việt",
-            questionType: (questionTypeMap[s.questionType ?? ""] ?? s.questionType) as any,
-            difficulty: (difficultyMap[s.difficulty ?? ""] ?? s.difficulty) as any,
-            studyMode: (studyModeMap[s.studyMode ?? ""] ?? s.studyMode) as any,
-            userPrompt: "",
+            language: s.language || "Tiếng Việt",
+            difficulty: s.difficulty || "medium",
+            numOneChoice: s.numOneChoice || 0,
+            numTrueFalse: s.numTrueFalse || 0,
+            numFillBlank: s.numFillBlank || 0,
+            userPrompt: s.userPrompt || "",
         };
     },
 }));

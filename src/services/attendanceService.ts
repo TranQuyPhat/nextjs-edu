@@ -1,7 +1,7 @@
 import apiClient from "@/lib/axios";
 
 interface AttendanceRecord {
-    sessionId: number;
+  sessionId: number;
   studentId: number;
   status: "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
   note?: string;
@@ -12,33 +12,30 @@ interface BulkAttendanceRequestDTO {
   records: AttendanceRecord[];
 }
 
-  interface SaveAttendanceResponse {
-    success: boolean;
-    message?: string;
-  }
+interface SaveAttendanceResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+  timestamp?: number;
+}
 
-export const  attendanceService = {
+export const attendanceService = {
   async getAttendanceBySession(sessionId: number): Promise<AttendanceRecord[]> {
-
-      const response = await apiClient(`/attendance/${sessionId}`);
+    const response = await apiClient(`/attendance/${sessionId}`);
     return response.data;
   },
 
+  async saveAttendance(
+    sessionId: number,
+    data: BulkAttendanceRequestDTO
+  ): Promise<SaveAttendanceResponse> {
+    console.log("[attendanceService] Sending request - sessionId:", sessionId);
+    console.log("[attendanceService] Payload:", data);
 
+    const response = await apiClient.post(`/attendance/${sessionId}`, data);
 
-    async saveAttendance(sessionId: number, data: BulkAttendanceRequestDTO): Promise<SaveAttendanceResponse> {
-    try {
-      console.log("sessionId:", sessionId);
-      console.log("payload:", data);
+    console.log("[attendanceService] Response received:", response.data);
 
-      await apiClient.post(`/attendance/${sessionId}`, data);
-      return { success: true };
-    } catch (error: any) {
-      console.error("Error saving attendance:", error);
-      return {
-        success: false,
-        message: error.response?.data?.message || "Không thể lưu điểm danh"
-      };
-    }
-  }
+    return response.data; // Backend trả về APIResponse<Void>
+  },
 };

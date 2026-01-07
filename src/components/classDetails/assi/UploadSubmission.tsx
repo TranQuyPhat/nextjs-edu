@@ -63,6 +63,7 @@ export default function UploadSubmission({
   const [user, setUser] = useState<any>(null);
   // const [submissionList, setSubmissionList] = useState<Submission[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -97,6 +98,7 @@ export default function UploadSubmission({
 
   const onSubmit = async (data: FieldValues) => {
     const submissionData = data as SubmissionFormData;
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append("assignmentId", assignment.id.toString());
@@ -111,11 +113,11 @@ export default function UploadSubmission({
       if (onSuccess) {
         onSuccess(newSubmission);
       }
-      // setSubmissionList(prev => [newSubmission, ...prev]); // Cập nhật danh sách bài nộp
+
       reset(); // Reset form về giá trị mặc định
       setIsDialogOpen(false); // Đóng dialog sau khi tạo thành công
       Swal.fire({
-        position: "top-end",
+        position: "center",
         icon: "success",
         title: "Nộp bài tập thành công!",
         showConfirmButton: false,
@@ -124,10 +126,11 @@ export default function UploadSubmission({
     } catch (error) {
       console.error("Có lỗi xảy ra khi tạo bài nộp:", error);
       toast.error("Có lỗi xảy ra khi tạo bài nộp."); // Thông báo lỗi
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // 🔹 Kiểm tra quá hạn nộp bài
   const isOverdue = new Date(assignment.dueDate) < new Date();
 
   return (
@@ -195,8 +198,19 @@ export default function UploadSubmission({
                   </p>
                 )}
               </div>
-              <Button type="submit" className="w-full">
-                Nộp bài
+              <Button
+                type="submit"
+                className="w-full transition-all duration-200 hover:scale-105 active:scale-95"
+                disabled={isSubmitting || !watchedFile}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Đang nộp bài...
+                  </>
+                ) : (
+                  "Nộp bài"
+                )}
               </Button>
             </div>
           </form>

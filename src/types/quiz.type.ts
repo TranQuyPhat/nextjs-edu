@@ -12,15 +12,20 @@ export type Quiz = {
 export type Question = {
     id: string;
     questionText: string;
-    questionType: string
+    questionType: string;
     options: Option[];
+    // For ONE_CHOICE/MULTI_CHOICE: "A" or "A,C"
+    // For TRUE_FALSE: "TRUE" or "FALSE"
     correctOptions?: string | null;
-    score?: null;
-    explanation?: string | null;
-    correctAnswerTexts?: null;
-    correctAnswerRegex?: null;
+    // For FILL_BLANK: array of valid answers
+    correctAnswerTexts?: string[] | null;
+    correctAnswerRegex?: string | null;
     caseSensitive?: boolean;
     trimWhitespace?: boolean;
+    score?: number | null;
+    explanation?: string | null;
+    topic?: string | null;
+    difficulty?: 'easy' | 'medium' | 'hard' | null;
 };
 export type Option = {
     optionLabel: string;
@@ -66,12 +71,13 @@ export interface QuizCard {
     status: string;
 }
 export interface AiQuizSettings {
-    numQuestions?: number;
     quizTitle?: string;
     language?: string;
-    questionType?: string;
     difficulty?: string;
-    studyMode?: string;
+    // Số lượng câu cho từng loại
+    numOneChoice?: number;     // ONE_CHOICE
+    numTrueFalse?: number;     // TRUE_FALSE
+    numFillBlank?: number;     // FILL_BLANK
     userPrompt?: string;
 }
 
@@ -82,7 +88,14 @@ export interface BackendQuizResponse {
         questionType: string;
         questionText: string;
         options: Option[];
-        correctIndex: number;
+        // For ONE_CHOICE/MULTI_CHOICE: "A" or "A,C"
+        // For TRUE_FALSE: "TRUE" or "FALSE"
+        correctOptions?: string | null;
+        // For FILL_BLANK
+        correctAnswerTexts?: string[] | null;
+        correctAnswerRegex?: string | null;
+        caseSensitive?: boolean;
+        trimWhitespace?: boolean;
         explanation?: string;
         topic?: string;
         difficulty?: 'easy' | 'medium' | 'hard';

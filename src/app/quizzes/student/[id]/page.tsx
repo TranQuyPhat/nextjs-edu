@@ -82,8 +82,6 @@ export default function QuizPage() {
     if (!startTime || isSubmitting || isSubmited) return;
     if (!quiz || !quiz.questions?.length) return;
 
-    setIsSubmitting(true);
-
     try {
       const answersPayload: Record<number, string[]> = {};
       for (const q of quiz.questions) {
@@ -101,21 +99,37 @@ export default function QuizPage() {
       const unanswered = Object.values(answersPayload).filter(
         (v) => v.length === 0
       ).length;
-      if (unanswered > 0) {
-        const result = await Swal.fire({
-          title: `Bạn còn ${unanswered} câu chưa làm.`,
-          text: "Bạn vẫn muốn nộp chứ?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Có",
-          cancelButtonText: "Không",
-        });
+      const answered = quiz.questions.length - unanswered;
 
-        if (!result.isConfirmed) {
-          setIsSubmitting(false);
-          return;
-        }
+      // Xác nhận nộp bài trong mọi trường hợp
+      const confirmResult = await Swal.fire({
+        title: "Xác nhận nộp bài",
+        html: `
+          <div class="text-left space-y-2">
+            <p><strong>Tổng số câu:</strong> ${quiz.questions.length}</p>
+            <p><strong>Đã làm:</strong> ${answered} câu</p>
+            <p><strong>Chưa làm:</strong> ${unanswered} câu</p>
+            ${
+              unanswered > 0
+                ? '<p class="text-amber-600 font-semibold mt-3">⚠️ Bạn còn câu chưa làm!</p>'
+                : ""
+            }
+          </div>
+        `,
+        text: "Bạn có chắc chắn muốn nộp bài không?",
+        icon: unanswered > 0 ? "warning" : "question",
+        showCancelButton: true,
+        confirmButtonText: "Nộp bài",
+        cancelButtonText: "Hủy",
+        confirmButtonColor: unanswered > 0 ? "#f59e0b" : "#3b82f6",
+        cancelButtonColor: "#6b7280",
+      });
+
+      if (!confirmResult.isConfirmed) {
+        return;
       }
+
+      setIsSubmitting(true);
 
       const userString = localStorage.getItem("user");
       if (!userString) throw new Error("User data not found");

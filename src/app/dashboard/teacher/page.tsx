@@ -27,8 +27,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTeacherDashboard } from "@/services/dashboardService";
-import { useTeacherRanking } from "@/app/grades/hooks/useTeacherRanking";
+import { useTopStudents } from "@/app/grades/hooks/useRankingData";
 import { PageSkeleton } from "@/components/ui/skeleton-modern";
+import { TeacherDashboardSkeleton } from "./teacherdashboradskeleton";
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -59,12 +60,12 @@ export default function TeacherDashboard() {
     error,
   } = useTeacherDashboard(Boolean(user));
   const {
-    data: rankingData = [],
+    data: topStudents = [],
     isLoading: rankingLoading,
     error: rankingError,
-  } = useTeacherRanking();
+  } = useTopStudents(3);
   if (isLoading) {
-    return <PageSkeleton />;
+    return <TeacherDashboardSkeleton />;
   }
 
   if (!user || !dashboardData) return null;
@@ -344,12 +345,12 @@ export default function TeacherDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-[28px] border-white/5 bg-white/5 p-6 text-white shadow-xl backdrop-blur-3xl">
+            <Card className="rounded-[28px] border-white/5 bg-slate-900/60 p-6 text-white shadow-xl backdrop-blur-2xl">
               <CardHeader className="flex items-center gap-3 border-b border-white/5 pb-4">
                 <Award className="h-5 w-5 text-yellow-300" />
                 <div>
                   <CardTitle>Học sinh nổi bật</CardTitle>
-                  <p className="text-sm text-slate-300">
+                  <p className="text-sm text-slate-400">
                     Điểm trung bình trên 8.0
                   </p>
                 </div>
@@ -365,24 +366,18 @@ export default function TeacherDashboard() {
                   </div>
                 ) : (
                   (() => {
-                    const excellentStudents = (rankingData || [])
-                      .filter((student) => Number(student.averageScore) > 8)
-                      .slice(0, 3);
-                    if (excellentStudents.length === 0) {
+                    if (!topStudents || topStudents.length === 0) {
                       return (
                         <div className="py-6 text-center text-slate-400">
-                          Không có học sinh xuất sắc nào (điểm &gt; 8)
+                          Không có học sinh xuất sắc nào
                         </div>
                       );
                     }
                     return (
                       <>
-                        {excellentStudents.map((student, index) => (
+                        {topStudents.map((student, index) => (
                           <div
-                            key={
-                              student.studentId ??
-                              `${student.studentEmail}-${index}`
-                            }
+                            key={student.studentId}
                             className="flex items-center justify-between rounded-2xl border border-white/5 p-4"
                           >
                             <div>
@@ -394,7 +389,7 @@ export default function TeacherDashboard() {
                               </p>
                             </div>
                             <Badge className="rounded-full bg-emerald-500/20 px-4 py-1 text-emerald-200">
-                              {student.averageScore}
+                              {student.bestScore.toFixed(1)}
                             </Badge>
                           </div>
                         ))}

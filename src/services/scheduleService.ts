@@ -1,5 +1,6 @@
 // services/scheduleService.ts
 import { ApiResp } from '../lib/type';
+import { getAccessToken } from '../lib/auth';
 
 export type LessonItem = {
   sessionId: number;

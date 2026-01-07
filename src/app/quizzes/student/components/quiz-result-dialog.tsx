@@ -197,7 +197,7 @@ export function QuizResultDialog({
           <div className="flex gap-3 pt-2">
             <Button
               variant="outline"
-              className="flex-1 rounded-xl border-white/30 text-white hover:bg-white/10"
+              className="flex-1 rounded-xl border-white/30 bg-white/30 text-white hover:bg-white/10 hover:text-white"
               onClick={() => onOpenChange(false)}
             >
               Đóng

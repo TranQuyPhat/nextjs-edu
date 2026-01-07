@@ -233,25 +233,23 @@ export default function TeacherQuizzesPage() {
 
     return (
       <div className="space-y-6">
-        <button
-          type="button"
-          onClick={handleOpenClassDetail}
-          className="flex w-full items-start justify-between text-left transition hover:translate-x-1"
-        >
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-semibold text-white underline-offset-4 hover:underline">
-                Lớp {classData.className}
-              </h2>
-              <Badge className="rounded-full border border-white/20 bg-white/10 text-emerald-200 px-3 py-1">
-                {totalQuizzes} bài kiểm tra
-              </Badge>
-            </div>
-            <p className="text-sm text-emerald-200/80">
-              Bấm để xem tất cả bài kiểm tra của lớp này
-            </p>
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-semibold text-white">
+              Lớp {classData.className}
+            </h2>
+            <Badge className="rounded-full border border-white/20 bg-white/10 text-emerald-200 px-3 py-1">
+              {totalQuizzes} bài kiểm tra
+            </Badge>
           </div>
-        </button>
+          <button
+            type="button"
+            onClick={handleOpenClassDetail}
+            className="text-emerald-400 hover:text-emerald-300 text-sm font-medium underline-offset-4 hover:underline transition"
+          >
+            Xem tất cả →
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {displayedQuizzes.map((quiz) => renderQuizCard(quiz))}

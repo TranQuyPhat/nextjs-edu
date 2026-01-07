@@ -179,6 +179,7 @@ export default function ClassSchedulePage() {
   const [locations, setLocations] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [previewSessions, setPreviewSessions] = useState<any[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     control,
@@ -278,6 +279,7 @@ export default function ClassSchedulePage() {
 
   const onSubmit = async (data: FormData) => {
     try {
+      setIsSubmitting(true);
       if (!data.startDate || !data.endDate) {
         toast.error("Vui lòng chọn ngày bắt đầu và kết thúc");
         return;
@@ -313,6 +315,8 @@ export default function ClassSchedulePage() {
       // } else {
       //   toast.error("Có lỗi xảy ra khi tạo lịch học.");
       // }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -539,6 +543,7 @@ export default function ClassSchedulePage() {
                   onClick={handlePreview}
                   variant="outline"
                   className="flex-1"
+                  disabled={isSubmitting}
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   Xem thử lịch học
@@ -546,8 +551,9 @@ export default function ClassSchedulePage() {
                 <Button
                   type="submit"
                   className="flex-1 bg-green-700 hover:bg-green-800"
+                  disabled={isSubmitting}
                 >
-                  Lưu lịch học
+                  {isSubmitting ? "Đang lưu..." : "Lưu lịch học"}
                 </Button>
               </div>
             </form>
@@ -693,7 +699,11 @@ export default function ClassSchedulePage() {
             </div>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setShowPreview(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowPreview(false)}
+                disabled={isSubmitting}
+              >
                 Đóng
               </Button>
               <Button
@@ -702,8 +712,9 @@ export default function ClassSchedulePage() {
                   handleSubmit(onSubmit)();
                 }}
                 className="bg-green-700 hover:bg-green-800"
+                disabled={isSubmitting}
               >
-                Xác nhận và lưu lịch học
+                {isSubmitting ? "Đang lưu..." : "Xác nhận và lưu lịch học"}
               </Button>
             </DialogFooter>
           </DialogContent>

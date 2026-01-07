@@ -17,35 +17,21 @@ import { useQuizStore } from "@/lib/store/quizStore";
 export function QuizSettingsForm() {
   const { settings, updateSettings } = useQuizStore();
 
-  const languages = useMemo(
-    () => ["Auto", "English", "Tiếng Việt", "Spanish", "French", "German"],
-    []
-  );
+  const languages = useMemo(() => ["Tiếng Việt", "English", "Auto"], []);
+
+  const totalQuestions =
+    (settings.numOneChoice || 0) +
+    (settings.numTrueFalse || 0) +
+    (settings.numFillBlank || 0);
 
   return (
     <div className="space-y-5" data-tour="ai-config">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label className="text-green-800">Chế độ sinh (Mode)</Label>
-          <Select
-            defaultValue={settings.studyMode}
-            onValueChange={(v) => updateSettings({ studyMode: v as any })}
-          >
-            <SelectTrigger className="border-green-500/30 focus:ring-green-500">
-              <SelectValue placeholder="Chọn chế độ" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="GENERATE">GENERATE</SelectItem>
-              <SelectItem value="EXTRACT">EXTRACT</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
           <Label className="text-green-800">Ngôn ngữ</Label>
           <Select
-            defaultValue={settings.language}
-            onValueChange={(v) => updateSettings({ language: v as any })}
+            value={settings.language || "Tiếng Việt"}
+            onValueChange={(v) => updateSettings({ language: v })}
           >
             <SelectTrigger className="border-green-500/30 focus:ring-green-500">
               <SelectValue placeholder="Chọn ngôn ngữ" />
@@ -61,35 +47,18 @@ export function QuizSettingsForm() {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-green-800">Loại câu hỏi</Label>
-          <Select
-            defaultValue={settings.questionType}
-            onValueChange={(v) => updateSettings({ questionType: v as any })}
-          >
-            <SelectTrigger className="border-green-500/30 focus:ring-green-500">
-              <SelectValue placeholder="Chọn loại" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Multiple Choice">Multiple Choice</SelectItem>
-              <SelectItem value="True/False">True/False</SelectItem>
-              <SelectItem value="Free Response">Free Response</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
           <Label className="text-green-800">Độ khó</Label>
           <Select
-            defaultValue={settings.difficulty}
-            onValueChange={(v) => updateSettings({ difficulty: v as any })}
+            value={settings.difficulty || "medium"}
+            onValueChange={(v) => updateSettings({ difficulty: v })}
           >
             <SelectTrigger className="border-green-500/30 focus:ring-green-500">
               <SelectValue placeholder="Chọn độ khó" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Easy">Easy</SelectItem>
-              <SelectItem value="Medium">Medium</SelectItem>
-              <SelectItem value="Hard">Hard</SelectItem>
+              <SelectItem value="easy">Dễ</SelectItem>
+              <SelectItem value="medium">Trung bình</SelectItem>
+              <SelectItem value="hard">Khó</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -97,20 +66,7 @@ export function QuizSettingsForm() {
 
       <Card className="border-green-500/20">
         <CardContent className="pt-6">
-          <div className="grid gap-3">
-            <div className="space-y-2">
-              <Label className="text-green-800">
-                Số lượng câu hỏi: {settings.numQuestions}
-              </Label>
-              <Slider
-                defaultValue={[settings.numQuestions || 10]}
-                min={1}
-                max={50}
-                step={1}
-                onValueChange={(v) => updateSettings({ numQuestions: v[0] })}
-                className="[&_.range]:bg-green-500"
-              />
-            </div>
+          <div className="grid gap-4">
             <div className="space-y-2">
               <Label className="text-green-800">Tiêu đề quiz (tùy chọn)</Label>
               <Input
@@ -119,6 +75,74 @@ export function QuizSettingsForm() {
                 value={settings.quizTitle ?? ""}
                 onChange={(e) => updateSettings({ quizTitle: e.target.value })}
               />
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-green-500/20 bg-green-50/30 p-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-green-800 font-semibold">
+                  Số lượng câu hỏi
+                </Label>
+                <span className="text-sm font-medium text-green-700">
+                  Tổng: {totalQuestions} câu
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm text-muted-foreground">
+                    Trắc nghiệm (ONE_CHOICE)
+                  </Label>
+                  <span className="text-sm font-medium">
+                    {settings.numOneChoice || 0}
+                  </span>
+                </div>
+                <Slider
+                  value={[settings.numOneChoice || 0]}
+                  min={0}
+                  max={30}
+                  step={1}
+                  onValueChange={(v) => updateSettings({ numOneChoice: v[0] })}
+                  className="[&_.range]:bg-green-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm text-muted-foreground">
+                    Đúng/Sai (TRUE_FALSE)
+                  </Label>
+                  <span className="text-sm font-medium">
+                    {settings.numTrueFalse || 0}
+                  </span>
+                </div>
+                <Slider
+                  value={[settings.numTrueFalse || 0]}
+                  min={0}
+                  max={20}
+                  step={1}
+                  onValueChange={(v) => updateSettings({ numTrueFalse: v[0] })}
+                  className="[&_.range]:bg-green-500"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm text-muted-foreground">
+                    Điền chỗ trống (FILL_BLANK)
+                  </Label>
+                  <span className="text-sm font-medium">
+                    {settings.numFillBlank || 0}
+                  </span>
+                </div>
+                <Slider
+                  value={[settings.numFillBlank || 0]}
+                  min={0}
+                  max={15}
+                  step={1}
+                  onValueChange={(v) => updateSettings({ numFillBlank: v[0] })}
+                  className="[&_.range]:bg-green-500"
+                />
+              </div>
             </div>
           </div>
         </CardContent>

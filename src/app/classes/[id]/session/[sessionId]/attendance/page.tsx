@@ -74,7 +74,13 @@ interface SessionData {
   startPeriod: number;
   endPeriod: number;
   location: string;
-  status: "SCHEDULED" | "COMPLETED" | "PENDING" | "CANCELLED" | "MAKEUP" | "HOLIDAY";
+  status:
+    | "SCHEDULED"
+    | "COMPLETED"
+    | "PENDING"
+    | "CANCELLED"
+    | "MAKEUP"
+    | "HOLIDAY";
   note?: string;
 }
 
@@ -274,10 +280,10 @@ export default function AttendancePage() {
     setIsSaving(true);
     try {
       const attendanceData = {
-        noteSession: sessionNote, // khớp với noteSession trong DTO
-        records: Object.values(attendance), // khớp với records trong DTO
+        noteSession: sessionNote,
+        records: Object.values(attendance),
       };
-      console.log("attendanceData: ", attendanceData);
+
       const response = await attendanceService.saveAttendance(
         sessionId,
         attendanceData
@@ -287,26 +293,23 @@ export default function AttendancePage() {
         throw new Error(response.message || "Không thể lưu điểm danh");
       }
 
-      // if (session.status === "PENDING" || session.status === "SCHEDULED") {
-      //   await updateSessionStatus(sessionId, "COMPLETED");
-      //   setSession(prev => prev ? { ...prev, status: "COMPLETED" } : null);
-      // }
+      toast.success(response.message || "Điểm danh đã được lưu thành công!");
 
-      toast.success("Điểm danh đã được lưu thành công!");
+   
       router.push(`/classes/teacher/schedule/session/${classId}`);
-
     } catch (error: any) {
-      console.error("Error saving attendance:", error);
+      console.error("[handleSaveAttendance] Error caught:", error);
 
       const errorMessage =
-        error?.response?.data?.messages?.[0] ??
         error?.response?.data?.message ??
+        error?.response?.data?.messages?.[0] ??
         (error instanceof Error
           ? error.message
           : "Có lỗi xảy ra khi lưu điểm danh!");
 
       toast.error(errorMessage);
     } finally {
+      console.log("[handleSaveAttendance] Finally block - resetting isSaving");
       setIsSaving(false);
     }
   }, [sessionId, attendance, sessionNote, isSaving, session, classId, router]);

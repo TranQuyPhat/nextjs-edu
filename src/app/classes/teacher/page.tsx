@@ -345,29 +345,61 @@ export default function TeacherClassesPage() {
 
   if (!user || isLoading) {
     return (
-      <div>
+      <div className="relative min-h-screen bg-slate-950 text-white">
+        <div className="absolute inset-0">
+          <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-emerald-600/40 via-slate-900 to-slate-950 blur-3xl" />
+          <div className="absolute -right-24 top-24 h-64 w-64 rounded-full bg-teal-500/30 blur-[140px]" />
+          <div className="absolute -left-16 bottom-0 h-72 w-72 rounded-full bg-indigo-500/30 blur-[150px]" />
+        </div>
         <Navigation />
-        <div className="container mx-auto p-6">
-          <div className="mb-8 rounded-[32px] border border-white/5 bg-white/5 p-8">
-            <div className="space-y-4">
-              <div className="h-8 w-2/3 rounded-lg bg-gradient-to-r from-white/10 to-white/5 animate-pulse"></div>
-              <div className="h-4 w-1/2 rounded-lg bg-gradient-to-r from-white/10 to-white/5 animate-pulse"></div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 animate-pulse"
-                  >
-                    <div className="h-3 w-1/3 rounded bg-gradient-to-r from-white/10 to-white/5 mb-2"></div>
-                    <div className="h-6 w-1/2 rounded bg-gradient-to-r from-white/10 to-white/5 mb-2"></div>
-                    <div className="h-2 w-2/3 rounded bg-gradient-to-r from-white/10 to-white/5"></div>
-                  </div>
-                ))}
+        <main className="relative z-10 mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+          {/* Search Section Skeleton */}
+          <section className="rounded-[32px] border border-white/5 bg-white/5 p-6 shadow-2xl backdrop-blur-3xl">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-3 flex-1">
+                <div className="h-10 flex-1 rounded-xl bg-slate-700/50 animate-pulse"></div>
+                <div className="h-10 w-40 rounded-xl bg-slate-700/50 animate-pulse"></div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-32 rounded-2xl bg-slate-700/50 animate-pulse"></div>
+                <div className="h-10 w-28 rounded-2xl bg-slate-700/50 animate-pulse"></div>
+                <div className="h-10 w-10 rounded-full bg-slate-700/50 animate-pulse"></div>
               </div>
             </div>
-          </div>
-          <CardSkeletonGrid count={6} />
-        </div>
+          </section>
+
+          {/* Classes Grid Skeleton */}
+          <section className="mt-12 space-y-8">
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="rounded-[28px] border border-white/10 bg-white/5 text-white"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex-1 space-y-2">
+                        <div className="h-6 w-3/4 rounded bg-slate-700/50 animate-pulse"></div>
+                        <div className="h-4 w-full rounded bg-slate-700/50 animate-pulse"></div>
+                      </div>
+                      <div className="h-6 w-20 rounded-full bg-slate-700/50 animate-pulse"></div>
+                    </div>
+                    <div className="h-4 w-1/2 rounded bg-slate-700/50 animate-pulse mb-4"></div>
+
+                    <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 mb-4">
+                      <div className="h-6 w-32 rounded bg-slate-700/50 animate-pulse"></div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="h-10 flex-1 rounded-xl bg-slate-700/50 animate-pulse"></div>
+                      <div className="h-10 w-10 rounded-xl bg-slate-700/50 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
       </div>
     );
   }
@@ -789,8 +821,8 @@ export default function TeacherClassesPage() {
                   onClick={() => handlePageChange(num)}
                   className={
                     num === pageNumber
-                      ? "rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
-                      : "rounded-full border-white/30 text-white hover:bg-white/10"
+                      ? "rounded-full bg-emerald-500 text-white hover:bg-emerald-600 hover:text-white"
+                      : "rounded-full bg-white/30 text-white hover:bg-white/10 hover:text-white"
                   }
                 >
                   {num + 1}

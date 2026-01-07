@@ -396,7 +396,7 @@ export default function StudentQuizzesPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/20  bg-white/20 text-white hover:bg-white/30 hover:text-white"
               >
                 <Eye className="mr-1 h-4 w-4" />
                 Xem kết quả
@@ -404,7 +404,7 @@ export default function StudentQuizzesPage() {
               <Button
                 size="sm"
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/20 bg-white/20 text-white hover:bg-white/30 hover:text-white"
               >
                 Xem đáp án
               </Button>
