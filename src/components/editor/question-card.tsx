@@ -46,9 +46,16 @@ export default function QuestionCard({
     setIsEditing(false);
   };
 
-  // Kiểm tra và set đáp án đúng nếu chưa có
+  // Kiểm tra và set đáp án đúng nếu chưa có (chỉ cho ONE_CHOICE/MULTI_CHOICE)
   useEffect(() => {
-    if (!question.correctOptions && question.options.length > 0) {
+    const needsCorrectOption =
+      question.questionType === "ONE_CHOICE" ||
+      question.questionType === "MULTI_CHOICE";
+    if (
+      needsCorrectOption &&
+      !question.correctOptions &&
+      question.options.length > 0
+    ) {
       const updated = {
         ...question,
         correctOptions: question.options[0].optionLabel, // Mặc định chọn đáp án đầu tiên
@@ -137,6 +144,138 @@ export default function QuestionCard({
     if (!isEditing) {
       onUpdate(updated); // Cập nhật ngay lập tức nếu không trong chế độ editing
     }
+  };
+
+  // Helper để render đáp án TRUE_FALSE
+  const renderTrueFalseAnswer = () => {
+    const isTrue = editedQuestion.correctOptions === "TRUE";
+
+    if (isEditing) {
+      return (
+        <RadioGroup
+          value={editedQuestion.correctOptions ?? "TRUE"}
+          onValueChange={(value) => {
+            const updated = { ...editedQuestion, correctOptions: value };
+            setEditedQuestion(updated);
+          }}
+          className="space-y-3"
+        >
+          <div className="flex items-center gap-3 p-3 border rounded-lg">
+            <RadioGroupItem value="TRUE" id={`q${index}-true`} />
+            <Label htmlFor={`q${index}-true`} className="flex-1 cursor-pointer">
+              Đúng
+            </Label>
+          </div>
+          <div className="flex items-center gap-3 p-3 border rounded-lg">
+            <RadioGroupItem value="FALSE" id={`q${index}-false`} />
+            <Label
+              htmlFor={`q${index}-false`}
+              className="flex-1 cursor-pointer"
+            >
+              Sai
+            </Label>
+          </div>
+        </RadioGroup>
+      );
+    }
+
+    return (
+      <div
+        className={`p-3 border rounded-lg ${
+          isTrue ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"
+        }`}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-4 h-4 rounded-full ${
+              isTrue ? "bg-green-500" : "bg-red-500"
+            }`}
+          />
+          <span className="font-medium">{isTrue ? "Đúng" : "Sai"}</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Helper để render đáp án FILL_BLANK
+  const renderFillBlankAnswer = () => {
+    const answers = editedQuestion.correctAnswerTexts || [];
+
+    if (isEditing) {
+      return (
+        <div className="space-y-3">
+          {answers.map((answer, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <Badge variant="outline" className="font-mono text-xs">
+                #{idx + 1}
+              </Badge>
+              <Input
+                value={answer}
+                onChange={(e) => {
+                  const newAnswers = [...answers];
+                  newAnswers[idx] = e.target.value;
+                  setEditedQuestion({
+                    ...editedQuestion,
+                    correctAnswerTexts: newAnswers,
+                  });
+                }}
+                placeholder="Nhập đáp án..."
+              />
+              {answers.length > 1 && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    const newAnswers = answers.filter((_, i) => i !== idx);
+                    setEditedQuestion({
+                      ...editedQuestion,
+                      correctAnswerTexts:
+                        newAnswers.length > 0 ? newAnswers : null,
+                    });
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          ))}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setEditedQuestion({
+                ...editedQuestion,
+                correctAnswerTexts: [...answers, ""],
+              });
+            }}
+            className="gap-2"
+          >
+            <Plus className="h-3 w-3" />
+            Thêm đáp án
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-2">
+        {answers.length > 0 ? (
+          answers.map((answer, idx) => (
+            <div
+              key={idx}
+              className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg"
+            >
+              <Badge variant="outline" className="font-mono text-xs">
+                #{idx + 1}
+              </Badge>
+              <span>{answer}</span>
+            </div>
+          ))
+        ) : (
+          <span className="text-muted-foreground text-sm">Chưa có đáp án</span>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -232,21 +371,32 @@ export default function QuestionCard({
         {/* Đáp án */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <Label className="text-sm font-medium">Đáp án</Label>
-            {isEditing && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={addOption}
-                className="gap-2 bg-transparent"
-              >
-                <Plus className="h-3 w-3" />
-                Thêm đáp án
-              </Button>
-            )}
+            <Label className="text-sm font-medium">
+              {question.questionType === "FILL_BLANK"
+                ? "Đáp án chấp nhận"
+                : "Đáp án"}
+            </Label>
+            {isEditing &&
+              (question.questionType === "ONE_CHOICE" ||
+                question.questionType === "MULTI_CHOICE") && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={addOption}
+                  className="gap-2 bg-transparent"
+                >
+                  <Plus className="h-3 w-3" />
+                  Thêm đáp án
+                </Button>
+              )}
           </div>
 
-          {isEditing ? (
+          {question.questionType === "TRUE_FALSE" ? (
+            renderTrueFalseAnswer()
+          ) : question.questionType === "FILL_BLANK" ? (
+            renderFillBlankAnswer()
+          ) : // ONE_CHOICE / MULTI_CHOICE
+          isEditing ? (
             <RadioGroup
               value={editedQuestion.correctOptions ?? ""}
               onValueChange={setCorrectAnswer}

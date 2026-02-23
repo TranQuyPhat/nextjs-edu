@@ -1,4 +1,4 @@
-import { apiCall } from "@/lib/api";
+import { apiCall, apiClient } from "@/lib/api";
 import { ApiResp, QuizFilters } from "@/lib/type";
 import { QuizCard } from "@/types/quiz.type";
 
@@ -78,4 +78,78 @@ export async function handleFetchError(res: Response) {
     `Request failed with status ${res.status}`;
 
   throw new ApiError(msg, res.status, payload);
+}
+export type QuizResTeacherDTO = {
+  classes: classDTO[],
+  classPage: number,
+  classTotalPages: number
+}
+export type classDTO = {
+  classId: number,
+  className: string,
+  subjectName: string,
+  quizTotal: number,
+  quizzes: QuizDTO[],
+}
+export type QuizDTO = {
+  id: number,
+  title: string,
+  description: string,
+  timeLimit: number,
+  startDate: string,
+  endDate: string,
+  subject: string,
+  className: string,
+  totalQuestion: number,
+  status: string,
+  totalStudents: number,
+  studentsSubmitted: number
+}
+export async function fetchGroupedQuizzes(params: {
+  status: "UPCOMING" | "OPEN" | "CLOSED";
+  classPage: number;
+  classSize: number;
+  quizPageSize?: number;
+}) {
+  const { status, classPage, classSize, quizPageSize = 3 } = params;
+  const res = await apiClient.get(
+    `/api/teacher/quizzes/group-by-class`,
+    {
+      params: { status, classPage, classSize, quizPageSize },
+    }
+  ) as ApiResp<QuizResTeacherDTO>;
+
+  return res.data;
+}
+export type Page<T> = {
+  content: T[];
+  totalPages: number;
+  number: number; // current page
+  size: number;
+  totalElements: number;
+};
+// API: /api/teacher/quizzes/class/{classId}
+export async function fetchQuizzesByClass(params: {
+  classId: number;
+  status: "UPCOMING" | "OPEN" | "CLOSED";
+  page: number;
+  size: number;
+}): Promise<Page<any>> {
+  const { classId, status, page, size } = params;
+  // Gọi API kèm tham số status bắt buộc
+  const res = await apiClient.get<ApiResp<Page<any>>>(
+    `/api/teacher/quizzes/class/${classId}`,
+    { params: { status, page, size } }
+  );
+  
+  const payload = res as unknown as ApiResp<Page<any>>; // apiClient interceptor trả res.data, nhưng type của axios không đổi
+  return payload.data; 
+}
+export async function fetchQuizzesByClassAll(params: { classId: number; page: number; size: number }) {
+  const { classId, page, size } = params;
+  const res = await apiClient.get<ApiResp<Page<any>>>(
+    `/api/teacher/quizzes/class/${classId}`,
+    { params: { page, size } }
+  );
+  return res.data;
 }

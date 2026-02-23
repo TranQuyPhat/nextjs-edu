@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +40,7 @@ import {
   getDayOfWeek,
   dayOfWeekMapping,
 } from "@/untils/datetime";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   getSessionById,
@@ -73,12 +74,19 @@ interface SessionData {
   startPeriod: number;
   endPeriod: number;
   location: string;
-  status: "SCHEDULED" | "COMPLETED" | "PENDING" | "CANCELLED" | "MAKEUP" | "HOLIDAY";
+  status:
+    | "SCHEDULED"
+    | "COMPLETED"
+    | "PENDING"
+    | "CANCELLED"
+    | "MAKEUP"
+    | "HOLIDAY";
   note?: string;
 }
 
 export default function AttendancePage() {
   const params = useParams();
+  const router = useRouter();
   const sessionId = Number(params.sessionId);
   const classId = Number(params.id);
 
@@ -272,10 +280,10 @@ export default function AttendancePage() {
     setIsSaving(true);
     try {
       const attendanceData = {
-        noteSession: sessionNote, // khớp với noteSession trong DTO
-        records: Object.values(attendance), // khớp với records trong DTO
+        noteSession: sessionNote,
+        records: Object.values(attendance),
       };
-      console.log("attendanceData: ", attendanceData);
+
       const response = await attendanceService.saveAttendance(
         sessionId,
         attendanceData
@@ -285,27 +293,26 @@ export default function AttendancePage() {
         throw new Error(response.message || "Không thể lưu điểm danh");
       }
 
-      // if (session.status === "PENDING" || session.status === "SCHEDULED") {
-      //   await updateSessionStatus(sessionId, "COMPLETED");
-      //   setSession(prev => prev ? { ...prev, status: "COMPLETED" } : null);
-      // }
+      toast.success(response.message || "Điểm danh đã được lưu thành công!");
 
-      toast.success("Điểm danh đã được lưu thành công!");
+   
+      router.push(`/classes/teacher/schedule/session/${classId}`);
     } catch (error: any) {
-      console.error("Error saving attendance:", error);
+      console.error("[handleSaveAttendance] Error caught:", error);
 
       const errorMessage =
-        error?.response?.data?.messages?.[0] ??
         error?.response?.data?.message ??
+        error?.response?.data?.messages?.[0] ??
         (error instanceof Error
           ? error.message
           : "Có lỗi xảy ra khi lưu điểm danh!");
 
       toast.error(errorMessage);
     } finally {
+      console.log("[handleSaveAttendance] Finally block - resetting isSaving");
       setIsSaving(false);
     }
-  }, [sessionId, attendance, sessionNote, isSaving, session]);
+  }, [sessionId, attendance, sessionNote, isSaving, session, classId, router]);
 
   // Computed values
   const stats = useMemo(() => {
@@ -318,12 +325,12 @@ export default function AttendancePage() {
 
   const sessionDate = useMemo(
     () => (session ? new Date(session.sessionDate) : new Date()),
-    [session?.sessionDate]
+    [session]
   );
 
   const dayOfWeek = useMemo(
     () => (session ? getDayOfWeek(session.sessionDate) : 0),
-    [session?.sessionDate]
+    [session]
   );
 
   const getStatusIcon = useCallback(
@@ -580,9 +587,11 @@ export default function AttendancePage() {
                           <div className="flex items-center gap-3">
                             <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                               {student.avatar ? (
-                                <img
+                                <Image
                                   src={student.avatar}
                                   alt={student.fullName}
+                                  width={32}
+                                  height={32}
                                   className="h-8 w-8 rounded-full object-cover"
                                 />
                               ) : (

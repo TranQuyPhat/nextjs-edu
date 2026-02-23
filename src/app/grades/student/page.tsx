@@ -26,6 +26,7 @@ import {
   Award,
   BookOpen,
   FileText,
+  Sparkles,
 } from "lucide-react";
 import { useStudentResult } from "../hooks/useTeacherRanking";
 import { fetchStudentDashboard } from "@/services/dashboardService";
@@ -105,12 +106,30 @@ export default function GradesPage() {
   const getGradeBadge = (grade: number, maxGrade: number) => {
     const percentage = (grade / maxGrade) * 100;
     if (percentage >= 90)
-      return <Badge className="bg-green-500">Xuất sắc</Badge>;
-    if (percentage >= 80) return <Badge className="bg-blue-500">Giỏi</Badge>;
-    if (percentage >= 65) return <Badge className="bg-yellow-500">Khá</Badge>;
+      return (
+        <Badge className="border-none bg-emerald-500/20 text-emerald-100">
+          Xuất sắc
+        </Badge>
+      );
+    if (percentage >= 80)
+      return (
+        <Badge className="border-none bg-blue-500/20 text-blue-100">Giỏi</Badge>
+      );
+    if (percentage >= 65)
+      return (
+        <Badge className="border-none bg-amber-500/20 text-amber-100">
+          Khá
+        </Badge>
+      );
     if (percentage >= 50)
-      return <Badge className="bg-orange-500">Trung bình</Badge>;
-    return <Badge variant="destructive">Yếu</Badge>;
+      return (
+        <Badge className="border-none bg-orange-500/20 text-orange-100">
+          Trung bình
+        </Badge>
+      );
+    return (
+      <Badge className="border-none bg-rose-500/20 text-rose-100">Yếu</Badge>
+    );
   };
 
   const getTypeIcon = (type: string) => {
@@ -138,35 +157,37 @@ export default function GradesPage() {
   }
 
   const OverviewTab = () => (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+    <div className="space-y-8">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="rounded-2xl border-white/10 bg-white/5 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-slate-200">
               Điểm trung bình
             </CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
+            <Award className="h-4 w-4 text-blue-200" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-white">
               {overallStats.averageGrade}
             </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">{overallStats.improvement}</span>{" "}
+            <p className="text-xs text-slate-400">
+              <span className="text-emerald-300">
+                {overallStats.improvement}
+              </span>{" "}
               từ kỳ trước
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-white/10 bg-white/5 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-slate-200">
               Bài tập hoàn thành
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <FileText className="h-4 w-4 text-blue-200" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-3xl font-bold text-white">
               {overallStats.completedAssignments}/
               {overallStats.totalAssignments}
             </div>
@@ -176,45 +197,49 @@ export default function GradesPage() {
                   overallStats.totalAssignments) *
                 100
               }
-              className="mt-2"
+              className="mt-2 h-2"
             />
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-white/10 bg-white/5 text-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Môn học</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-slate-200">
+              Môn học
+            </CardTitle>
+            <BookOpen className="h-4 w-4 text-blue-200" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data?.length}</div>
-            <p className="text-xs text-muted-foreground">Đang theo học</p>
+            <div className="text-3xl font-bold text-white">{data?.length}</div>
+            <p className="text-xs text-slate-400">Đang theo học</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="rounded-2xl border-white/10 bg-white/5 text-white">
           <CardHeader>
-            <CardTitle>Tiến độ theo môn học</CardTitle>
+            <CardTitle className="text-lg">Tiến độ theo môn học</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {data?.map((subject) => (
               <div
                 key={subject.id}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <div className="h-2 w-2 rounded-full bg-blue-400"></div>
                   <div>
-                    <p className="font-medium">{subject.subject}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="font-medium text-white">{subject.subject}</p>
+                    <p className="text-sm text-slate-400">
                       {subject.assignments.length} bài
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="font-bold">{subject.average}</span>
+                  <span className="font-bold text-white">
+                    {subject.average}
+                  </span>
                   {getTrendIcon(subject.trend)}
                 </div>
               </div>
@@ -222,9 +247,9 @@ export default function GradesPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="rounded-2xl border-white/10 bg-white/5 text-white">
           <CardHeader>
-            <CardTitle>Bài tập gần đây</CardTitle>
+            <CardTitle className="text-lg">Bài tập gần đây</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {data
@@ -240,18 +265,23 @@ export default function GradesPage() {
               )
               .slice(0, 5)
               .map((assignment, index) => (
-                <div key={index} className="flex items-center justify-between">
+                <div
+                  key={index}
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+                >
                   <div className="flex items-center space-x-3">
                     {getTypeIcon(assignment.type)}
                     <div>
-                      <p className="font-medium">{assignment.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-white">
+                        {assignment.name}
+                      </p>
+                      <p className="text-sm text-slate-400">
                         {assignment.subject} • {assignment.date}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="font-bold">
+                    <span className="font-bold text-white">
                       {assignment.grade}/{assignment.maxGrade}
                     </span>
                     {getGradeBadge(assignment.grade, assignment.maxGrade)}
@@ -267,17 +297,26 @@ export default function GradesPage() {
   const SubjectGradesTab = () => (
     <div className="space-y-6">
       {data?.map((subject) => (
-        <Card key={subject.id}>
+        <Card
+          key={subject.id}
+          className="rounded-2xl border-white/10 bg-white/5 text-white backdrop-blur-2xl"
+        >
           <CardHeader>
-            <div className="flex justify-between items-center">
+            <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-xl">{subject.subject}</CardTitle>
-                <CardDescription>{subject.className}</CardDescription>
+                <CardTitle className="text-xl text-white">
+                  {subject.subject}
+                </CardTitle>
+                <CardDescription className="text-slate-300">
+                  {subject.className}
+                </CardDescription>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold">{subject.average}</div>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-muted-foreground">Điểm TB</span>
+                <div className="text-2xl font-bold text-white">
+                  {subject.average}
+                </div>
+                <div className="flex items-center gap-1 text-sm text-slate-400">
+                  <span>Điểm TB</span>
                   {getTrendIcon(subject.trend)}
                 </div>
               </div>
@@ -286,21 +325,21 @@ export default function GradesPage() {
           <CardContent>
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Bài tập</TableHead>
-                  <TableHead>Loại</TableHead>
-                  <TableHead>Ngày</TableHead>
-                  <TableHead>Điểm</TableHead>
-                  <TableHead>Đánh giá</TableHead>
+                <TableRow className="border-white/10">
+                  <TableHead className="text-slate-300">Bài tập</TableHead>
+                  <TableHead className="text-slate-300">Loại</TableHead>
+                  <TableHead className="text-slate-300">Ngày</TableHead>
+                  <TableHead className="text-slate-300">Điểm</TableHead>
+                  <TableHead className="text-slate-300">Đánh giá</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {subject.assignments.map((assignment, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">
+                  <TableRow key={index} className="border-white/10">
+                    <TableCell className="font-medium text-white">
                       {assignment.name}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-slate-200">
                       <div className="flex items-center gap-2">
                         {getTypeIcon(assignment.type)}
                         <span className="text-sm">
@@ -308,8 +347,10 @@ export default function GradesPage() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>{assignment.date}</TableCell>
-                    <TableCell className="font-bold">
+                    <TableCell className="text-slate-200">
+                      {assignment.date}
+                    </TableCell>
+                    <TableCell className="font-bold text-white">
                       {assignment.grade}/{assignment.maxGrade}
                     </TableCell>
                     <TableCell>
@@ -326,31 +367,42 @@ export default function GradesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navigation />
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Kết quả học tập</h1>
-          <p className="text-gray-600">
-            Theo dõi điểm số và tiến độ học tập của bạn
-          </p>
-        </div>
-
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="overview">Tổng quan</TabsTrigger>
-            <TabsTrigger value="subjects">Theo môn học</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <OverviewTab />
-          </TabsContent>
-
-          <TabsContent value="subjects">
-            <SubjectGradesTab />
-          </TabsContent>
-        </Tabs>
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-indigo-600/35 via-slate-900 to-slate-950 blur-3xl" />
+        <div className="absolute -right-16 top-28 h-64 w-64 rounded-full bg-blue-500/25 blur-[130px]" />
+        <div className="absolute -left-14 bottom-0 h-72 w-72 rounded-full bg-violet-500/25 blur-[140px]" />
       </div>
+
+      <Navigation />
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-5 sm:px-6 lg:px-8">
+        <section className=" rounded-[32px] border border-white/5 bg-slate-900/60 p-6 shadow-2xl backdrop-blur-2xl">
+          <Tabs defaultValue="overview" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/5 p-1">
+              <TabsTrigger
+                value="overview"
+                className="rounded-xl text-white data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+              >
+                Tổng quan
+              </TabsTrigger>
+              <TabsTrigger
+                value="subjects"
+                className="rounded-xl text-white data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+              >
+                Theo môn học
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview">
+              <OverviewTab />
+            </TabsContent>
+
+            <TabsContent value="subjects">
+              <SubjectGradesTab />
+            </TabsContent>
+          </Tabs>
+        </section>
+      </main>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export function MathliveModal({
           </button>
         </div>
 
-        {/* @ts-expect-error aaa */}
+        {/* @ts-expect-error - MathLive custom element not in TypeScript types */}
         <math-field
           ref={mfRef}
           virtual-keyboard-mode="onfocus"

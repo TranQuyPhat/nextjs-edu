@@ -71,7 +71,7 @@ import SubmissionsTable from "./assi/SubmissionsTable";
 import { formatDateTime } from "@/untils/dateFormatter";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 import UpdateUploadSubmission from "./assi/UpdateUploadSubmission";
 import UpdateAssignment from "./assi/UpdateAssignment";
 import type { Comment } from "@/types/assignment";
@@ -125,6 +125,8 @@ export const AssignmentsTab = ({
   const [visibleComments, setVisibleComments] = useState<
     Record<number, boolean>
   >({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
 
   // Callback khi nộp thành công
   const handleSubmissionSuccess = (newSubmission: Submission) => {
@@ -324,6 +326,7 @@ export const AssignmentsTab = ({
   };
 
   const onSubmit = async (data: FieldValues) => {
+    setIsLoading(true);
     const formData = data as CreateAssignmentFormData;
     try {
       const formData = new FormData();
@@ -345,6 +348,8 @@ export const AssignmentsTab = ({
     } catch (error) {
       console.error("Error creating assignment:", error);
       toast.error("Có lỗi xảy ra khi tạo bài tập."); // Thông báo lỗi
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -534,10 +539,13 @@ export const AssignmentsTab = ({
                 <div className="space-y-4">
                   {/* Tiêu đề */}
                   <div className="space-y-2">
-                    <Label htmlFor="title">Tiêu đề bài tập</Label>
+                    <Label htmlFor="title">
+                      Tiêu đề bài tập <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="title"
                       {...register("title")}
+                      disabled={isLoading}
                       placeholder="VD: Bài tập Chương 1"
                     />
                     {errors.title && (
@@ -552,6 +560,7 @@ export const AssignmentsTab = ({
                     <Textarea
                       id="description"
                       {...register("description")}
+                      disabled={isLoading}
                       placeholder="Mô tả chi tiết về bài tập..."
                       rows={4}
                     />
@@ -563,13 +572,16 @@ export const AssignmentsTab = ({
                   </div>
                   {/* Hạn nộp */}
                   <div className="space-y-2">
-                    <Label htmlFor="dueDate">Hạn nộp</Label>
+                    <Label htmlFor="dueDate">
+                      Hạn nộp <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="dueDate"
                       type="datetime-local"
                       {...register("dueDate", {
-                        valueAsDate: true, // Quan trọng: chuyển đổi giá trị input date thành Date object
+                        valueAsDate: true,
                       })}
+                      disabled={isLoading}
                     />
                     {errors.dueDate && (
                       <p className="text-red-500 text-sm">
@@ -579,64 +591,54 @@ export const AssignmentsTab = ({
                   </div>
                   {/* Điểm tối đa */}
                   <div className="space-y-2">
-                    <Label htmlFor="maxScore">Điểm tối đa</Label>
+                    <Label htmlFor="maxScore">
+                      Điểm tối đa <span className="text-red-500">*</span>
+                    </Label>
                     <Input
                       id="maxScore"
                       type="number"
-                      {...register("maxScore", {
-                        valueAsNumber: true, // Quan trọng: chuyển đổi giá trị input number thành number
-                      })}
-                      placeholder="VD: 100"
+                      value={10}
+                      disabled
+                      className="bg-gray-100"
                     />
-                    {errors.maxScore && (
-                      <p className="text-red-500 text-sm">
-                        {errors.maxScore.message}
-                      </p>
-                    )}
+                    <input type="hidden" {...register("maxScore")} value={10} />
                   </div>
-                  {/* Chọn lớp */}
+                  {/* Lớp học (auto fill) */}
                   <div className="space-y-2">
-                    <Label htmlFor="classId">Chọn lớp</Label>
-                    <Select
-                      onValueChange={(value) =>
-                        setValue("classId", parseInt(value))
-                      }
-                      value={watchedClassId ? watchedClassId.toString() : ""}
-                    >
-                      <SelectTrigger
-                        className={errors.classId ? "border-red-500" : ""}
-                      >
-                        <SelectValue placeholder="Chọn lớp học" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {classes.map((cls) => (
-                          <SelectItem key={cls.id} value={cls.id.toString()}>
-                            {cls.className}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.classId && (
-                      <p className="text-red-500 text-sm">
-                        {errors.classId.message}
-                      </p>
-                    )}
+                    <Label htmlFor="classId">
+                      Lớp học <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="classId"
+                      value={classes[0]?.className || ""}
+                      disabled
+                      className="bg-gray-100"
+                    />
+                    <input
+                      type="hidden"
+                      {...register("classId")}
+                      value={classes[0]?.id || ""}
+                    />
                   </div>
+
                   {/* File đính kèm */}
                   <div className="space-y-2">
-                    <Label htmlFor="file">Tệp đính kèm</Label>
+                    <Label htmlFor="file">
+                      Tệp đính kèm <span className="text-red-500">*</span>
+                    </Label>
                     <div
                       className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50"
                       onClick={() => document.getElementById("file")?.click()}
                     >
                       <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
 
-                      <p className="text-sm text-gray-600">
-                        Kéo thả tệp hoặc click để chọn
-                      </p>
-                      {watchedFile && (
-                        <p className="text-xs text-gray-500 mt-2">
+                      {watchedFile ? (
+                        <p className="text-sm text-slate-700">
                           {watchedFile.name}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-600">
+                          Kéo thả tệp hoặc click để chọn
                         </p>
                       )}
                     </div>
@@ -645,8 +647,9 @@ export const AssignmentsTab = ({
                       type="file"
                       className="hidden"
                       onChange={(e) => {
-                        setValue("file", e.target.files?.[0] || null); // Lấy file đầu tiên hoặc null
+                        setValue("file", e.target.files?.[0] || null);
                       }}
+                      disabled={isLoading}
                     />
                     {errors.file && (
                       <p className="text-red-500 text-sm">
@@ -655,8 +658,8 @@ export const AssignmentsTab = ({
                     )}
                   </div>
                   {/* Submit */}
-                  <Button type="submit" className="w-full">
-                    Tạo bài tập
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? "Đang tạo bài tập..." : "Tạo bài tập"}
                   </Button>
                 </div>
               </form>
@@ -827,7 +830,8 @@ export const AssignmentsTab = ({
                                                 onClick={() =>
                                                   handleViewFile(
                                                     submission.filePath,
-                                                    submission.fileType
+                                                    submission.fileType,
+                                                    submission.fileName
                                                   )
                                                 }
                                               >
@@ -970,9 +974,14 @@ export const AssignmentsTab = ({
                                   (s) => s.status === "GRADED"
                                 )
                               ? "bg-blue-500 text-white"
+                              : submissionsByAssignment[assignment.id]?.some(
+                                  (s) => s.status === "GRADED"
+                                )
+                              ? "bg-amber-500 text-white"
                               : "opacity-50 cursor-not-allowed"
                           }
                           disabled={
+                            loadingId === assignment.id ||
                             assignment.published ||
                             (submissionsByAssignment[assignment.id]?.length ??
                               0) < countstudents ||
@@ -982,6 +991,7 @@ export const AssignmentsTab = ({
                           }
                           onClick={async () => {
                             try {
+                              setLoadingId(assignment.id);
                               await publishAssignment(assignment.id);
                               setAssignmentList((prev) =>
                                 prev.map((item) =>
@@ -996,10 +1006,14 @@ export const AssignmentsTab = ({
                             } catch (error) {
                               console.error("Lỗi khi công bố điểm:", error);
                               toast.error("Công bố điểm thất bại!");
+                            } finally {
+                              setLoadingId(null); // tắt loading
                             }
                           }}
                         >
-                          {assignment.published
+                          {loadingId === assignment.id
+                            ? "Đang công bố điểm..."
+                            : assignment.published
                             ? "Đã công bố điểm"
                             : (submissionsByAssignment[assignment.id]?.length ??
                                 0) < countstudents
@@ -1007,12 +1021,20 @@ export const AssignmentsTab = ({
                                 submissionsByAssignment[assignment.id]
                                   ?.length || 0
                               }/${countstudents})`
-                            : !submissionsByAssignment[assignment.id]?.every(
+                            : submissionsByAssignment[assignment.id]?.filter(
                                 (s) => s.status === "GRADED"
-                              )
-                            ? "Chưa chấm xong"
+                              ).length <
+                              submissionsByAssignment[assignment.id]?.length
+                            ? `Đang chấm ${
+                                submissionsByAssignment[assignment.id]?.filter(
+                                  (s) => s.status === "GRADED"
+                                ).length
+                              }/${
+                                submissionsByAssignment[assignment.id]?.length
+                              }`
                             : "Công bố điểm"}
                         </Button>
+
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -1152,7 +1174,8 @@ export const AssignmentsTab = ({
                                                 onClick={() =>
                                                   handleViewFile(
                                                     userSubmission.filePath,
-                                                    userSubmission.fileType
+                                                    userSubmission.fileType,
+                                                    userSubmission.fileName
                                                   )
                                                 }
                                               >

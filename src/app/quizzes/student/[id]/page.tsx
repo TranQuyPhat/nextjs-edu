@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback, useRef } from "react";
+import { getAccessToken } from "@/lib/auth";
 import {
   Card,
   CardContent,
@@ -58,59 +59,8 @@ export default function QuizPage() {
   const [quizResult, setQuizResult] = useState<QuizResultData | null>(null);
   const [isResultOpen, setIsResultOpen] = useState(false);
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  const token = getAccessToken();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Khởi tạo timer khi có quiz data
-  useEffect(() => {
-    if (quiz && quiz.timeLimit && !startTime) {
-      const now = new Date();
-      setStartTime(now);
-      setTimeLeft(quiz.timeLimit * 60); // Convert minutes to seconds
-    }
-  }, [quiz, startTime]);
-
-  // Timer logic
-  useEffect(() => {
-    if (isSubmited || isSubmitting || timeLeft <= 0) {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-
-      if (timeLeft <= 0 && !isSubmited && !isSubmitting && startTime) {
-        handleSubmit();
-      }
-
-      return;
-    }
-
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        const newTime = prev - 1;
-        return newTime;
-      });
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, [timeLeft, isSubmitting, isSubmited, startTime]);
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -128,38 +78,9 @@ export default function QuizPage() {
       .padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
   };
 
-  const handleAnswerChange = (
-    questionId: number,
-    answer: string | string[]
-  ) => {
-    setQuizAnswers((prev) => ({
-      ...prev,
-      [Number(questionId)]: answer,
-    }));
-  };
-
-  const calculateProgress = () => {
-    if (!quiz || !quiz.questions?.length) return 0;
-    if (!quizAnswers) return 0;
-
-    const answeredCount =
-      quiz?.questions?.filter((q: any) => {
-        const answer = quizAnswers[q.id as number];
-        return (
-          (Array.isArray(answer) && answer.length > 0) ||
-          (!Array.isArray(answer) && answer !== "")
-        );
-      }).length ?? 0;
-    return quiz?.questions?.length
-      ? (answeredCount / quiz.questions.length) * 100
-      : 0;
-  };
-
   const handleSubmit = useCallback(async () => {
     if (!startTime || isSubmitting || isSubmited) return;
     if (!quiz || !quiz.questions?.length) return;
-
-    setIsSubmitting(true);
 
     try {
       const answersPayload: Record<number, string[]> = {};
@@ -178,21 +99,37 @@ export default function QuizPage() {
       const unanswered = Object.values(answersPayload).filter(
         (v) => v.length === 0
       ).length;
-      if (unanswered > 0) {
-        const result = await Swal.fire({
-          title: `Bạn còn ${unanswered} câu chưa làm.`,
-          text: "Bạn vẫn muốn nộp chứ?",
-          icon: "warning",
-          showCancelButton: true,
-          confirmButtonText: "Có",
-          cancelButtonText: "Không",
-        });
+      const answered = quiz.questions.length - unanswered;
 
-        if (!result.isConfirmed) {
-          setIsSubmitting(false);
-          return;
-        }
+      // Xác nhận nộp bài trong mọi trường hợp
+      const confirmResult = await Swal.fire({
+        title: "Xác nhận nộp bài",
+        html: `
+          <div class="text-left space-y-2">
+            <p><strong>Tổng số câu:</strong> ${quiz.questions.length}</p>
+            <p><strong>Đã làm:</strong> ${answered} câu</p>
+            <p><strong>Chưa làm:</strong> ${unanswered} câu</p>
+            ${
+              unanswered > 0
+                ? '<p class="text-amber-600 font-semibold mt-3">⚠️ Bạn còn câu chưa làm!</p>'
+                : ""
+            }
+          </div>
+        `,
+        text: "Bạn có chắc chắn muốn nộp bài không?",
+        icon: unanswered > 0 ? "warning" : "question",
+        showCancelButton: true,
+        confirmButtonText: "Nộp bài",
+        cancelButtonText: "Hủy",
+        confirmButtonColor: unanswered > 0 ? "#f59e0b" : "#3b82f6",
+        cancelButtonColor: "#6b7280",
+      });
+
+      if (!confirmResult.isConfirmed) {
+        return;
       }
+
+      setIsSubmitting(true);
 
       const userString = localStorage.getItem("user");
       if (!userString) throw new Error("User data not found");
@@ -265,6 +202,84 @@ export default function QuizPage() {
       setIsSubmitting(false);
     }
   }, [id, startTime, quiz, quizAnswers, isSubmitting, isSubmited, token]);
+
+  const handleAnswerChange = (
+    questionId: number,
+    answer: string | string[]
+  ) => {
+    setQuizAnswers((prev) => ({
+      ...prev,
+      [Number(questionId)]: answer,
+    }));
+  };
+
+  const calculateProgress = () => {
+    if (!quiz || !quiz.questions?.length) return 0;
+    if (!quizAnswers) return 0;
+
+    const answeredCount =
+      quiz?.questions?.filter((q: any) => {
+        const answer = quizAnswers[q.id as number];
+        return (
+          (Array.isArray(answer) && answer.length > 0) ||
+          (!Array.isArray(answer) && answer !== "")
+        );
+      }).length ?? 0;
+    return quiz?.questions?.length
+      ? (answeredCount / quiz.questions.length) * 100
+      : 0;
+  };
+
+  // Khởi tạo timer khi có quiz data
+  useEffect(() => {
+    if (quiz && quiz.timeLimit && !startTime) {
+      const now = new Date();
+      setStartTime(now);
+      setTimeLeft(quiz.timeLimit * 60); // Convert minutes to seconds
+    }
+  }, [quiz, startTime]);
+
+  // Timer logic
+  useEffect(() => {
+    if (isSubmited || isSubmitting || timeLeft <= 0) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
+      if (timeLeft <= 0 && !isSubmited && !isSubmitting && startTime) {
+        handleSubmit();
+      }
+
+      return;
+    }
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        const newTime = prev - 1;
+        return newTime;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [timeLeft, isSubmitting, isSubmited, startTime, handleSubmit]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
+
   if (error) {
     return (
       <QueryError
@@ -283,40 +298,45 @@ export default function QuizPage() {
     return <QuizSkeleton />;
   }
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-indigo-600/35 via-slate-900 to-slate-950 blur-3xl" />
+        <div className="absolute -right-16 top-24 h-64 w-64 rounded-full bg-blue-500/25 blur-[130px]" />
+        <div className="absolute -left-14 bottom-0 h-72 w-72 rounded-full bg-violet-500/25 blur-[140px]" />
+      </div>
+
       <Navigation />
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <Card className="lg:col-span-1 sticky top-4 h-fit">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+          <Card className="sticky top-4 h-fit rounded-[24px] border-white/10 bg-white/5 text-white backdrop-blur-2xl lg:col-span-1">
             <CardHeader>
-              <CardTitle className="text-lg font-bold truncate">
+              <CardTitle className="truncate text-xl font-semibold">
                 {quiz.title}
               </CardTitle>
-              <CardDescription className="flex items-center">
-                <Clock className="w-4 h-4 mr-2" />
+              <CardDescription className="flex items-center text-slate-300">
+                <Clock className="mr-2 h-4 w-4" />
                 Thời gian: {quiz.timeLimit} phút
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-700">
-                    Tiến độ
-                  </span>
-                  <span className="text-sm font-medium text-indigo-600">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-200">Tiến độ</span>
+                  <span className="text-sm font-semibold text-blue-200">
                     {Math.round(calculateProgress())}%
                   </span>
                 </div>
-                <Progress value={calculateProgress()} />
+                <Progress
+                  value={calculateProgress()}
+                  className="h-2 bg-white/10"
+                />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-700">
-                    Thời gian còn lại:
-                  </span>
-                  <span className="text-sm font-medium text-red-600">
+              <div className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+                <div className="flex justify-between text-sm text-slate-200">
+                  <span>Thời gian còn lại</span>
+                  <span className="font-semibold text-amber-200">
                     {formatTime(timeLeft)}
                   </span>
                 </div>
@@ -337,11 +357,15 @@ export default function QuizPage() {
                         key={q.id}
                         size="icon"
                         onClick={() => setCurrentPage(pageOfQuestion)}
-                        className={`
-                          ${isInCurrentPage ? "border-2 border-primary" : ""}
-                          ${isAnswered ? "bg-gray-700 text-white" : ""}
-                          hover:bg-primary hover:text-white transition
-                        `}
+                        className={`rounded-lg border-white/20 text-white hover:bg-white/10 ${
+                          isInCurrentPage
+                            ? "border-2 border-blue-400 bg-white/10"
+                            : "border"
+                        } ${
+                          isAnswered
+                            ? "border-emerald-300/60 bg-emerald-500/30"
+                            : ""
+                        }`}
                         variant="outline"
                       >
                         {index + 1}
@@ -352,12 +376,12 @@ export default function QuizPage() {
               </div>
 
               <Button
-                className="w-full mt-4"
+                className="mt-2 w-full rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
                 size="lg"
                 onClick={handleSubmit}
                 disabled={isSubmitting || isSubmited}
               >
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="mr-2 h-4 w-4" />
                 {isSubmited
                   ? "Đã nộp"
                   : isSubmitting
@@ -367,9 +391,9 @@ export default function QuizPage() {
             </CardContent>
           </Card>
 
-          <div className="lg:col-span-3 space-y-6">
-            <Card>
-              <CardContent>
+          <div className="space-y-6 lg:col-span-3">
+            <Card className="rounded-[24px] border-white/10 bg-white/5 text-white backdrop-blur-2xl">
+              <CardContent className="space-y-6">
                 {currentQuestions.map((q: any, idx: number) => (
                   <QuestionCard
                     key={q.id}
@@ -380,13 +404,14 @@ export default function QuizPage() {
                   />
                 ))}
 
-                <div className="flex justify-between mt-8">
+                <div className="flex justify-between pt-2">
                   <Button
                     variant="outline"
                     onClick={() => setCurrentPage((prev) => prev - 1)}
                     disabled={currentPage === 0}
+                    className="rounded-xl border-white/20 text-white hover:bg-white/10"
                   >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    <ArrowLeft className="mr-2 h-4 w-4" />
                     Trang trước
                   </Button>
 
@@ -395,16 +420,18 @@ export default function QuizPage() {
                     <Button
                       onClick={() => setCurrentPage((prev) => prev + 1)}
                       disabled={isSubmited}
+                      className="rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-600 hover:to-indigo-600"
                     >
                       Trang tiếp
-                      <ArrowRight className="w-4 h-4 ml-2" />
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   ) : (
                     <Button
                       onClick={handleSubmit}
                       disabled={isSubmitting || isSubmited}
+                      className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-600 hover:to-teal-600"
                     >
-                      <Send className="w-4 h-4 mr-2" />
+                      <Send className="mr-2 h-4 w-4" />
                       {isSubmited
                         ? "Đã nộp"
                         : isSubmitting

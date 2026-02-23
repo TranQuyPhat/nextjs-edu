@@ -17,7 +17,7 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
     if (typeof window !== "undefined") {
-        const token = localStorage.getItem("accessToken");
+        const token = getCookie("accessToken");
         if (token) {
             config.headers = config.headers || {};
             config.headers.Authorization = `Bearer ${token}`;
@@ -25,6 +25,18 @@ apiClient.interceptors.request.use((config) => {
     }
     return config;
 });
+
+function getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.indexOf(nameEQ) === 0) {
+            return cookie.substring(nameEQ.length);
+        }
+    }
+    return null;
+}
 
 apiClient.interceptors.response.use(
     (res) => res.data,
